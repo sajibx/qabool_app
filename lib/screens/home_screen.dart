@@ -7,6 +7,7 @@ import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
+import 'package:qabool_app/screens/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -238,13 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     final profile = _nearbyProfiles[index];
                                     return _buildProfileCard(
                                       context: context,
-                                      imageUrl: profile.profileImageUrl ?? 'https://via.placeholder.com/150',
-                                      name: profile.firstName,
-                                      age: profile.age?.toString() ?? "",
-                                      verified: profile.isVerified,
-                                      job: profile.profession ?? "Member",
-                                      jobIcon: Icons.work,
-                                      location: '${profile.city}, ${profile.country}',
+                                      profile: profile,
                                       onConnect: () async {
                                         try {
                                           final chatService = context.read<ChatService>();
@@ -361,135 +356,145 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildProfileCard({
     required BuildContext context,
-    required String imageUrl,
-    required String name,
-    required String age,
-    required bool verified,
-    required String job,
-    required IconData jobIcon,
-    required String location,
+    required UserModel profile,
     required VoidCallback onConnect,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const aColor = QaboolTheme.accentGold;
     const pColor = QaboolTheme.primary;
+    
+    final imageUrl = profile.profileImageUrl ?? 'https://via.placeholder.com/150';
+    final name = profile.firstName;
+    final age = profile.age?.toString() ?? "";
+    final verified = profile.isVerified;
+    final location = '${profile.city}, ${profile.country}';
 
-    return Container(
-      width: 170, // Increased slightly to fit button
-      margin: const EdgeInsets.only(right: 16),
-      decoration: BoxDecoration(
-        color: isDark ? pColor.withOpacity(0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProfileScreen(user: profile),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              child: Stack(
-                fit: StackFit.expand,
+        );
+      },
+      child: Container(
+        width: 170, // Increased slightly to fit button
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          color: isDark ? pColor.withOpacity(0.05) : Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: isDark ? Colors.grey[800] : Colors.grey[200],
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: isDark ? Colors.grey[800] : Colors.grey[200],
+                        child: Icon(Icons.person,
+                            color: isDark ? Colors.grey[600] : Colors.grey[400]),
+                      ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.favorite_border, color: Colors.white, size: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: isDark ? Colors.grey[800] : Colors.grey[200],
-                      child: const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                  Row(
+                    children: [
+                      Text(
+                        '$name, $age',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.grey[900],
+                        ),
                       ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: isDark ? Colors.grey[800] : Colors.grey[200],
-                      child: Icon(Icons.person,
-                          color: isDark ? Colors.grey[600] : Colors.grey[400]),
-                    ),
+                      if (verified) ...[
+                        const SizedBox(width: 4),
+                        const Icon(Icons.verified, color: aColor, size: 14),
+                      ],
+                    ],
                   ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.4),
-                        shape: BoxShape.circle,
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, size: 12, color: Colors.grey[500]),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          location,
+                          style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      child: const Icon(Icons.favorite_border, color: Colors.white, size: 16),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: onConnect,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: pColor,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 32),
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'CONNECT',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      '$name, $age',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.grey[900],
-                      ),
-                    ),
-                    if (verified) ...[
-                      const SizedBox(width: 4),
-                      const Icon(Icons.verified, color: aColor, size: 14),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(Icons.location_on, size: 12, color: Colors.grey[500]),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        location,
-                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: onConnect,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: pColor,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 32),
-                    padding: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'CONNECT',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

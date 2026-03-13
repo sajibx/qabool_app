@@ -6,6 +6,7 @@ import 'package:qabool_app/services/profile_service.dart';
 import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
+import 'package:qabool_app/screens/profile_screen.dart';
 import 'package:qabool_app/services/auth_service.dart';
 
 class DiscoveryScreen extends StatefulWidget {
@@ -199,7 +200,14 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
     required Color accentGold,
   }) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProfileScreen(user: profile),
+          ),
+        );
+      },
       child: Container(
         decoration: BoxDecoration(
           color: cardBg,
