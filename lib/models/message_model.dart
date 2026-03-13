@@ -24,7 +24,7 @@ class MessageModel {
     return MessageModel(
       id: json['id']?.toString() ?? '',
       chatId: (json['chatId'] ?? json['chat']?['id'])?.toString() ?? '',
-      senderId: (json['senderId'] ?? json['sender']?['id'])?.toString() ?? '',
+      senderId: (json['senderId'] ?? json['sender_id'] ?? json['sender']?['id'])?.toString() ?? '',
       content: json['content']?.toString() ?? '',
       type: MessageType.values.firstWhere(
         (e) => e.name == json['type'],

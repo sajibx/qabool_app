@@ -210,7 +210,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
-                      final isMe = currentUserId != null && message.senderId.trim() == currentUserId.trim();
+                      // Case-insensitive comparison and trimming for robustness
+                      final isMe = currentUserId != null && 
+                          message.senderId.trim().toLowerCase() == currentUserId.trim().toLowerCase();
                       
                       if (isMe) {
                         return _buildSentMessage(
