@@ -7,11 +7,12 @@ class ProfileService extends ChangeNotifier {
 
   ProfileService(this._apiService);
 
-  Future<List<UserModel>> getDiscoveryList({String? religion, String? region}) async {
+  Future<List<UserModel>> getDiscoveryList({String? religion, String? region, String? search}) async {
     try {
       final queryParams = <String, dynamic>{};
       if (religion != null) queryParams['religion'] = religion;
       if (region != null) queryParams['region'] = region;
+      if (search != null) queryParams['search'] = search;
 
       final response = await _apiService.client.get('/profiles', queryParameters: queryParams);
       if (response.statusCode == 200) {

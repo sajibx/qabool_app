@@ -6,12 +6,14 @@ class ChatModel {
   final List<UserModel> participants;
   final List<MessageModel> messages;
   final MessageModel? lastMessage;
+  final int unreadCount;
 
   ChatModel({
     required this.id,
     required this.participants,
     this.messages = const [],
     this.lastMessage,
+    this.unreadCount = 0,
   });
 
   factory ChatModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,7 @@ class ChatModel {
       lastMessage: json['lastMessage'] != null 
           ? MessageModel.fromJson(json['lastMessage'])
           : (messages.isNotEmpty ? messages.last : null),
+      unreadCount: json['unreadCount'] ?? 0,
     );
   }
 
@@ -38,12 +41,14 @@ class ChatModel {
     List<UserModel>? participants,
     List<MessageModel>? messages,
     MessageModel? lastMessage,
+    int? unreadCount,
   }) {
     return ChatModel(
       id: id ?? this.id,
       participants: participants ?? this.participants,
       messages: messages ?? this.messages,
       lastMessage: lastMessage ?? this.lastMessage,
+      unreadCount: unreadCount ?? this.unreadCount,
     );
   }
 

@@ -15,6 +15,7 @@ class ChatService extends ChangeNotifier {
   ChatService(this._apiService);
 
   List<ChatModel> get chats => _chats;
+  int get totalUnreadCount => _chats.fold(0, (sum, chat) => sum + chat.unreadCount);
   List<MessageModel> getMessages(String chatId) => _messages[chatId] ?? [];
 
   void initSocket(String token) {
@@ -47,7 +48,11 @@ class ChatService extends ChangeNotifier {
           jsonData = jsonDecode(data);
         } else {
           // Robust way to convert JS object to Dart Map on web
-          jsonData = jsonDecode(jsonEncode(data));
+          try {
+            jsonData = jsonDecode(jsonEncode(data));
+          } catch (_) {
+            jsonData = Map<String, dynamic>.from(data as dynamic);
+          }
         }
         final message = MessageModel.fromJson(jsonData);
         _addMessage(message);
@@ -81,11 +86,22 @@ class ChatService extends ChangeNotifier {
     // Update last message in the chat list for continuity
     final chatIndex = _chats.indexWhere((c) => c.id == message.chatId);
     if (chatIndex != -1) {
-      final updatedChat = _chats[chatIndex].copyWith(lastMessage: message);
-      _chats[chatIndex] = updatedChat;
+      final chat = _chats[chatIndex];
+      // Increment unread count if message is not from me
+      final isFromMe = message.senderId.trim() == _apiService.currentUserId?.trim();
+      final updatedChat = chat.copyWith(
+        lastMessage: message,
+        unreadCount: !isFromMe ? chat.unreadCount + 1 : chat.unreadCount,
+      );
+      
+      // Move to top (Stack approach)
+      _chats.removeAt(chatIndex);
+      _chats.insert(0, updatedChat);
+      notifyListeners();
+    } else {
+      // If chat not in list, refetch to be sure
+      fetchChats();
     }
-    
-    notifyListeners();
   }
 
   Future<ChatModel> createChat(String recipientId) async {
@@ -111,11 +127,37 @@ class ChatService extends ChangeNotifier {
     try {
       final response = await _apiService.client.get('/chats');
       if (response.statusCode == 200) {
-        _chats = (response.data as List).map((c) => ChatModel.fromJson(c)).toList();
+        _chats = (response.data as List)
+            .map((c) => ChatModel.fromJson(c))
+            .where((c) => c.lastMessage != null)
+            .toList();
+        
+        // Sorting: Stack approach (latest message at the top)
+        _chats.sort((a, b) {
+          final timeA = a.lastMessage?.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final timeB = b.lastMessage?.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return timeB.compareTo(timeA);
+        });
+        
         notifyListeners();
       }
     } catch (e) {
-      rethrow;
+      print('Error fetching chats: $e');
+    }
+  }
+
+  Future<void> markAsRead(String chatId) async {
+    try {
+      final response = await _apiService.client.post('/chats/$chatId/read');
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final index = _chats.indexWhere((c) => c.id == chatId);
+        if (index != -1) {
+          _chats[index] = _chats[index].copyWith(unreadCount: 0);
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      print('Error marking chat as read: $e');
     }
   }
 

@@ -25,6 +25,7 @@ class AuthService extends ChangeNotifier {
         final token = response.data['access_token'];
         await _apiService.saveToken(token);
         _currentUser = UserModel.fromJson(response.data['user']);
+        _apiService.currentUserId = _currentUser?.id;
         notifyListeners();
       }
     } catch (e) {
@@ -53,6 +54,7 @@ class AuthService extends ChangeNotifier {
         final token = response.data['access_token'];
         await _apiService.saveToken(token);
         _currentUser = UserModel.fromJson(response.data['user']);
+        _apiService.currentUserId = _currentUser?.id;
         notifyListeners();
       }
     } catch (e) {
@@ -65,6 +67,7 @@ class AuthService extends ChangeNotifier {
   Future<void> logout() async {
     await _apiService.deleteToken();
     _currentUser = null;
+    _apiService.currentUserId = null;
     notifyListeners();
   }
 
@@ -75,6 +78,7 @@ class AuthService extends ChangeNotifier {
         final response = await _apiService.client.get('/profiles/me');
         if (response.statusCode == 200) {
           _currentUser = UserModel.fromJson(response.data);
+          _apiService.currentUserId = _currentUser?.id;
           notifyListeners();
         }
       }

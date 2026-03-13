@@ -133,6 +133,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         isTyping: false,
                         isActive: false,
                         isOnline: otherUser.isOnline,
+                        unreadCount: chat.unreadCount,
                         onTap: () {
                           Navigator.push(
                             context,

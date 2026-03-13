@@ -18,6 +18,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _isLoadingProfiles = true;
   bool _isLoadingChats = true;
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
   List<UserModel> _nearbyProfiles = [];
 
   @override
@@ -26,16 +28,25 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchData();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _fetchData() async {
     _fetchProfiles();
     _fetchChats();
   }
 
-  Future<void> _fetchProfiles() async {
+  Future<void> _fetchProfiles({String? query}) async {
     try {
+      if (query != null) {
+        setState(() => _isLoadingProfiles = true);
+      }
       final authService = context.read<AuthService>();
       final profileService = context.read<ProfileService>();
-      final profiles = await profileService.getDiscoveryList();
+      final profiles = await profileService.getDiscoveryList(search: query);
       if (mounted) {
         setState(() {
           _nearbyProfiles = profiles
@@ -68,7 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     const pColor = QaboolTheme.maroon;
-    const aColor = QaboolTheme.primary;
     const bgLight = Color(0xFFFDFCFB);
     const bgDark = Color(0xFF1A1616);
     const neutralSoftUrlLight = Color(0xFFF4F1F0);
@@ -92,35 +102,67 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.favorite, color: pColor, size: 28),
-                      const SizedBox(width: 8),
-                      RichText(
-                        text: const TextSpan(
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            fontFamily: 'Manrope',
+                  if (!_isSearching)
+                    Row(
+                      children: [
+                        const Icon(Icons.favorite, color: pColor, size: 28),
+                        const SizedBox(width: 8),
+                        RichText(
+                          text: const TextSpan(
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              fontFamily: 'Manrope',
+                            ),
+                            children: [
+                              TextSpan(text: 'Qabool', style: TextStyle(color: pColor)),
+                            ],
                           ),
-                          children: [
-                            TextSpan(text: 'Qabool', style: TextStyle(color: pColor)),
-                            TextSpan(text: 'App', style: TextStyle(color: aColor)),
-                          ],
+                        ),
+                      ],
+                    )
+                  else
+                    Expanded(
+                      child: Container(
+                        height: 40,
+                        margin: const EdgeInsets.only(right: 12),
+                        child: TextField(
+                          controller: _searchController,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            hintText: 'Search people...',
+                            hintStyle: const TextStyle(fontSize: 14),
+                            prefixIcon: const Icon(Icons.search, size: 20, color: pColor),
+                            filled: true,
+                            fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                            contentPadding: EdgeInsets.zero,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.close, size: 16),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _isSearching = false);
+                                _fetchProfiles();
+                              },
+                            ),
+                          ),
+                          onSubmitted: (val) {
+                            _fetchProfiles(query: val);
+                          },
                         ),
                       ),
-                    ],
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E293B) : neutralSoftUrlLight,
-                      shape: BoxShape.circle,
                     ),
-                    child: IconButton(
-                      icon: Icon(Icons.search, color: isDark ? Colors.grey[300] : Colors.grey[600]),
-                      onPressed: () {},
+                  if (!_isSearching)
+                    IconButton(
+                      icon: const Icon(Icons.search, color: pColor),
+                      onPressed: () => setState(() => _isSearching = true),
+                      style: IconButton.styleFrom(
+                        backgroundColor: isDark ? Colors.grey[800] : Colors.grey[100],
+                      ),
                     ),
-                  )
                 ],
               ),
             ),

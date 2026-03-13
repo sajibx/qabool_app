@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qabool_app/theme.dart';
+import 'package:provider/provider.dart';
+import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/screens/home_screen.dart';
 import 'package:qabool_app/screens/discovery_screen.dart';
 import 'package:qabool_app/screens/messages_screen.dart';
@@ -59,18 +61,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         child: SafeArea(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildNavItem(
-                  Icons.home, 'Home', 0, secondaryColor, primaryColor, isDark),
-              _buildNavItem(Icons.explore, 'Discover', 1, secondaryColor,
-                  primaryColor, isDark),
-              _buildNavItem(Icons.chat_bubble, 'Messages', 2, secondaryColor,
-                  primaryColor, isDark),
-              _buildNavItem(Icons.account_circle, 'Profile', 3, secondaryColor,
-                  primaryColor, isDark),
-            ],
+          child: Consumer<ChatService>(
+            builder: (context, chatService, _) {
+              final totalUnread = chatService.totalUnreadCount;
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildNavItem(
+                      Icons.home, 'Home', 0, secondaryColor, primaryColor, isDark),
+                  _buildNavItem(Icons.explore, 'Discover', 1, secondaryColor,
+                      primaryColor, isDark),
+                  _buildNavItem(Icons.chat_bubble, 'Messages', 2, secondaryColor,
+                      primaryColor, isDark, badgeCount: totalUnread > 0 ? totalUnread : null),
+                  _buildNavItem(Icons.account_circle, 'Profile', 3, secondaryColor,
+                      primaryColor, isDark),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -107,7 +114,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               ),
             ],
           ),
-          if (badgeCount != null && !isActive)
+          if (badgeCount != null)
             Positioned(
               top: -2,
               right: -4,

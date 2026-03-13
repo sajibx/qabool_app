@@ -5,6 +5,7 @@ class ApiService {
   static const String baseUrl = 'http://127.0.0.1:3000/api/v1';
   final Dio _dio = Dio(BaseOptions(baseUrl: baseUrl));
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  String? currentUserId;
 
   ApiService() {
     _dio.interceptors.add(

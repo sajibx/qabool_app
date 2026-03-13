@@ -22,10 +22,10 @@ class MessageModel {
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
-      id: json['id'],
-      chatId: json['chatId'] ?? json['chat']?['id'] ?? '',
-      senderId: json['senderId'] ?? json['sender']?['id'] ?? '',
-      content: json['content'],
+      id: json['id']?.toString() ?? '',
+      chatId: (json['chatId'] ?? json['chat']?['id'])?.toString() ?? '',
+      senderId: (json['senderId'] ?? json['sender']?['id'])?.toString() ?? '',
+      content: json['content']?.toString() ?? '',
       type: MessageType.values.firstWhere(
         (e) => e.name == json['type'],
         orElse: () => MessageType.TEXT,

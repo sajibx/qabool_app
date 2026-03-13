@@ -4,6 +4,7 @@ import 'package:qabool_app/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/services/chat_service.dart';
+import 'package:qabool_app/screens/edit_profile_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -134,7 +135,12 @@ class ProfileScreen extends StatelessWidget {
                           padding: EdgeInsets.zero,
                           icon: const Icon(Icons.edit,
                               color: Colors.white, size: 20),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -172,7 +178,12 @@ class ProfileScreen extends StatelessWidget {
                       Expanded(
                         flex: 3,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             backgroundColor:

@@ -44,7 +44,9 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     try {
-      await context.read<ChatService>().fetchMessages(_activeChatId!);
+      final chatService = context.read<ChatService>();
+      await chatService.fetchMessages(_activeChatId!);
+      await chatService.markAsRead(_activeChatId!);
       if (mounted) {
         setState(() => _isLoading = false);
         _scrollToBottom();
@@ -199,7 +201,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     );
                   }
 
-                  final currentUserId = context.read<AuthService>().currentUser?.id ?? "";
 
                   return ListView.builder(
                     controller: _scrollController,
@@ -207,8 +208,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
-                      final isMe = message.senderId == currentUserId;
-
+                      final currentUserId = context.watch<AuthService>().currentUser?.id ?? "";
+                      final isMe = message.senderId.trim() == currentUserId.trim();
+                      
                       if (isMe) {
                         return _buildSentMessage(
                           primaryColor: primaryColor,
