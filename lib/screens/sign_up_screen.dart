@@ -18,6 +18,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  String? _selectedGender;
 
   @override
   void dispose() {
@@ -37,6 +38,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         password: _passwordController.text,
         firstName: _firstNameController.text,
         lastName: _lastNameController.text,
+        gender: _selectedGender,
       );
       if (!mounted) return;
       
@@ -331,6 +333,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 16),
+                          buildLabel('Gender'),
+                          DropdownButtonFormField<String>(
+                            value: _selectedGender,
+                            decoration: inputDecoration('Select Gender'),
+                            items: ['Male', 'Female']
+                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (val) {
+                              setState(() {
+                                _selectedGender = val;
+                              });
+                            },
                           ),
                           const SizedBox(height: 16),
                           buildLabel('Email Address'),

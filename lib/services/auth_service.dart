@@ -40,6 +40,7 @@ class AuthService extends ChangeNotifier {
     required String password,
     required String firstName,
     required String lastName,
+    String? gender,
   }) async {
     try {
       _setLoading(true);
@@ -48,6 +49,7 @@ class AuthService extends ChangeNotifier {
         'password': password,
         'firstName': firstName,
         'lastName': lastName,
+        'gender': gender,
       });
 
       if (response.statusCode == 201) {
