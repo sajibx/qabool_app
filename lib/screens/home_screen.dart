@@ -26,7 +26,7 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    refreshData();
   }
 
   @override
@@ -344,11 +344,12 @@ class HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildProfileCard({
     required BuildContext context,
