@@ -78,9 +78,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    const pColor = QaboolTheme.maroon;
-    const bgLight = Color(0xFFFDFCFB);
-    const bgDark = Color(0xFF1A1616);
+    const pColor = QaboolTheme.primary;
+    const bgLight = QaboolTheme.backgroundLight;
+    const bgDark = QaboolTheme.backgroundDark;
     const neutralSoftUrlLight = Color(0xFFF4F1F0);
 
     return Scaffold(
@@ -371,8 +371,8 @@ class _HomeScreenState extends State<HomeScreen> {
     required VoidCallback onConnect,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    const aColor = QaboolTheme.primary;
-    const pColor = QaboolTheme.maroon;
+    const aColor = QaboolTheme.accentGold;
+    const pColor = QaboolTheme.primary;
 
     return Container(
       width: 170, // Increased slightly to fit button

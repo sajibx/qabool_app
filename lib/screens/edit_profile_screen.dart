@@ -88,17 +88,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const primaryColor = QaboolTheme.primary;
-    const secondaryColor = QaboolTheme.maroon;
+    const accentGold = QaboolTheme.accentGold;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF1A1616) : const Color(0xFFFDFCFB),
       appBar: AppBar(
-        title: const Text('Edit Profile', style: TextStyle(color: secondaryColor, fontWeight: FontWeight.bold)),
+        title: const Text('Edit Profile', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: secondaryColor),
+          icon: const Icon(Icons.close, color: primaryColor),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -156,7 +156,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       style: const TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w900,
-        color: QaboolTheme.maroon,
+        color: QaboolTheme.primary,
         letterSpacing: 2,
       ),
     );

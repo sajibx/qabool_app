@@ -69,7 +69,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     // Using color extraction from tailwind config in HTML
     const pColor = QaboolTheme.primary; // #d4af35 (Gold)
-    const aColor = QaboolTheme.maroon; // #800000 (Maroon)
+    const aColor = QaboolTheme.primary; // Deep Maroon
 
     Widget buildSectionHeader(IconData icon, String title) {
       return Padding(

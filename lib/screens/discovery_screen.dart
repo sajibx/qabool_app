@@ -53,10 +53,11 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Tailwind extracted colors
-    const primaryColor = QaboolTheme.primary; // Gold: #d4af35
-    const secondaryColor = QaboolTheme.maroon; // Maroon: #800000
-    const bgLight = Color(0xFFF8F7F6);
-    const bgDark = Color(0xFF201D12);
+    // Theme-based colors
+    const primaryColor = QaboolTheme.primary; 
+    const accentGold = QaboolTheme.accentGold; 
+    const bgLight = QaboolTheme.backgroundLight;
+    const bgDark = QaboolTheme.backgroundDark;
     const cardBgLight = Colors.white;
     const cardBgDark = Color(0xFF1E293B);
 
@@ -85,7 +86,7 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Icon(Icons.search,
-                          color: isDark ? primaryColor : secondaryColor,
+                          color: isDark ? primaryColor : primaryColor,
                           size: 28),
                       Text(
                         'Qabool',
@@ -93,12 +94,12 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
                           fontStyle: FontStyle.italic,
-                          color: isDark ? primaryColor : secondaryColor,
+                          color: isDark ? primaryColor : primaryColor,
                           letterSpacing: -0.5,
                         ),
                       ),
                       Icon(Icons.tune,
-                          color: isDark ? primaryColor : secondaryColor,
+                          color: isDark ? primaryColor : primaryColor,
                           size: 28),
                     ],
                   ),
@@ -110,16 +111,16 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                     child: Row(
                       children: [
                         _buildFilterButton(
-                            'Age', primaryColor, secondaryColor, isDark),
+                            'Age', primaryColor, accentGold, isDark),
                         const SizedBox(width: 12),
                         _buildFilterButton(
-                            'Religion', primaryColor, secondaryColor, isDark),
+                            'Religion', primaryColor, accentGold, isDark),
                         const SizedBox(width: 12),
                         _buildFilterButton(
-                            'Education', primaryColor, secondaryColor, isDark),
+                            'Education', primaryColor, accentGold, isDark),
                         const SizedBox(width: 12),
                         _buildFilterButton(
-                            'Location', primaryColor, secondaryColor, isDark),
+                            'Location', primaryColor, accentGold, isDark),
                       ],
                     ),
                   ),
@@ -149,7 +150,7 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                               isDark: isDark,
                               cardBg: isDark ? cardBgDark : cardBgLight,
                               primaryColor: primaryColor,
-                              secondaryColor: secondaryColor,
+                              accentGold: accentGold,
                             );
                           },
                         ),
@@ -195,7 +196,7 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
     required bool isDark,
     required Color cardBg,
     required Color primaryColor,
-    required Color secondaryColor,
+    required Color accentGold,
   }) {
     return GestureDetector(
       onTap: () {},
@@ -343,8 +344,8 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isDark ? primaryColor : secondaryColor,
-                  foregroundColor: isDark ? secondaryColor : Colors.white,
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   minimumSize: const Size(double.infinity, 36),
                   shape: RoundedRectangleBorder(

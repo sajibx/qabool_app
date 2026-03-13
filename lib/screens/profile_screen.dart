@@ -15,8 +15,8 @@ class ProfileScreen extends StatelessWidget {
     final auth = context.watch<AuthService>();
     final user = auth.currentUser;
     
-    const primaryColor = QaboolTheme.primary; // Gold
-    const secondaryColor = QaboolTheme.maroon; // Maroon
+    const primaryColor = QaboolTheme.primary; // Maroon
+    const accentGold = QaboolTheme.accentGold; // Gold
     const bgDark = Color(0xFF1A1616);
 
     if (user == null) {
@@ -32,7 +32,7 @@ class ProfileScreen extends StatelessWidget {
           'My Profile',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: QaboolTheme.maroon, // Consistent with header theme
+            color: QaboolTheme.primary, // Consistent with header theme
           ),
         ),
         centerTitle: true,
@@ -41,7 +41,7 @@ class ProfileScreen extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 1, // small shadow on scroll
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: QaboolTheme.maroon),
+          icon: const Icon(Icons.arrow_back, color: QaboolTheme.primary),
           onPressed: () {
             // Because it's a tab, back isn't necessarily logical, but if accessed out of tab:
             if (Navigator.canPop(context)) {
@@ -77,9 +77,9 @@ class ProfileScreen extends StatelessWidget {
                           shape: BoxShape.circle,
                           gradient: const LinearGradient(
                             colors: [
-                              Color(0xFFD4AF35),
-                              Color(0xFFF1D592),
-                              Color(0xFFD4AF35)
+                              QaboolTheme.primary,
+                              QaboolTheme.accentGold,
+                              QaboolTheme.primary
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -188,7 +188,7 @@ class ProfileScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             backgroundColor:
                                 Colors.transparent, // handled by Ink
-                            shadowColor: secondaryColor.withOpacity(0.2),
+                            shadowColor: primaryColor.withOpacity(0.2),
                             elevation: 8,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -269,7 +269,7 @@ class ProfileScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w900,
-                                color: secondaryColor,
+                                color: QaboolTheme.accentGold,
                                 letterSpacing: 2,
                               ),
                             ),
@@ -308,7 +308,7 @@ class ProfileScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w900,
-                                color: secondaryColor,
+                                color: accentGold,
                                 letterSpacing: 2,
                               ),
                             ),

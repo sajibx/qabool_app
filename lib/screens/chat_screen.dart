@@ -91,9 +91,9 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = QaboolTheme.primary;
-    final secondaryColor = QaboolTheme.maroon;
-    const bgLight = Color(0xFFF8F7F6);
-    const bgDark = Color(0xFF201D12);
+    final accentGold = QaboolTheme.accentGold;
+    final bgLight = QaboolTheme.backgroundLight;
+    final bgDark = QaboolTheme.backgroundDark;
 
     final otherUser = widget.otherUser;
 
@@ -214,7 +214,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       if (isMe) {
                         return _buildSentMessage(
                           primaryColor: primaryColor,
-                          secondaryColor: secondaryColor,
+                          accentGold: accentGold,
                           message: message.content,
                           time: message.timeString,
                           isSeen: message.status == MessageStatus.READ,
@@ -342,7 +342,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildSentMessage({
     required Color primaryColor,
-    required Color secondaryColor,
+    required Color accentGold,
     required String message,
     required String time,
     required bool isSeen,
@@ -361,7 +361,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: secondaryColor,
+                    color: primaryColor,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),

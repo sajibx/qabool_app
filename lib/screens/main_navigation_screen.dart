@@ -35,7 +35,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const primaryColor = QaboolTheme.primary; // Gold
-    const secondaryColor = QaboolTheme.maroon; // Maroon
+    const accentGold = QaboolTheme.accentGold;
     const bgDark = Color(0xFF1A1616);
 
     // We are maintaining the custom bottom nav bar design
@@ -68,12 +68,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildNavItem(
-                      Icons.home, 'Home', 0, secondaryColor, primaryColor, isDark),
-                  _buildNavItem(Icons.explore, 'Discover', 1, secondaryColor,
+                      Icons.home, 'Home', 0, accentGold, primaryColor, isDark),
+                  _buildNavItem(Icons.explore, 'Discover', 1, accentGold,
                       primaryColor, isDark),
-                  _buildNavItem(Icons.chat_bubble, 'Messages', 2, secondaryColor,
+                  _buildNavItem(Icons.chat_bubble, 'Messages', 2, accentGold,
                       primaryColor, isDark, badgeCount: totalUnread > 0 ? totalUnread : null),
-                  _buildNavItem(Icons.account_circle, 'Profile', 3, secondaryColor,
+                  _buildNavItem(Icons.account_circle, 'Profile', 3, accentGold,
                       primaryColor, isDark),
                 ],
               );

@@ -117,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   shape: BoxShape.circle,
                                   color: QaboolTheme.primary.withOpacity(0.05),
                                   border: Border.all(
-                                    color: const Color(0xFFD4AF35)
+                                    color: QaboolTheme.accentGold
                                         .withOpacity(0.1),
                                     width: 1,
                                   ),
@@ -227,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
-                                      color: Color(0xFFD4AF35),
+                                      color: QaboolTheme.primary,
                                     ),
                                   ),
                                 )
@@ -391,7 +391,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: const Text(
                                     'Sign In',
                                     style: TextStyle(
-                                      color: Color(0xFFD4AF35),
+                                      color: QaboolTheme.primary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -467,7 +467,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 width: 40,
                                 height: 40,
                                 decoration: const BoxDecoration(
-                                  color: Color(0xFFD4AF35),
+                                  color: QaboolTheme.primary,
                                   shape: BoxShape.circle,
                                 ),
                               ),

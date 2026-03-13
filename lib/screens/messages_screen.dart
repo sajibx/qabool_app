@@ -36,10 +36,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Tailwind extracted colors
-    const primaryColor = QaboolTheme.primary; // Gold: #d4af35
-    const secondaryColor = QaboolTheme.maroon; // Maroon: #800000
-    const bgLight = Color(0xFFF8F7F6);
-    const bgDark = Color(0xFF201D12);
+    // Theme-based colors
+    const primaryColor = QaboolTheme.primary;
+    const accentGold = QaboolTheme.accentGold;
+    const bgLight = QaboolTheme.backgroundLight;
+    const bgDark = QaboolTheme.backgroundDark;
 
     return Scaffold(
       backgroundColor: isDark ? bgDark : bgLight,
@@ -71,7 +72,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? primaryColor : secondaryColor,
+                          color: isDark ? primaryColor : primaryColor,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -125,7 +126,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         context: context,
                         isDark: isDark,
                         primaryColor: primaryColor,
-                        secondaryColor: secondaryColor,
+                        accentGold: accentGold,
                         imageUrl: otherUser.profileImageUrl ?? 'https://via.placeholder.com/150',
                         name: otherUser.fullName,
                         time: chat.lastMessage?.timeString ?? '',
@@ -161,7 +162,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     required BuildContext context,
     required bool isDark,
     required Color primaryColor,
-    required Color secondaryColor,
+    required Color accentGold,
     required String imageUrl,
     required String name,
     required String time,
@@ -312,7 +313,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 width: 20,
                 height: 20,
                 decoration: BoxDecoration(
-                  color: secondaryColor,
+                  color: primaryColor,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,

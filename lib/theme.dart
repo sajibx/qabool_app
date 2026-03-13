@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class QaboolTheme {
-  // Core colors from Tailwind configuration
-  static const Color primary = Color(0xFFD4AF35);
-  static const Color maroon = Color(0xFF800000);
-  static const Color backgroundLight = Color(0xFFF8F7F6);
-  static const Color backgroundDark = Color(0xFF201D12);
+  // Core colors for Asian marriage theme
+  static const Color primary = Color(0xFF800000); // Deep Maroon
+  static const Color accentGold = Color(0xFFD4AF35); // Gold accent
+  static const Color backgroundLight = Color(0xFFFDFCFB); 
+  static const Color backgroundDark = Color(0xFF1A1616);
 
   static const Color textLight = Color(0xFF1E293B); // Slate 800
   static const Color textDark = Color(0xFFF1F5F9); // Slate 100
@@ -18,7 +18,7 @@ class QaboolTheme {
       scaffoldBackgroundColor: backgroundLight,
       colorScheme: const ColorScheme.light(
         primary: primary,
-        secondary: maroon,
+        secondary: accentGold,
         surface: Colors.white,
       ),
       textTheme: GoogleFonts.manropeTextTheme().apply(
@@ -52,7 +52,7 @@ class QaboolTheme {
       scaffoldBackgroundColor: backgroundDark,
       colorScheme: const ColorScheme.dark(
         primary: primary,
-        secondary: maroon,
+        secondary: accentGold,
         surface: Color(0xFF0F172A),
       ),
       textTheme: GoogleFonts.manropeTextTheme(ThemeData.dark().textTheme).apply(
