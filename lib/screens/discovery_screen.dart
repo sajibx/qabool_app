@@ -32,10 +32,23 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
     try {
       final profiles = await profileService.getDiscoveryList();
       if (mounted) {
+        final currentUser = authService.currentUser;
         setState(() {
-          _profiles = profiles
-              .where((p) => p.id != authService.currentUser?.id)
-              .toList();
+          _profiles = profiles.where((p) {
+            // Filter out self
+            if (p.id == currentUser?.id) return false;
+            
+            // If current user has gender set, show only opposite gender
+            if (currentUser?.gender != null) {
+              if (currentUser!.gender == 'Male') {
+                return p.gender == 'Female';
+              } else if (currentUser.gender == 'Female') {
+                return p.gender == 'Male';
+              }
+            }
+            
+            return true;
+          }).toList();
           _isLoading = false;
         });
       }

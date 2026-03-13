@@ -49,10 +49,23 @@ class _HomeScreenState extends State<HomeScreen> {
       final profileService = context.read<ProfileService>();
       final profiles = await profileService.getDiscoveryList(search: query);
       if (mounted) {
+        final currentUser = authService.currentUser;
         setState(() {
-          _nearbyProfiles = profiles
-              .where((p) => p.id != authService.currentUser?.id)
-              .toList();
+          _nearbyProfiles = profiles.where((p) {
+            // Filter out self
+            if (p.id == currentUser?.id) return false;
+            
+            // If current user has gender set, show only opposite gender
+            if (currentUser?.gender != null) {
+              if (currentUser!.gender == 'Male') {
+                return p.gender == 'Female';
+              } else if (currentUser.gender == 'Female') {
+                return p.gender == 'Male';
+              }
+            }
+            
+            return true;
+          }).toList();
           _isLoadingProfiles = false;
         });
       }

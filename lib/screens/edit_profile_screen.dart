@@ -57,6 +57,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
         'bio': _bioController.text,
+        'gender': _selectedGender,
         'region': _regionController.text,
         'religion': _religionController.text,
         'profession': _professionController.text,
@@ -127,6 +128,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 16),
               _buildTextField(controller: _lastNameController, label: 'Last Name', icon: Icons.person_outline),
               const SizedBox(height: 16),
+              _buildGenderDropdown(),
+              const SizedBox(height: 16),
               _buildTextField(controller: _bioController, label: 'Bio', icon: Icons.edit, maxLines: 3),
               const SizedBox(height: 32),
               
@@ -193,6 +196,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           if (label == 'First Name') return 'Required';
         }
         return null;
+      },
+    );
+  }
+
+  String? _selectedGender;
+
+  Widget _buildGenderDropdown() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final user = context.read<AuthService>().currentUser;
+    _selectedGender ??= user?.gender;
+
+    return DropdownButtonFormField<String>(
+      value: _selectedGender,
+      style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+      decoration: InputDecoration(
+        labelText: 'Gender',
+        prefixIcon: const Icon(Icons.people, color: QaboolTheme.primary),
+        labelStyle: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600]),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: QaboolTheme.primary.withOpacity(0.1)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: QaboolTheme.primary),
+        ),
+        filled: true,
+        fillColor: isDark ? const Color(0xFF2D2626) : Colors.white,
+      ),
+      items: ['Male', 'Female']
+          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+          .toList(),
+      onChanged: (val) {
+        setState(() {
+          _selectedGender = val;
+        });
       },
     );
   }
