@@ -37,7 +37,7 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: isDark ? bgDark : const Color(0xFFFDFCFB),
       appBar: AppBar(
         title: Text(
-          isMe ? 'My Profile' : displayUser.fullName,
+          isMe ? 'My Profile' : '',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: QaboolTheme.primary,
