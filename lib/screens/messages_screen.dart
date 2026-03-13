@@ -10,11 +10,15 @@ class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
 
   @override
-  State<MessagesScreen> createState() => _MessagesScreenState();
+  State<MessagesScreen> createState() => MessagesScreenState();
 }
 
-class _MessagesScreenState extends State<MessagesScreen> {
+class MessagesScreenState extends State<MessagesScreen> {
   bool _isLoading = true;
+
+  Future<void> refreshData() async {
+    await _fetchChats();
+  }
 
   @override
   void initState() {
@@ -116,38 +120,43 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     return const Center(child: Text('No messages yet'));
                   }
                   final currentUserId = authService.currentUser?.id ?? "";
-                  return ListView.builder(
-                    itemCount: chats.length,
-                    itemBuilder: (context, index) {
-                      final chat = chats[index];
-                      final otherUser = chat.otherParticipant(currentUserId);
-                      if (otherUser == null) return const SizedBox.shrink();
-                      return _buildMessageItem(
-                        context: context,
-                        isDark: isDark,
-                        primaryColor: primaryColor,
-                        accentGold: accentGold,
-                        imageUrl: otherUser.profileImageUrl ?? 'https://via.placeholder.com/150',
-                        name: otherUser.fullName,
-                        time: chat.lastMessage?.timeString ?? '',
-                        message: chat.lastMessage?.content ?? '',
-                        isTyping: false,
-                        isActive: false,
-                        isOnline: otherUser.isOnline,
-                        unreadCount: chat.unreadCount,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChatScreen(
-                                chatId: chat.id,
-                                otherUser: otherUser,
+                  return RefreshIndicator(
+                    onRefresh: refreshData,
+                    color: primaryColor,
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: chats.length,
+                      itemBuilder: (context, index) {
+                        final chat = chats[index];
+                        final otherUser = chat.otherParticipant(currentUserId);
+                        if (otherUser == null) return const SizedBox.shrink();
+                        return _buildMessageItem(
+                          context: context,
+                          isDark: isDark,
+                          primaryColor: primaryColor,
+                          accentGold: accentGold,
+                          imageUrl: otherUser.profileImageUrl ?? 'https://via.placeholder.com/150',
+                          name: otherUser.fullName,
+                          time: chat.lastMessage?.timeString ?? '',
+                          message: chat.lastMessage?.content ?? '',
+                          isTyping: false,
+                          isActive: false,
+                          isOnline: otherUser.isOnline,
+                          unreadCount: chat.unreadCount,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatScreen(
+                                  chatId: chat.id,
+                                  otherUser: otherUser,
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      );
-                    },
+                            );
+                          },
+                        );
+                      },
+                    ),
                   );
                 },
               ),

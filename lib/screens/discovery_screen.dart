@@ -13,12 +13,16 @@ class DiscoveryScreen extends StatefulWidget {
   const DiscoveryScreen({super.key});
 
   @override
-  State<DiscoveryScreen> createState() => _DiscoveryScreenState();
+  State<DiscoveryScreen> createState() => DiscoveryScreenState();
 }
 
-class _DiscoveryScreenState extends State<DiscoveryScreen> {
+class DiscoveryScreenState extends State<DiscoveryScreen> {
   bool _isLoading = true;
   List<UserModel> _profiles = [];
+
+  Future<void> refreshData() async {
+    await _fetchProfiles();
+  }
 
   @override
   void initState() {
@@ -148,26 +152,31 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                   ? const Center(child: CircularProgressIndicator())
                   : _profiles.isEmpty
                       ? const Center(child: Text('No profiles found Match your criteria'))
-                      : GridView.builder(
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 2,
-                            childAspectRatio: 0.55,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 16,
-                          ),
-                          padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
-                          itemCount: _profiles.length,
-                          itemBuilder: (context, index) {
-                            final profile = _profiles[index];
-                            return _buildProfileCard(
-                              profile: profile,
-                              isDark: isDark,
-                              cardBg: isDark ? cardBgDark : cardBgLight,
-                              primaryColor: primaryColor,
-                              accentGold: accentGold,
-                            );
-                          },
+                      : RefreshIndicator(
+                      onRefresh: refreshData,
+                      color: primaryColor,
+                      child: GridView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 2,
+                          childAspectRatio: 0.55,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
                         ),
+                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
+                        itemCount: _profiles.length,
+                        itemBuilder: (context, index) {
+                          final profile = _profiles[index];
+                          return _buildProfileCard(
+                            profile: profile,
+                            isDark: isDark,
+                            cardBg: isDark ? cardBgDark : cardBgLight,
+                            primaryColor: primaryColor,
+                            accentGold: accentGold,
+                          );
+                        },
+                      ),
+                    ),
             ),
           ],
         ),
