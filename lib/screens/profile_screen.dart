@@ -36,13 +36,15 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDark ? bgDark : const Color(0xFFFDFCFB),
       appBar: AppBar(
-        title: Text(
-          isMe ? 'My Profile' : '',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: QaboolTheme.primary,
-          ),
-        ),
+        title: isMe
+            ? const Text(
+                'My Profile',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: QaboolTheme.primary,
+                ),
+              )
+            : null,
         centerTitle: true,
         backgroundColor:
             isDark ? bgDark.withOpacity(0.8) : Colors.white.withOpacity(0.8),

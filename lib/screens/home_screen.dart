@@ -107,34 +107,12 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               decoration: BoxDecoration(
                 color: isDark ? bgDark.withOpacity(0.8) : Colors.white.withOpacity(0.8),
-                border: Border(
-                  bottom: BorderSide(
-                    color: isDark ? const Color(0xFF1E293B) : neutralSoftUrlLight,
-                  ),
-                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (!_isSearching)
-                    Row(
-                      children: [
-                        const Icon(Icons.favorite, color: pColor, size: 28),
-                        const SizedBox(width: 8),
-                        RichText(
-                          text: const TextSpan(
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              fontFamily: 'Manrope',
-                            ),
-                            children: [
-                              TextSpan(text: 'Qabool', style: TextStyle(color: pColor)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    )
+                    const SizedBox.shrink() // Replace with empty space to keep search button on the right
                   else
                     Expanded(
                       child: Container(

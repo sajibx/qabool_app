@@ -51,7 +51,7 @@ class QaboolApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: QaboolTheme.lightTheme,
       darkTheme: QaboolTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       initialRoute: authService.currentUser == null ? '/login' : '/main',
       routes: {
         '/login': (context) => const LoginScreen(),
