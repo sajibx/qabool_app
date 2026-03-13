@@ -13,10 +13,10 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   bool _isLoadingProfiles = true;
   bool _isLoadingChats = true;
   bool _isSearching = false;
@@ -35,9 +35,11 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> _fetchData() async {
-    _fetchProfiles();
-    _fetchChats();
+  Future<void> refreshData() async {
+    await Future.wait([
+      _fetchProfiles(),
+      _fetchChats(),
+    ]);
   }
 
   Future<void> _fetchProfiles({String? query}) async {
@@ -159,10 +161,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // Scrollable Content
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
+              child: RefreshIndicator(
+                onRefresh: refreshData,
+                color: pColor,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 16),

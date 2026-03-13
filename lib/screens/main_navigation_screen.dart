@@ -15,17 +15,22 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
+  final GlobalKey<HomeScreenState> _homeKey = GlobalKey<HomeScreenState>();
   int _currentIndex = 0;
 
   // The screens we will navigate between
-  final List<Widget> _screens = [
-    const HomeScreen(),
+  late final List<Widget> _screens = [
+    HomeScreen(key: _homeKey),
     const DiscoveryScreen(),
     const MessagesScreen(),
     const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
+    if (_currentIndex == index && index == 0) {
+      // Refresh home screen if already on it
+      _homeKey.currentState?.refreshData();
+    }
     setState(() {
       _currentIndex = index;
     });
