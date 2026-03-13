@@ -95,6 +95,8 @@ class _ChatScreenState extends State<ChatScreen> {
     final bgLight = QaboolTheme.backgroundLight;
     final bgDark = QaboolTheme.backgroundDark;
 
+    final authService = context.watch<AuthService>();
+    final currentUserId = authService.currentUser?.id;
     final otherUser = widget.otherUser;
 
     return Scaffold(
@@ -208,8 +210,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
-                      final currentUserId = context.watch<AuthService>().currentUser?.id ?? "";
-                      final isMe = message.senderId.trim() == currentUserId.trim();
+                      final isMe = currentUserId != null && message.senderId.trim() == currentUserId.trim();
                       
                       if (isMe) {
                         return _buildSentMessage(
