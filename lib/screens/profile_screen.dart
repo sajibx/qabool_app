@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/screens/edit_profile_screen.dart';
+import 'package:qabool_app/models/user_model.dart';
+import 'package:qabool_app/screens/chat_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final UserModel? user;
