@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Qabool - Discovery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af35", // Gold
+                        "secondary": "#800000", // Maroon
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-nav .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10">
+<div class="flex items-center justify-between px-6 py-4">
+<div class="w-10">
+<span class="material-symbols-outlined text-secondary dark:text-primary">search</span>
+</div>
+<h1 class="text-2xl font-extrabold tracking-tight text-secondary dark:text-primary italic">Qabool</h1>
+<div class="w-10 flex justify-end">
+<button class="text-secondary dark:text-primary">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+</div>
+<!-- Advanced Filters -->
+<div class="flex gap-3 px-6 pb-4 overflow-x-auto no-scrollbar">
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-semibold whitespace-nowrap text-secondary dark:text-primary">
+                Age <span class="material-symbols-outlined text-xs">keyboard_arrow_down</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-semibold whitespace-nowrap text-secondary dark:text-primary">
+                Religion <span class="material-symbols-outlined text-xs">keyboard_arrow_down</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-semibold whitespace-nowrap text-secondary dark:text-primary">
+                Education <span class="material-symbols-outlined text-xs">keyboard_arrow_down</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-semibold whitespace-nowrap text-secondary dark:text-primary">
+                Location <span class="material-symbols-outlined text-xs">keyboard_arrow_down</span>
+</button>
+</div>
+</header>
+<!-- Main Content: Discovery Grid -->
+<main class="px-4 py-6 mb-24">
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+<!-- Profile Card 1 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-primary/5 group">
+<div class="relative aspect-[3/4] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Professional portrait of a man in traditional attire" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD3lZUeG-XYYfcWU7SQh3ogF8nW1ybVZItsPSGpbyem7oqFe0VvuPq03gyyx2ugdTsNbsQ-qq1WPraxi6RTnczsLW_yIRZ3MOBfWlb1RxuaIADwjok4508lP1vduytrMS3gLfTFUWyRHcLG0xr4ikR-RML9lU66ourxNTjWFrHW-mTjISa--y82kZ8zOZHkne0diacpp0GC5xUO-0gXUKlCeagrvf1cSc5Z2mA8URLdaWj5xkcqH3k5gzkC7Lh5YKUoLP5eYm4EcUWo');"></div>
+<div class="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-3 left-3 text-white">
+<p class="text-xs font-medium opacity-90">Last seen 2h ago</p>
+</div>
+</div>
+<div class="p-4">
+<h3 class="font-bold text-lg text-secondary dark:text-white">Omar, 29</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400">Architect</p>
+<p class="text-sm text-slate-500 dark:text-slate-500 flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-xs">location_on</span> Dubai, UAE
+                    </p>
+<button class="w-full mt-4 py-2.5 bg-secondary dark:bg-primary text-white dark:text-secondary rounded-lg font-bold text-sm tracking-wide transition-opacity hover:opacity-90">
+                        Connect
+                    </button>
+</div>
+</div>
+<!-- Profile Card 2 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-primary/5 group">
+<div class="relative aspect-[3/4] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Modern professional portrait of a woman smiling" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAxkWNOS8_qJ5Iwpru0RYu7zUuDbbGT3cJPHDAiiO9a2cG9YhYVOt5azmmt2bwI7J3FD7fGQ2WYz1IR7U-6elpjBBQzGiIA4nU6yHOXnybnd_NReeGIuIIDfjeYzNtIywhBaaZe5ZU97NMKsLCbJzV1d1znLgR9nWLiiKfxqTAUs7vq3O58wZVWH5KJP4pEPDx5TSEULXr8nVCgFu_I0sgEPw96Jvgt8W-JRYm4Vt9_wHys-pX_9Cx6sSl4C3SP_aR5jaz3CdkK5Zf1');"></div>
+<div class="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-3 left-3 text-white">
+<p class="text-xs font-medium opacity-90">Active now</p>
+</div>
+</div>
+<div class="p-4">
+<h3 class="font-bold text-lg text-secondary dark:text-white">Aisha, 26</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400">Software Engineer</p>
+<p class="text-sm text-slate-500 dark:text-slate-500 flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-xs">location_on</span> London, UK
+                    </p>
+<button class="w-full mt-4 py-2.5 bg-secondary dark:bg-primary text-white dark:text-secondary rounded-lg font-bold text-sm tracking-wide transition-opacity hover:opacity-90">
+                        Connect
+                    </button>
+</div>
+</div>
+<!-- Profile Card 3 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-primary/5 group">
+<div class="relative aspect-[3/4] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Smiling man in business casual attire" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDYEoWBMoH1vrAQaDXTcr94vzY_pNEgDIbo50UpYb3-Ua2Ik7ut4N607in7ndbnABPWkXn9dLDgWm5A56waLUUy3c7x1qHsFKsrTlZf1l-SKLsPIoWKtnBb5xhFYRUmatpDtAh2xc20Lciehgy81gtv-ENNz4LVrJp2gQ-66JlATgiInHTIuokZsBNhvMfsDUBzlnWiayvG5nJH0TnqrZpJOd0dom9CKDwDCCoEebbE3rx42lnc3OGveNnWv1DblwyYiqssC0sKkMGo');"></div>
+<div class="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-3 left-3 text-white">
+<p class="text-xs font-medium opacity-90">Recently active</p>
+</div>
+</div>
+<div class="p-4">
+<h3 class="font-bold text-lg text-secondary dark:text-white">Zain, 31</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400">Cardiologist</p>
+<p class="text-sm text-slate-500 dark:text-slate-500 flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-xs">location_on</span> Doha, Qatar
+                    </p>
+<button class="w-full mt-4 py-2.5 bg-secondary dark:bg-primary text-white dark:text-secondary rounded-lg font-bold text-sm tracking-wide transition-opacity hover:opacity-90">
+                        Connect
+                    </button>
+</div>
+</div>
+<!-- Profile Card 4 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-primary/5 group">
+<div class="relative aspect-[3/4] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Young woman with a warm friendly expression" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCYLc10lDSvWsXqvXv8qSenRZs6cMYS6VVxQKCbjWyPFzLAmJ6HWBHpcnTxp0Cx45MN3uW-TTkLeBjv4P1NThthWK5bUqVpff7g4zsUpDQvCyEH6SuUOjRFbM8ZCgt8L1iJN5H3tDApgFYoaMhioLQOgALGG5XfO7GMn1xARYKHrkt_5y5n7bsRNjWMumzL0PNdmFlO89A9ugNDY7zJG_vGrxFLzFAjN9v33Yg_fpHUWtws0PKty-hM8p6mkWRavlEsilDxPiqt5wQR');"></div>
+<div class="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-3 left-3 text-white">
+<p class="text-xs font-medium opacity-90">New member</p>
+</div>
+</div>
+<div class="p-4">
+<h3 class="font-bold text-lg text-secondary dark:text-white">Maryam, 24</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400">Graphic Designer</p>
+<p class="text-sm text-slate-500 dark:text-slate-500 flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-xs">location_on</span> Istanbul, TR
+                    </p>
+<button class="w-full mt-4 py-2.5 bg-secondary dark:bg-primary text-white dark:text-secondary rounded-lg font-bold text-sm tracking-wide transition-opacity hover:opacity-90">
+                        Connect
+                    </button>
+</div>
+</div>
+<!-- Profile Card 5 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-primary/5 group">
+<div class="relative aspect-[3/4] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Confident man posing for a headshot" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCHjryTxiOI6YE8whYdjJspl5PgF6TMDpKBO6tspqZLJtmY5EZCHtQ_oQG-4BY44VAWITEyq8AfXRtjjifO831wNRlsUDuC5mxlUQZk0FcBZTw2NYNtFqN2xnHMlqhgZbcPrmbuQcgKKGUb8Cej7488z2ZSfMSVjGhwqsJCeY6pDzHjWr6BBwgHgtS9cJ3CqcClDvM9wwDhBLvSmNevxciwcra0sLHNeUHldNZAedgrbp-aE8GUyodyIF6T4bpA_qo7WFt0PaEq1UqC');"></div>
+<div class="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent"></div>
+</div>
+<div class="p-4">
+<h3 class="font-bold text-lg text-secondary dark:text-white">Hamza, 28</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400">Marketing Director</p>
+<p class="text-sm text-slate-500 dark:text-slate-500 flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-xs">location_on</span> Toronto, CA
+                    </p>
+<button class="w-full mt-4 py-2.5 bg-secondary dark:bg-primary text-white dark:text-secondary rounded-lg font-bold text-sm tracking-wide transition-opacity hover:opacity-90">
+                        Connect
+                    </button>
+</div>
+</div>
+<!-- Profile Card 6 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-primary/5 group">
+<div class="relative aspect-[3/4] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Elegant woman in a stylish studio shot" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA_bCuvlQfV7-3DryoYNz6guPZ54zZ7QH8ghrZKzS7Maq65GI_dYjf-oiyJqVHdw8e38LSKCipygFQjg4h89fiWmaLKw5Jh6euCbx1R5AMvH4TIErpOJLtRpzfOIducpHVO0husIum-JSj9r3e5yWelgMJJrP2ohTMXA6zQXssbju8-1617RdzttMbXkJg072zW5yVdMPiTMNvUArV6eNjaxzlGtACWnbCBLeYzF8PquCWpnWM9CVTQ_btdmmd1nhVCr0OHXyA3ohEb');"></div>
+<div class="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent"></div>
+</div>
+<div class="p-4">
+<h3 class="font-bold text-lg text-secondary dark:text-white">Sana, 27</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400">Dentist</p>
+<p class="text-sm text-slate-500 dark:text-slate-500 flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-xs">location_on</span> Riyadh, KSA
+                    </p>
+<button class="w-full mt-4 py-2.5 bg-secondary dark:bg-primary text-white dark:text-secondary rounded-lg font-bold text-sm tracking-wide transition-opacity hover:opacity-90">
+                        Connect
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-background-dark border-t border-primary/10 px-6 py-3 z-50">
+<div class="flex items-center justify-between max-w-lg mx-auto"><a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-secondary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">home</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-secondary dark:text-primary active-nav" href="#">
+<span class="material-symbols-outlined text-2xl">explore</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Discover</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-secondary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">chat_bubble</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Messages</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-secondary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">account_circle</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Profile</span>
+</a></div>
+</nav>
+</body></html>

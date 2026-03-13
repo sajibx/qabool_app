@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Join Qabool - Detailed Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af35", // Gold
+                        "accent": "#800000",  // Maroon
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#1a1811",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            min-height: 100dvh;
+        }
+        .form-input-focus {
+            @apply focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col items-center overflow-x-hidden pb-12">
+<div class="sticky top-0 z-50 flex w-full max-w-[480px] items-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md p-4 justify-between border-b border-slate-200 dark:border-slate-800">
+<div class="text-accent dark:text-primary flex size-10 shrink-0 items-center justify-center cursor-pointer rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</div>
+<h2 class="text-accent dark:text-primary text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10">Complete Your Profile</h2>
+</div>
+<div class="w-full max-w-[480px] text-center px-6 pt-8 pb-4">
+<h1 class="text-accent dark:text-primary tracking-tight text-3xl font-extrabold leading-tight">Join Qabool</h1>
+<p class="text-slate-600 dark:text-slate-400 text-base font-normal leading-normal mt-2">Let us help you find your blessed union with a detailed profile.</p>
+</div>
+<div class="flex w-full max-w-[480px] flex-col gap-8 px-6 py-6">
+<section class="flex flex-col items-center gap-4 mb-4">
+<div class="relative">
+<div class="size-32 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-primary flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-5xl">add_a_photo</span>
+</div>
+<button class="absolute bottom-0 right-0 size-10 bg-accent text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-slate-900">
+<span class="material-symbols-outlined text-xl">upload</span>
+</button>
+</div>
+<div class="text-center">
+<button class="text-accent dark:text-primary font-bold text-sm hover:underline flex items-center gap-1 mx-auto mb-1">
+            Upload Photo
+        </button>
+<p class="text-slate-500 dark:text-slate-400 text-xs">
+            Add a photo to increase your match chances by <span class="text-accent dark:text-primary font-bold">80%</span>
+</p>
+</div>
+</section><section class="flex flex-col gap-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">account_circle</span>
+<h3 class="text-accent dark:text-primary text-xl font-bold uppercase tracking-wider text-sm">Contact &amp; Credentials</h3>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">First Name</p>
+<input class="form-input flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="First Name" type="text"/>
+</label>
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Last Name</p>
+<input class="form-input flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Last Name" type="text"/>
+</label>
+</div>
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Email Address</p>
+<input class="form-input flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="name@example.com" type="email"/>
+</label>
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Password</p>
+<div class="relative">
+<input class="form-input flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 pr-12 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Min. 8 characters" type="password"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">visibility_off</span>
+</div>
+</label>
+</section>
+<hr class="border-slate-200 dark:border-slate-800"/>
+<section class="flex flex-col gap-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">person_search</span>
+<h3 class="text-accent dark:text-primary text-xl font-bold uppercase tracking-wider text-sm">Personal Attributes</h3>
+</div>
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Region</p>
+<input class="form-input flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="City, Country" type="text"/>
+</label><label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Date of Birth</p>
+<input class="form-input flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="DD/MM/YYYY" type="date"/>
+</label>
+<div class="grid grid-cols-2 gap-4">
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Religion</p>
+<select class="form-select flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none">
+<option value="">Select</option>
+<option>Islam (Sunni)</option>
+<option>Islam (Shia)</option>
+<option>Islam (Other)</option>
+</select>
+</label><label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Date of Birth</p>
+<input class="form-input flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="DD/MM/YYYY" type="date"/>
+</label>
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Race/Ethnicity</p>
+<input class="form-input flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="e.g. Arab, Asian" type="text"/>
+</label>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Height</p>
+<div class="flex">
+<input class="form-input flex-1 rounded-l-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Value" type="number"/>
+<select class="form-select w-20 rounded-r-xl border-l-0 border-slate-200 bg-slate-50 dark:bg-slate-700 dark:border-slate-700 dark:text-white h-12 px-2 text-sm focus:ring-0">
+<option>cm</option>
+<option>ft</option>
+</select>
+</div>
+</div>
+<div class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Weight</p>
+<div class="flex">
+<input class="form-input flex-1 rounded-l-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Value" type="number"/>
+<select class="form-select w-20 rounded-r-xl border-l-0 border-slate-200 bg-slate-50 dark:bg-slate-700 dark:border-slate-700 dark:text-white h-12 px-2 text-sm focus:ring-0">
+<option>kg</option>
+<option>lbs</option>
+</select>
+</div>
+</div>
+</div>
+</section>
+<hr class="border-slate-200 dark:border-slate-800"/>
+<section class="flex flex-col gap-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">school</span>
+<h3 class="text-accent dark:text-primary text-xl font-bold uppercase tracking-wider text-sm">Professional &amp; Educational</h3>
+</div>
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Work / Profession</p>
+<input class="form-input flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Current occupation" type="text"/>
+</label>
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Studies / Education</p>
+<input class="form-input flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-12 px-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Highest degree earned" type="text"/>
+</label>
+</section>
+<hr class="border-slate-200 dark:border-slate-800"/>
+<section class="flex flex-col gap-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">description</span>
+<h3 class="text-accent dark:text-primary text-xl font-bold uppercase tracking-wider text-sm">Bio</h3>
+</div>
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Tell us a bit about yourself</p>
+<textarea class="form-textarea flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-32 p-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none resize-none" placeholder="Tell us a bit about yourself..."></textarea>
+</label>
+</section>
+<hr class="border-slate-200 dark:border-slate-800"/><section class="flex flex-col gap-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">info</span>
+<h3 class="text-accent dark:text-primary text-xl font-bold uppercase tracking-wider text-sm">Special Considerations</h3>
+</div>
+<label class="flex flex-col w-full">
+<p class="text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wide pb-1.5 px-1">Accessibility or Special Cases</p>
+<textarea class="form-textarea flex w-full rounded-xl border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white h-32 p-4 text-base focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none resize-none" placeholder="Please mention any physical accessibility requirements, health conditions, or unique circumstances you'd like your partner to be aware of..."></textarea>
+</label>
+</section>
+<div class="pt-6">
+<button class="w-full bg-accent hover:bg-accent/90 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+<span>Create Account</span>
+<span class="material-symbols-outlined">how_to_reg</span>
+</button>
+<p class="text-center text-slate-500 dark:text-slate-400 text-sm mt-4">
+                    By joining, you agree to our <a class="text-accent dark:text-primary underline" href="#">Terms of Service</a>
+</p>
+</div>
+<p class="text-center text-slate-600 dark:text-slate-400 text-base">
+                Already have an account? <a class="text-accent dark:text-primary font-bold hover:underline" href="#">Sign In</a>
+</p>
+</div>
+<div class="h-8"></div>
+</div>
+</body></html>

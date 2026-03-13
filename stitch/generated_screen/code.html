@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Qabool - Premium Matrimony Splash Screen</title>
+<!-- BEGIN: External Resources -->
+<!-- Google Font: Manrope -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- END: External Resources -->
+<!-- BEGIN: Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            maroon: {
+              DEFAULT: '#800000',
+              dark: '#4a0000',
+              light: '#a32a2a'
+            },
+            gold: {
+              DEFAULT: '#d4af35',
+              dark: '#b8860b',
+              light: '#f4e0a6'
+            }
+          },
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+          },
+          borderRadius: {
+            'custom': '8px', // Based on ROUND_EIGHT
+          }
+        }
+      }
+    }
+  </script>
+<!-- END: Tailwind Configuration -->
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="layout-animations">
+    /* Subtle fade-in animation for the splash screen elements */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 1.2s ease-out forwards;
+    }
+
+    /* Decorative gradient for a premium feel */
+    .bg-premium-gradient {
+      background: radial-gradient(circle at center, #ffffff 0%, #f9f9f9 100%);
+    }
+
+    /* Subtle pulse for the logo */
+    @keyframes logoPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    .logo-glow {
+      animation: logoPulse 4s infinite ease-in-out;
+    }
+  </style>
+<style data-purpose="typography">
+    .tagline-spacing {
+      letter-spacing: 0.15em;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="bg-premium-gradient font-sans h-screen flex flex-col items-center justify-between overflow-hidden">
+<!-- BEGIN: Splash Content -->
+<main class="flex-grow flex flex-col items-center justify-center w-full px-6 text-center">
+<!-- Logo Container -->
+<div class="relative mb-12 animate-fade-in" data-purpose="logo-wrapper">
+<!-- Decorative background ring -->
+<div class="absolute inset-0 rounded-full border border-gold/10 scale-150"></div>
+<!-- Main Logo Image -->
+<img alt="Qabool Logo" class="w-48 h-48 md:w-64 md:h-64 object-contain rounded-full shadow-sm logo-glow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQNkB3_Xo85js-pXMyuaOCGrioNQ7iIz8NoIP7Jd08HdmMCHdjFnh-CuD5esD0XUKVsUb20cAaTyhK6mJXWVWLo8mNhaqbK2vinMQDSJdLOIfEW8G0REkP10r_x4KOs1kMpv8wMIhMLSmO-4nvc5g6QrG70RDYTZMUpv3P9WELcEZ-YMCeHCxGVU9MrVRB-EDGXzaAuLDNQBtg8glclPxZ_a9KpceZ2HEUvvMsRw_NqWUenn3cB7zzlU3ucUBHxOHB_0olv8zSBiCK"/>
+</div>
+<!-- App Name and Tagline -->
+<div class="animate-fade-in" data-purpose="branding-text" style="animation-delay: 0.3s;">
+<h1 class="text-4xl md:text-5xl font-bold text-maroon mb-4 tracking-tight">
+        Qabool
+      </h1>
+<!-- Divider with Gold Accent -->
+<div class="flex items-center justify-center gap-4 mb-4">
+<div class="h-[1px] w-8 bg-gold/40"></div>
+<div class="w-2 h-2 rounded-full bg-gold"></div>
+<div class="h-[1px] w-8 bg-gold/40"></div>
+</div>
+<p class="text-sm md:text-base text-gray-600 uppercase font-medium tagline-spacing max-w-xs mx-auto">
+        Connecting Hearts,<br/>Building Legacies
+      </p>
+</div>
+</main>
+<!-- END: Splash Content -->
+<!-- BEGIN: Footer Elements -->
+<footer class="w-full pb-12 flex flex-col items-center animate-fade-in" style="animation-delay: 0.6s;">
+<!-- Loading indicator or cultural motif -->
+<div class="flex space-x-2 mb-8" data-purpose="loading-dots">
+<div class="w-1.5 h-1.5 rounded-full bg-maroon/20"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-maroon/40"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-maroon/60"></div>
+</div>
+<!-- Subtle branding at bottom -->
+<p class="text-[10px] text-gray-400 uppercase tracking-widest">
+      Premium Matrimony Experience
+    </p>
+</footer>
+<!-- END: Footer Elements -->
+</body></html>

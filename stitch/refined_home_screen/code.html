@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#800000", // Maroon for primary buttons/accents
+                        "accent-gold": "#d4af35", // Gold highlights
+                        "background-light": "#fdfcfb",
+                        "background-dark": "#1a1616",
+                        "neutral-soft": "#f4f1f0",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.6rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-neutral-soft dark:border-slate-800">
+<div class="max-w-md mx-auto flex items-center justify-between px-4 py-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">favorite</span>
+<h1 class="text-xl font-extrabold tracking-tight text-primary">Eternal<span class="text-accent-gold">Bond</span></h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full bg-neutral-soft dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</div>
+</header>
+<main class="max-w-md mx-auto pb-24">
+<!-- People Nearby Section -->
+<section class="py-6">
+<div class="flex items-center justify-between px-4 mb-4">
+<h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                People Nearby <span class="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">New</span>
+</h2>
+<a class="text-xs font-bold text-primary" href="#">View all</a>
+</div>
+<div class="flex overflow-x-auto gap-4 px-4 no-scrollbar">
+<!-- Profile Card 1 -->
+<div class="flex-shrink-0 w-64 group">
+<div class="relative aspect-[3/4] rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+<img alt="Profile photo of Sarah" class="w-full h-full object-cover" data-alt="Young professional woman smiling outdoors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdv4WddrOqciIp2nPiC0IPJ9hbXJohApWN-Qc2aHIcurJnxD2x0ERDhcsp3963uSREfro8Gdr7Wd7-V6naQ9ZfBax99EJO8Qp8JUmzjfzCwJvb1hYlZLEfZCBDjk5pnknqEEaxZQl_-fEv5vmQAf8Pqqs1sFw-Fmg5fCzM1hxJg4Bb-oO02PUrqQCEIKw8EvNHA8yDeGu5wlYFzgWIyXOZaSCxNr2txCWD4515RLtVUjo7VIWbx1pNpPN009IGqLk8tQeF2MBphO_x"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-4 text-white">
+<div class="flex items-center gap-1 mb-1">
+<span class="text-lg font-bold">Sarah, 26</span>
+<span class="material-symbols-outlined text-blue-400 text-sm">verified</span>
+</div>
+<p class="text-xs opacity-90 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">work</span> Software Engineer
+                        </p>
+<p class="text-xs opacity-90 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">location_on</span> New York, NY
+                        </p>
+</div>
+<button class="absolute top-3 right-3 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-primary transition-colors">
+<span class="material-symbols-outlined text-xl">favorite</span>
+</button>
+</div>
+</div>
+<!-- Profile Card 2 -->
+<div class="flex-shrink-0 w-64">
+<div class="relative aspect-[3/4] rounded-xl overflow-hidden shadow-sm">
+<img alt="Profile photo of David" class="w-full h-full object-cover" data-alt="Smiling man in a casual shirt" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNIPoQnMyEUBG-Wz9ImkjzEze6Xl2P0hP0neEf4dhHNwkLdD4OzCmS3vr2JfJAbtEMYE-7zkEaB6gx2hpEBtRQIRBZxsQixC1-aXJvX7Wh5rvuN-OOuI3erTZ3hMKjDfMeEIZtPenCrpg8TZlggnAKXjJVCj1l6mIhkRWv0Y9I_T03UA-FZE0xSBg5j8DJHTwBqgHHb_QAYRKm1-vtssqR_wcqO17Y7N3O-Fi8pCCx6FKd5JeAskEt8xf7vnUwPRG_f4Ar3kJ16585"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-4 text-white">
+<div class="flex items-center gap-1 mb-1">
+<span class="text-lg font-bold">David, 29</span>
+<span class="material-symbols-outlined text-blue-400 text-sm">verified</span>
+</div>
+<p class="text-xs opacity-90 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">medical_services</span> Doctor
+                        </p>
+<p class="text-xs opacity-90 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">location_on</span> Brooklyn, NY
+                        </p>
+</div>
+<button class="absolute top-3 right-3 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-primary transition-colors">
+<span class="material-symbols-outlined text-xl">favorite</span>
+</button>
+</div>
+</div>
+<!-- Profile Card 3 -->
+<div class="flex-shrink-0 w-64">
+<div class="relative aspect-[3/4] rounded-xl overflow-hidden shadow-sm">
+<img alt="Profile photo of Elena" class="w-full h-full object-cover" data-alt="Young woman with creative style posing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAa1a2e5mszw5z-zgHt4bHyP1tOzbbEU1EiJPazrNeFym5J6ytvmsK_ypfqUH2_Ih19WZsvcqh6zt7ADNf7_Ws2cycYsZYPeFPXO6ljDroI21-8HTDg4JzMLxJg3hKG-l_BdxyhE-U3IEoafDkFDebtNg4ZvRf2Z3pxsBa-OhVE0dD7ArnTDYGGhNNEO-Lkr4d2ERbCDR7VApB0AsDu2Rbe6rAQI1dZqw__6jtZg5Xw-DdaE8fNwwpg9VE_4E_og1R9E4foCFD1Inls"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-4 text-white">
+<div class="flex items-center gap-1 mb-1">
+<span class="text-lg font-bold">Elena, 27</span>
+</div>
+<p class="text-xs opacity-90 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">palette</span> UX Designer
+                        </p>
+<p class="text-xs opacity-90 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">location_on</span> Jersey City, NJ
+                        </p>
+</div>
+<button class="absolute top-3 right-3 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-primary transition-colors">
+<span class="material-symbols-outlined text-xl">favorite</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Chat Section -->
+<section class="p-4">
+<h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+            Recent Conversations
+        </h2>
+<div class="space-y-1">
+<!-- Chat Item 1 (Active/Unread) -->
+<div class="flex items-center gap-4 p-3 rounded-xl hover:bg-neutral-soft dark:hover:bg-slate-800 transition-colors cursor-pointer bg-white dark:bg-background-dark border border-neutral-soft dark:border-slate-800 shadow-sm mb-3">
+<div class="relative">
+<img alt="Priya Chat" class="w-14 h-14 rounded-full object-cover" data-alt="Portrait of a woman for chat avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaJLmTVTI8-TxcfzP7hXhgpT7MXHgj0xF0MuVg0J6POg7o7O6kUejS4q1S_zaBDS9Y_oQVlE2aAwALpuFSGZsdvFobiiejuTdyG4wIJhipU9iuTI8JhaT-N2C187c1ZmgbGalBWjrYy2Fgyyui4ZwQAXnF1dbQsw2seB_g9IPIazfD1FLCRdraz50oiSDwiCq19Cz9mVBSveLULZ8XPZY2XH-Z8K6JvRIUqwOHnCibjvoQS_Wz5V4JzmVvPZR6UA32meaE1WXR7Qw9"/>
+<span class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-bold text-slate-900 dark:text-slate-100 truncate">Priya Sharma</h4>
+<span class="text-[10px] font-bold text-primary">2m ago</span>
+</div>
+<p class="text-sm text-slate-900 font-semibold truncate dark:text-slate-200">That sounds amazing! I'd love to...</p>
+</div>
+<div class="w-2.5 h-2.5 bg-primary rounded-full"></div>
+</div>
+<!-- Chat Item 2 -->
+<div class="flex items-center gap-4 p-3 rounded-xl hover:bg-neutral-soft dark:hover:bg-slate-800 transition-colors cursor-pointer">
+<div class="relative">
+<img alt="Arjun Chat" class="w-14 h-14 rounded-full object-cover" data-alt="Portrait of a man for chat avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6ZiCvd8Bdjt3NRNe9Qycc6lSUDnfpsJXg_aAgcPJ26FlUwCzkiWMuoJcIaOi1x6P4_Yxsuee2IkunP_IzgsDQ8rbsqzb6Ja9k5HPm-gFifL1EuziSjKL4CgZbQ4UicsrEDYcAw2S-2hvjiwJAjH7WOuyhKwd0w6DS-dDJ4Zp3qTXhLUSbG7wxTmWah0PMBXzyOUsBjtjbQHQ7eFGoW9J5ReO8wcz_5rM_pV2zxQ4kTuwQ4FbnoBfyy6TuYLQC1N9v8J5RwHpiq7i9"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-bold text-slate-900 dark:text-slate-100 truncate">Arjun Mehta</h4>
+<span class="text-[10px] text-slate-400">1h ago</span>
+</div>
+<p class="text-sm text-slate-500 truncate dark:text-slate-400">Thanks for the recommendation!</p>
+</div>
+</div>
+<!-- Chat Item 3 -->
+<div class="flex items-center gap-4 p-3 rounded-xl hover:bg-neutral-soft dark:hover:bg-slate-800 transition-colors cursor-pointer">
+<div class="relative">
+<img alt="Meera Chat" class="w-14 h-14 rounded-full object-cover" data-alt="Portrait of a woman with glasses for chat avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlCQz88kG9WVSKxLNcLWOMzapYr3z-UnQ12olSKTQmqy4CUkS6ovVbwWH7KTnEUGxVyEkL4dCOebHPd7jaREHEDvFaWc3BklAbSX1nBLmweu3lIwHuaG0lTIGAFlBLhJAY6SnOPYEvDtC1IPMfgbEHNJ8yyGVHm46YJkedgCoCdhve4ZEavFiDtPXw_wyrUAqnFXgTlMNo8lbOgFTFAYAqjPmq2VwoKWbaZNUQEr9RwHoVeuy_PWEfUw937p-COJI5m5yH6h-rXc82"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-bold text-slate-900 dark:text-slate-100 truncate">Meera Kapoor</h4>
+<span class="text-[10px] text-slate-400">Yesterday</span>
+</div>
+<p class="text-sm text-slate-500 truncate dark:text-slate-400">Sent an image</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-4 py-3 border-2 border-dashed border-neutral-soft dark:border-slate-800 rounded-xl text-sm font-bold text-slate-400 hover:text-primary hover:border-primary transition-all">
+            See More Conversations
+        </button>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-background-dark border-t border-neutral-soft dark:border-slate-800 px-6 py-2 shadow-2xl z-50">
+<div class="max-w-md mx-auto flex justify-between items-center">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-[1] font-variation-fill-1">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-[10px] font-bold">Discover</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors relative" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="text-[10px] font-bold">Messages</span>
+<span class="absolute -top-1 right-0 h-4 w-4 bg-primary text-white text-[8px] flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900">3</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">Profile</span>
+</a>
+</div>
+</nav>
+</body></html>

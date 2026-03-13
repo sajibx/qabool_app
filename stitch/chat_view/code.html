@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af35",
+                        "maroon": "#800000",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Qabool - Chat</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased">
+<!-- Mobile Screen Wrapper -->
+<div class="relative mx-auto flex h-screen max-w-md w-full flex-col bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border-x border-slate-200 dark:border-slate-800">
+<!-- Header / TopAppBar -->
+<header class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 py-3">
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
+</button>
+<div class="relative shrink-0">
+<div class="size-10 rounded-full bg-slate-200 bg-cover bg-center border-2 border-primary" data-alt="Portrait of a woman smiling for profile" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCR6XxICaU_ykBK-7Gpo19pGvgBuklFavJsf7Sz73ypm1eWBP6i-qS1hSLHWH60xXoeMXOXmyoP7pHF99ITjW89ObkRBRs4d_jjaoMt9_UvVRKk6Wzi85HdY_2Fjbj2reys45bWUNsUXaV9gphTEpTlf9neSk9oNVHOBq9IraVFG1Sx2y8HPMEoKDIaAsYH5Az99hLOgs4Bzue6SQILVW2UV6inHt5uZIOx5xmhCoYcsw38O522xRnij-rkqTzMgqbG7er5dyrsV2aw')"></div>
+<div class="absolute bottom-0 right-0 size-3 rounded-full border-2 border-white bg-green-500"></div>
+</div>
+<div>
+<h2 class="text-slate-900 dark:text-slate-100 text-base font-bold leading-tight">Priya Sharma</h2>
+<p class="text-[11px] text-primary font-medium tracking-wide uppercase">Online Now</p>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">videocam</span>
+</button>
+<button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">call</span>
+</button>
+<button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Message History -->
+<main class="flex-1 overflow-y-auto p-4 space-y-6 bg-slate-50/50 dark:bg-background-dark/30">
+<div class="flex justify-center">
+<span class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest bg-white dark:bg-slate-800 px-3 py-1 rounded-full shadow-sm">Yesterday</span>
+</div>
+<!-- Received Message -->
+<div class="flex items-end gap-2.5 max-w-[85%]">
+<div class="size-8 shrink-0 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Recipient profile small icon" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD8jLHwREtFk9AfHqpqAFJ0YfMIXhjHOrY-DQV5LcaqBsZcIMPHb9UAjatIMGK6elHIk_RefY-Uu_8obWQMwNOHPQQwQnhYrkBjsujeta1aYYSbDcq_81PFFntZvuW2aKRE6UAK375L4jjm2MDmaRhi-3OSd-KBs2ZxRvuFzCC4ieXdgDGm1rFxy8nJSBKCHMLCz9Dc6XDbGQL8hlOZcdSiFnmQyT42-MCEy5fqGDZQOrqzH5K1hJDvUgnOL9omCWsD4P9OCEa_CFg2')"></div>
+<div class="flex flex-col gap-1">
+<div class="rounded-2xl rounded-bl-none px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-sm border border-slate-100 dark:border-slate-700">
+<p class="text-sm leading-relaxed">Assalamu Alaikum! I read your bio about your passion for photography. It's really inspiring.</p>
+</div>
+<span class="text-[10px] text-slate-400 ml-1">10:24 AM</span>
+</div>
+</div>
+<!-- Sent Message -->
+<div class="flex items-end gap-2.5 max-w-[85%] ml-auto flex-row-reverse">
+<div class="size-8 shrink-0 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Sender profile small icon" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCNqwDO-6UXJNIP6_EEhC3zmmzcYsjElz1g6y3HWiftt7Hlj_qckyG3xMPn2-IO7jVxvfKDYeTx6ItSiT43Isp0yW40AcM73FukLHRbfmdnkgCE-BfRTMQivkFMy7Wsipv_XAheWKMBFC9XSy43D4duEF_Mfyn5Cy1_QMdp-GJ6aI_qTTV_k4XpCXdNYeUI7fl4eaCGoIx31lDcj37_EzDgfqTj75tuiypEOwLxhdjFCkWzU0c_jB85Fr4LpiT5XMWeojVN5wnhdMbc')"></div>
+<div class="flex flex-col items-end gap-1">
+<div class="rounded-2xl rounded-br-none px-4 py-2.5 bg-maroon text-white shadow-md shadow-maroon/20">
+<p class="text-sm leading-relaxed">Walaikum Assalam! Thank you, Priya. It's something I've loved since childhood. Do you have any hobbies you're passionate about?</p>
+</div>
+<div class="flex items-center gap-1 mr-1">
+<span class="text-[10px] text-slate-400">10:26 AM</span>
+<span class="material-symbols-outlined text-[14px] text-primary">done_all</span>
+</div>
+</div>
+</div>
+<!-- Received Message -->
+<div class="flex items-end gap-2.5 max-w-[85%]">
+<div class="size-8 shrink-0 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Recipient profile small icon" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCAP2EQN-BIVYU-hgeoEuIgRZnO-YCC_CRRI4MGJg5IZGCyUDqd4--UCT0mHYmy7JbO6mgchKrnTf-waTzyotikL0Sos6ssbQ5F8kduW6pT_jxmIfThABbZzxLWbywneNv-0StmtEv_xeuxKC1bfd5eHVY0yO-J2Pdum93pYW9-ynx3ec48VxWsYNOtLuN7T7shof-eNPGzGfPVb6GtMJeesmMQz01OErQ70hpb6kINtKlPdCEcsmNE04AVfU3tDWC_yFBEISRBtPwU')"></div>
+<div class="flex flex-col gap-1">
+<div class="rounded-2xl rounded-bl-none px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-sm border border-slate-100 dark:border-slate-700">
+<p class="text-sm leading-relaxed">I love interior design and traditional crafts. I'm actually working on a small project for my sister's new home right now.</p>
+</div>
+<span class="text-[10px] text-slate-400 ml-1">10:28 AM</span>
+</div>
+</div>
+<!-- Sent Message (Typing/New) -->
+<div class="flex items-end gap-2.5 max-w-[85%] ml-auto flex-row-reverse">
+<div class="size-8 shrink-0 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Sender profile small icon" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDLXj9ApWDCrBKG415NeZWCYunUqWFBkEXjogOI0MgfFCFDBUqknluwi8qUER4RCIoGg5TyA_ETNufqF9H901V_oS35ENeeAEnICOd0DTOP8Y_pjKcTJFOwgnyTMX2aWHYI_nuV3N0qhIOWA-xXs8ocomVgfdevD_Y9NAjInnZdZVqzkPuImTat7WvyCIhtRrFYlDEmBHFTvEguLAhxHfHj0K4hlFgeaHU5lYr6qkCWmnnF86mjGJNdXMu6CTNec4nVxsi8o1gOkbVi')"></div>
+<div class="flex flex-col items-end gap-1">
+<div class="rounded-2xl rounded-br-none px-4 py-2.5 bg-maroon text-white shadow-md shadow-maroon/20">
+<p class="text-sm leading-relaxed">That sounds wonderful! I'd love to see some of your work sometime. Interior design requires such a creative eye.</p>
+</div>
+<div class="flex items-center gap-1 mr-1">
+<span class="text-[10px] text-slate-400">10:30 AM</span>
+<span class="text-[10px] font-bold text-primary uppercase">Seen</span>
+</div>
+</div>
+</div>
+<!-- Placeholder for interactive scroll -->
+<div class="h-4"></div>
+</main>
+<!-- Input Area -->
+<footer class="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center size-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<div class="relative flex-1">
+<input class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-full py-2.5 pl-4 pr-10 text-sm focus:ring-2 focus:ring-primary/50 text-slate-800 dark:text-slate-200 placeholder:text-slate-400" placeholder="Type a message..." type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined">mood</span>
+</button>
+</div>
+<button class="flex items-center justify-center size-10 rounded-full bg-primary text-white shadow-lg shadow-primary/30 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+<!-- Safe area for mobile -->
+<div class="h-2"></div>
+</footer>
+</div>
+</body></html>

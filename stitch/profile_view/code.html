@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#d4af35", // Gold
+              "background-light": "#fdfcfb",
+              "background-dark": "#1a1616",
+              "maroon-accent": "#800000",
+              "maroon-dark": "#4a0000",
+            },
+            fontFamily: {
+              "display": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.5rem",
+              "lg": "1rem",
+              "xl": "1.5rem",
+              "2xl": "2rem",
+              "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+<title>My Profile - Qabool App</title>
+<style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+      .gold-gradient {
+        background: linear-gradient(135deg, #d4af35 0%, #f1d592 50%, #d4af35 100%);
+      }
+      .maroon-gradient {
+        background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
+      }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-maroon-accent cursor-pointer">arrow_back</span>
+<h1 class="text-xl font-bold tracking-tight text-maroon-accent">My Profile</h1>
+</div>
+<button class="p-2 rounded-full hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined text-primary">settings</span>
+</button>
+</header>
+<main class="max-w-md mx-auto pb-32">
+<!-- Profile Hero -->
+<section class="flex flex-col items-center pt-10 pb-8 px-6 bg-white dark:bg-background-dark shadow-sm">
+<div class="relative group">
+<div class="w-36 h-36 rounded-full p-1 gold-gradient shadow-xl">
+<div class="w-full h-full rounded-full border-4 border-white dark:border-background-dark bg-cover bg-center overflow-hidden" data-alt="Professional portrait of a woman" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA8Z_8pkHi6uiVSNSu0d78UmskV6V1Cu993jL5OhaCDaPRxtGn6muuUElyrGF8Y1VhX2fjkHpd_2BhPlb2CYhZADxFIxjI65lnjZPgDvJFyLAYLe-mfK66KUfaPWfmX_u9Kte97byPLql6sPDvESs1Uu8AG1Mf79D6y4FL6T3KSZdHbJ-w6ebdHyZWsN1pLSLMoA0Hrw79zixSmm-UCp0BEGZf4RS-aNOvotcGRxgzaf78bUN5257GjJr96m1kYS63lExtrAoZxrmyz')">
+</div>
+</div>
+<button class="absolute bottom-1 right-1 maroon-gradient text-white w-10 h-10 flex items-center justify-center rounded-full shadow-lg border-2 border-white dark:border-background-dark transition-transform active:scale-95">
+<span class="material-symbols-outlined text-base">edit</span>
+</button>
+</div>
+<div class="text-center mt-6">
+<h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Ananya Sharma, 27</h2>
+<div class="flex items-center justify-center gap-1 text-slate-400 dark:text-slate-500 mt-1">
+<span class="material-symbols-outlined text-lg">location_on</span>
+<span class="text-sm font-medium">Mumbai, Maharashtra</span>
+</div>
+</div>
+<div class="mt-8 w-full flex gap-3">
+<button class="flex-[3] maroon-gradient text-white py-4 rounded-2xl font-bold text-sm tracking-widest uppercase shadow-lg shadow-maroon-accent/20 active:scale-[0.98] transition-all">
+                Edit Profile
+            </button>
+<button class="flex-1 border-2 border-primary/20 text-primary rounded-2xl font-bold hover:bg-primary/5 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</section>
+<!-- Content Sections -->
+<div class="px-6 space-y-6 mt-6">
+<!-- Bio Section -->
+<section class="bg-white dark:bg-slate-900/40 p-6 rounded-3xl shadow-sm border border-primary/5">
+<h3 class="text-sm font-black text-maroon-accent uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary scale-90">account_circle</span>
+                About Me
+            </h3>
+<p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm font-medium">
+                I am a software engineer at a top-tier tech firm, passionate about innovation and problem-solving. Outside of work, I enjoy classical dance, traveling, and exploring new cuisines. Looking for someone who values tradition while embracing a modern outlook on life.
+            </p>
+</section>
+<!-- Personal Details -->
+<section class="bg-white dark:bg-slate-900/40 p-6 rounded-3xl shadow-sm border border-primary/5">
+<h3 class="text-sm font-black text-maroon-accent uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary scale-90">list_alt</span>
+                Personal Details
+            </h3>
+<div class="space-y-6">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">school</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold tracking-widest mb-0.5">Education</p>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200">M.Tech in Computer Science, IIT Bombay</p>
+</div>
+</div>
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">work</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold tracking-widest mb-0.5">Profession</p>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200">Senior Software Engineer at Google</p>
+</div>
+</div>
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">height</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold tracking-widest mb-0.5">Height</p>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200">5'6" (167 cm)</p>
+</div>
+</div>
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">church</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold tracking-widest mb-0.5">Religion &amp; Caste</p>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200">Hindu, Brahmin (Saraswat)</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-t border-primary/10 px-6 pb-8 pt-4 flex justify-around items-center z-50">
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-maroon-accent transition-colors">home</span>
+<span class="text-[9px] font-bold text-slate-400 group-hover:text-maroon-accent tracking-widest">HOME</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-maroon-accent transition-colors">explore</span>
+<span class="text-[9px] font-bold text-slate-400 group-hover:text-maroon-accent tracking-widest">DISCOVER</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-maroon-accent transition-colors">chat_bubble</span>
+<span class="text-[9px] font-bold text-slate-400 group-hover:text-maroon-accent tracking-widest">MESSAGES</span>
+</a>
+<a class="flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined text-maroon-accent fill-[1]">person</span>
+<span class="text-[9px] font-black text-maroon-accent tracking-widest">PROFILE</span>
+</a>
+</nav>
+</body></html>

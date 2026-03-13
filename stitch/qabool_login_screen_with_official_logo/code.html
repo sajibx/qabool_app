@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#800000", // Maroon for buttons
+                        "accent": "#d4af35",  // Gold for text links
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201d12",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top Navigation -->
+<header class="flex items-center bg-white dark:bg-slate-900 p-4 border-b border-slate-100 dark:border-slate-800 justify-between">
+<div class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-12">Login to Qabool</h2>
+</header>
+<main class="flex-1 max-w-md mx-auto w-full px-6 py-8">
+<!-- Hero/Branding -->
+<div class="mb-10 text-center">
+<div class="inline-flex items-center justify-center w-28 h-28 rounded-full bg-primary/5 mb-6 relative">
+<div class="absolute inset-0 rounded-full border border-accent/10 scale-125"></div>
+<img alt="Qabool Logo" class="w-24 h-24 object-contain rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQNkB3_Xo85js-pXMyuaOCGrioNQ7iIz8NoIP7Jd08HdmMCHdjFnh-CuD5esD0XUKVsUb20cAaTyhK6mJXWVWLo8mNhaqbK2vinMQDSJdLOIfEW8G0REkP10r_x4KOs1kMpv8wMIhMLSmO-4nvc5g6QrG70RDYTZMUpv3P9WELcEZ-YMCeHCxGVU9MrVRB-EDGXzaAuLDNQBtg8glclPxZ_a9KpceZ2HEUvvMsRw_NqWUenn3cB7zzlU3ucUBHxOHB_0olv8zSBiCK"/>
+</div>
+<h1 class="text-slate-900 dark:text-white text-3xl font-extrabold tracking-tight mb-2">Qabool</h1>
+<p class="text-slate-500 dark:text-slate-400">Find your soulmate today</p>
+</div>
+<!-- Form Fields -->
+<div class="space-y-4">
+<div class="flex flex-col gap-2">
+<label class="text-slate-700 dark:text-slate-300 text-sm font-semibold">Email or Phone Number</label>
+<input class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-base focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Enter your email" type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<label class="text-slate-700 dark:text-slate-300 text-sm font-semibold">Password</label>
+<a class="text-accent text-sm font-medium hover:underline" href="#">Forgot password?</a>
+</div>
+<div class="relative">
+<input class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-base focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<!-- Login Button -->
+<button class="w-full bg-primary text-white font-bold py-4 rounded-lg shadow-lg hover:opacity-90 transition-opacity mt-2">
+            Log In
+        </button>
+</div>
+<!-- Divider -->
+<div class="flex items-center my-10">
+<div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+<span class="px-4 text-slate-400 text-sm font-medium uppercase tracking-wider">New to Qabool?</span>
+<div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+</div>
+<!-- Sign Up Button -->
+<div class="text-center pb-8">
+<button class="w-full border-2 border-primary text-primary font-bold py-4 rounded-lg hover:bg-primary/5 transition-colors mb-6">
+            Sign Up Now
+        </button>
+<p class="text-slate-600 dark:text-slate-400 font-medium">
+            Already have an account? 
+            <a class="text-accent font-bold hover:underline ml-1" href="#">Sign In</a>
+</p>
+</div>
+</main>
+<!-- Visual Element -->
+<div class="hidden lg:block fixed right-0 top-0 bottom-0 w-1/3 overflow-hidden">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Elegant Indian wedding reception decorations with flowers" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDwOsb2tTh6jwLW0Qqp3VyLDqDik4kWO2AfCDdp_s0pDmZ8MnT--MRJOJwyw7w7GdBg-yN4nyZaYAhNyTdQmQEyJNsMyqN16ErJmj1dyBlqo5lt2NftAWPaxNl7BaNu0UvjEYWX5ZOtCN5NzfLAk3dtRKdjnzPQSVMJg0S8c9cAQ9g49tT3ZqToAKewFWisGoRccY7eAjch8Mx4xJsveCYrFNPv1wKhwTAJWMeMfG6ovThdUBGykgi3zaQAFQAxPrY8eeyTgcXVSkDD");'>
+<div class="w-full h-full bg-primary/20 backdrop-blur-[2px] flex items-center justify-center p-12">
+<div class="bg-white/90 p-8 rounded-xl shadow-2xl max-w-sm text-center">
+<h3 class="text-primary text-2xl font-bold mb-4">Start your journey on Qabool</h3>
+<p class="text-slate-700 leading-relaxed mb-6">"Love is not about finding the perfect person, but by learning to see an imperfect person perfectly."</p>
+<div class="flex items-center justify-center gap-3">
+<div class="size-10 rounded-full bg-accent"></div>
+<div class="text-left">
+<p class="text-sm font-bold text-slate-900">Trusted by Millions</p>
+<p class="text-xs text-slate-500">Verified matrimony profiles</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>
