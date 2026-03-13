@@ -88,7 +88,20 @@ class ChatService extends ChangeNotifier {
     if (chatIndex != -1) {
       final chat = _chats[chatIndex];
       // Increment unread count if message is not from me
-      final isFromMe = message.senderId.trim() == _apiService.currentUserId?.trim();
+      // Robust isFromMe: if it doesn't match the other person in this 1:1 chat, it's from me
+      final otherParticipant = chat.participants.firstWhere(
+        (p) => p.id.trim().toLowerCase() != _apiService.currentUserId?.trim().toLowerCase(),
+        orElse: () => chat.participants.first, // Fallback
+      );
+      
+      final isFromMe = message.senderId.trim().toLowerCase() != otherParticipant.id.trim().toLowerCase();
+
+      print('--- DEBUG UNREAD ---');
+      print('Message Sender ID: "${message.senderId}"');
+      print('Other Participant ID: "${otherParticipant.id}"');
+      print('Current User ID (ApiService): "${_apiService.currentUserId}"');
+      print('Is From Me: $isFromMe');
+      
       final updatedChat = chat.copyWith(
         lastMessage: message,
         unreadCount: !isFromMe ? chat.unreadCount + 1 : chat.unreadCount,

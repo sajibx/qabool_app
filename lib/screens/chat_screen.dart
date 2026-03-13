@@ -210,9 +210,23 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
-                      // Case-insensitive comparison and trimming for robustness
-                      final isMe = currentUserId != null && 
+                      // Super robust check: If it matches the other user, it's NOT me.
+                      // If it doesn't match the other user, it MUST be me (in a 1:1 chat).
+                      final isMe = otherUser != null && 
+                          message.senderId.trim().toLowerCase() != otherUser.id.trim().toLowerCase();
+                      
+                      // Secondary check for safety
+                      final isMe_fallback = currentUserId != null && 
                           message.senderId.trim().toLowerCase() == currentUserId.trim().toLowerCase();
+                      
+                      if (index == messages.length - 1) {
+                        print('--- DEBUG ALIGNMENT ---');
+                        print('Msg Content: ${message.content}');
+                        print('Msg Sender ID: "${message.senderId}"');
+                        print('Other User ID: "${otherUser?.id}"');
+                        print('Current User ID: "$currentUserId"');
+                        print('Result isMe: $isMe');
+                      }
                       
                       if (isMe) {
                         return _buildSentMessage(
