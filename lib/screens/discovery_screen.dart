@@ -403,38 +403,76 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
               child: ClipRRect(
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(16)),
-                child: CachedNetworkImage(
-                  imageUrl: profile.profileImageUrl ?? '',
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: primaryColor,
-                        strokeWidth: 2,
-                      ),
-                    ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.person,
-                            size: 40,
-                            color: isDark ? Colors.grey[600] : Colors.grey[400]),
-                        const SizedBox(height: 4),
-                        Text(
-                          'No Image',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: isDark ? Colors.grey[600] : Colors.grey[400],
-                            fontWeight: FontWeight.bold,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: profile.profileImageUrl ?? '',
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: isDark ? Colors.grey[800] : Colors.grey[200],
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: primaryColor,
+                            strokeWidth: 2,
                           ),
                         ),
-                      ],
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: isDark ? Colors.grey[800] : Colors.grey[200],
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.person,
+                                size: 40,
+                                color: isDark ? Colors.grey[600] : Colors.grey[400]),
+                            const SizedBox(height: 4),
+                            Text(
+                              'No Image',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: isDark ? Colors.grey[600] : Colors.grey[400],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: GestureDetector(
+                        onTap: () async {
+                          final profileService = context.read<ProfileService>();
+                          try {
+                            if (profile.isFavorited) {
+                              await profileService.unfavoriteUser(profile.id);
+                            } else {
+                              await profileService.favoriteUser(profile.id);
+                            }
+                            _fetchProfiles();
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e')),
+                            );
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.4),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            profile.isFavorited ? Icons.favorite : Icons.favorite_border,
+                            color: profile.isFavorited ? Colors.red : Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -19,6 +19,7 @@ class UserModel {
   final String? education;
   final String? specialConsiderations;
   final bool isVerified;
+  final bool isFavorited;
   final DateTime? lastSeen;
 
   UserModel({
@@ -40,6 +41,7 @@ class UserModel {
     this.education,
     this.specialConsiderations,
     this.isVerified = false,
+    this.isFavorited = false,
     this.lastSeen,
   });
 
@@ -80,6 +82,7 @@ class UserModel {
       education: json['education'],
       specialConsiderations: json['specialConsiderations'],
       isVerified: json['isVerified'] ?? false,
+      isFavorited: json['isFavorited'] ?? false,
       lastSeen: json['lastSeen'] != null ? DateTime.parse(json['lastSeen']) : null,
     );
   }
@@ -105,6 +108,7 @@ class UserModel {
       'education': education,
       'specialConsiderations': specialConsiderations,
       'isVerified': isVerified,
+      'isFavorited': isFavorited,
       'lastSeen': lastSeen?.toIso8601String(),
     };
   }

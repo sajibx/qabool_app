@@ -47,4 +47,47 @@ class ProfileService extends ChangeNotifier {
       rethrow;
     }
   }
+
+  // Favorites
+  Future<void> favoriteUser(String id) async {
+    try {
+      await _apiService.client.post('/favorites/$id');
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> unfavoriteUser(String id) async {
+    try {
+      await _apiService.client.delete('/favorites/$id');
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<UserModel>> getMyFavorites() async {
+    try {
+      final response = await _apiService.client.get('/favorites/my');
+      if (response.statusCode == 200) {
+        return (response.data as List).map((u) => UserModel.fromJson(u)).toList();
+      }
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<UserModel>> getUsersWhoFavoritedMe() async {
+    try {
+      final response = await _apiService.client.get('/favorites/by-whom');
+      if (response.statusCode == 200) {
+        return (response.data as List).map((u) => UserModel.fromJson(u)).toList();
+      }
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

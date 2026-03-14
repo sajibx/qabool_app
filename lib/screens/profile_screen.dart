@@ -8,10 +8,24 @@ import 'package:qabool_app/screens/edit_profile_screen.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final UserModel? user;
 
   const ProfileScreen({super.key, this.user});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late UserModel? _displayUser;
+  bool _isMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayUser = widget.user;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,15 +33,19 @@ class ProfileScreen extends StatelessWidget {
     final auth = context.watch<AuthService>();
     final currentUser = auth.currentUser;
     
-    // If a user is passed in, it's a public profile. Otherwise, it's the current user's profile.
-    final displayUser = user ?? currentUser;
-    final isMe = displayUser?.id == currentUser?.id;
+    if (_displayUser == null && currentUser != null) {
+      _displayUser = currentUser;
+    }
+    
+    _isMe = _displayUser?.id == currentUser?.id;
+    
+    final profileService = context.watch<ProfileService>();
     
     const primaryColor = QaboolTheme.primary; // Maroon
     const accentGold = QaboolTheme.accentGold; // Gold
     const bgDark = Color(0xFF1A1616);
 
-    if (displayUser == null) {
+    if (_displayUser == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
@@ -36,7 +54,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDark ? bgDark : const Color(0xFFFDFCFB),
       appBar: AppBar(
-        title: isMe
+        title: _isMe
             ? const Text(
                 'My Profile',
                 style: TextStyle(
@@ -59,7 +77,7 @@ class ProfileScreen extends StatelessWidget {
           },
         ),
         actions: [
-          if (isMe)
+          if (_isMe)
             IconButton(
               icon: const Icon(Icons.settings, color: primaryColor),
               onPressed: () {},
@@ -104,7 +122,7 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         child: ClipOval(
                           child: CachedNetworkImage(
-                            imageUrl: displayUser.profileImageUrl ?? '',
+                            imageUrl: _displayUser!.profileImageUrl ?? '',
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
                               color: isDark ? Colors.grey[800] : Colors.grey[200],
@@ -121,7 +139,7 @@ class ProfileScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (isMe)
+                      if (_isMe)
                         Container(
                           width: 40,
                           height: 40,
@@ -158,7 +176,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    '${displayUser.fullName}${displayUser.age != null ? ", ${displayUser.age}" : ""}',
+                    '${_displayUser!.fullName}${_displayUser!.age != null ? ", ${_displayUser!.age}" : ""}',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
@@ -174,7 +192,7 @@ class ProfileScreen extends StatelessWidget {
                           color: isDark ? Colors.grey[500] : Colors.grey[400]),
                       const SizedBox(width: 4),
                       Text(
-                        displayUser.region ?? 'No location added',
+                        _displayUser!.region ?? 'No location added',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -253,72 +271,127 @@ class ProfileScreen extends StatelessWidget {
                       ],
                     )
                   else
-                    ElevatedButton(
-                      onPressed: () async {
-                        try {
-                          final chatService = context.read<ChatService>();
-                          final chat = await chatService.createChat(displayUser.id);
-                          if (context.mounted) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatScreen(
-                                  chatId: chat.id,
-                                  otherUser: displayUser,
-                                ),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to initiate chat: $e')),
-                            );
-                          }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Colors.transparent,
-                        shadowColor: primaryColor.withOpacity(0.2),
-                        elevation: 8,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ).copyWith(
-                        backgroundColor:
-                            WidgetStateProperty.all(Colors.transparent),
-                      ),
-                      child: Ink(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF800000), Color(0xFF4A0000)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                    Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            try {
+                              final chatService = context.read<ChatService>();
+                              final chat = await chatService.createChat(_displayUser!.id);
+                              if (context.mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatScreen(
+                                      chatId: chat.id,
+                                      otherUser: _displayUser!,
+                                    ),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Failed to initiate chat: $e')),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: Colors.transparent,
+                            shadowColor: primaryColor.withOpacity(0.2),
+                            elevation: 8,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ).copyWith(
+                            backgroundColor:
+                                WidgetStateProperty.all(Colors.transparent),
                           ),
-                          borderRadius: BorderRadius.circular(16),
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF800000), Color(0xFF4A0000)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Container(
+                              alignment: Alignment.center,
+                              constraints: const BoxConstraints(minHeight: 52),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.chat_bubble_outline, color: Colors.white),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'CONNECT',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                        child: Container(
-                          alignment: Alignment.center,
-                          constraints: const BoxConstraints(minHeight: 52),
-                          child: const Row(
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: () async {
+                            try {
+                              if (_displayUser!.isFavorited) {
+                                await profileService.unfavoriteUser(_displayUser!.id);
+                              } else {
+                                await profileService.favoriteUser(_displayUser!.id);
+                              }
+                              // Re-fetch profile to update local state
+                              final updatedUser = await profileService.getProfile(_displayUser!.id);
+                              setState(() {
+                                _displayUser = updatedUser;
+                              });
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error: $e')),
+                                );
+                              }
+                            }
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            side: BorderSide(
+                                color: _displayUser!.isFavorited ? Colors.red : primaryColor.withOpacity(0.2),
+                                width: 2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            minimumSize: const Size.fromHeight(52),
+                          ),
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.chat_bubble_outline, color: Colors.white),
-                              SizedBox(width: 12),
+                              Icon(
+                                _displayUser!.isFavorited ? Icons.favorite : Icons.favorite_border,
+                                color: _displayUser!.isFavorited ? Colors.red : primaryColor,
+                              ),
+                              const SizedBox(width: 12),
                               Text(
-                                'CONNECT',
+                                _displayUser!.isFavorited ? 'UNFAVORITE' : 'ADD TO FAVORITES',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: _displayUser!.isFavorited ? Colors.red : primaryColor,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14,
                                   letterSpacing: 1.5,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
+                      ],
                     ),
                 ],
               ),
@@ -356,7 +429,7 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          displayUser.bio ?? (isMe ? 'No bio added yet. Tell others bit about yourself!' : 'No bio provided.'),
+                          _displayUser!.bio ?? (_isMe ? 'No bio added yet. Tell others bit about yourself!' : 'No bio provided.'),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -397,7 +470,7 @@ class ProfileScreen extends StatelessWidget {
                         _buildDetailRow(
                           icon: Icons.school,
                           label: 'EDUCATION',
-                          value: displayUser.education ?? 'Not specified',
+                          value: _displayUser!.education ?? 'Not specified',
                           primaryColor: primaryColor,
                           isDark: isDark,
                         ),
@@ -405,7 +478,7 @@ class ProfileScreen extends StatelessWidget {
                         _buildDetailRow(
                           icon: Icons.work,
                           label: 'PROFESSION',
-                          value: displayUser.profession ?? 'Not specified',
+                          value: _displayUser!.profession ?? 'Not specified',
                           primaryColor: primaryColor,
                           isDark: isDark,
                         ),
@@ -413,7 +486,7 @@ class ProfileScreen extends StatelessWidget {
                         _buildDetailRow(
                           icon: Icons.height,
                           label: 'HEIGHT',
-                          value: displayUser.height != null ? "${displayUser.height} cm" : 'Not specified',
+                          value: _displayUser!.height != null ? "${_displayUser!.height} cm" : 'Not specified',
                           primaryColor: primaryColor,
                           isDark: isDark,
                         ),
@@ -421,14 +494,14 @@ class ProfileScreen extends StatelessWidget {
                         _buildDetailRow(
                           icon: Icons.church,
                           label: 'RELIGION & CASTE',
-                          value: '${displayUser.religion ?? "Not specified"}${displayUser.ethnicity != null ? ", ${displayUser.ethnicity}" : ""}',
+                          value: '${_displayUser!.religion ?? "Not specified"}${_displayUser!.ethnicity != null ? ", ${_displayUser!.ethnicity}" : ""}',
                           primaryColor: primaryColor,
                           isDark: isDark,
                         ),
                       ],
                     ),
                   ),
-                  if (isMe) ...[
+                  if (_isMe) ...[
                     const SizedBox(height: 32),
                     // Logout Button
                     OutlinedButton(

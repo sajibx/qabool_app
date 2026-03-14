@@ -23,6 +23,8 @@ class HomeScreenState extends State<HomeScreen> {
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   List<UserModel> _nearbyProfiles = [];
+  List<UserModel> _likedMeProfiles = [];
+  bool _isLoadingLikedMe = true;
 
   @override
   void initState() {
@@ -39,6 +41,7 @@ class HomeScreenState extends State<HomeScreen> {
   Future<void> refreshData() async {
     await Future.wait([
       _fetchProfiles(),
+      _fetchLikedMeProfiles(),
       _fetchChats(),
     ]);
   }
@@ -74,6 +77,21 @@ class HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       if (mounted) setState(() => _isLoadingProfiles = false);
+    }
+  }
+
+  Future<void> _fetchLikedMeProfiles() async {
+    try {
+      final profileService = context.read<ProfileService>();
+      final profiles = await profileService.getUsersWhoFavoritedMe();
+      if (mounted) {
+        setState(() {
+          _likedMeProfiles = profiles;
+          _isLoadingLikedMe = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoadingLikedMe = false);
     }
   }
 
@@ -160,6 +178,69 @@ class HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 8),
+
+                    // Who Liked You Section
+                    if (_likedMeProfiles.isNotEmpty || _isLoadingLikedMe) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'Who Liked You',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.grey[100] : Colors.grey[800],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 100,
+                        child: _isLoadingLikedMe
+                            ? const Center(child: CircularProgressIndicator())
+                            : ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                itemCount: _likedMeProfiles.length,
+                                itemBuilder: (context, index) {
+                                  final profile = _likedMeProfiles[index];
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ProfileScreen(user: profile),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      width: 80,
+                                      margin: const EdgeInsets.only(right: 12),
+                                      child: Column(
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 30,
+                                            backgroundImage: profile.profileImageUrl != null
+                                                ? CachedNetworkImageProvider(profile.profileImageUrl!)
+                                                : null,
+                                            child: profile.profileImageUrl == null
+                                                ? const Icon(Icons.person)
+                                                : null,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            profile.firstName,
+                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
 
                     // People Nearby Header
                     Padding(
@@ -417,13 +498,35 @@ class HomeScreenState extends State<HomeScreen> {
                     Positioned(
                       top: 8,
                       right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.4),
-                          shape: BoxShape.circle,
+                      child: GestureDetector(
+                        onTap: () async {
+                          final profileService = context.read<ProfileService>();
+                          try {
+                            if (profile.isFavorited) {
+                              await profileService.unfavoriteUser(profile.id);
+                            } else {
+                              await profileService.favoriteUser(profile.id);
+                            }
+                            // Refresh local state or parent handles it
+                            refreshData();
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e')),
+                            );
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.4),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            profile.isFavorited ? Icons.favorite : Icons.favorite_border,
+                            color: profile.isFavorited ? Colors.red : Colors.white,
+                            size: 16,
+                          ),
                         ),
-                        child: const Icon(Icons.favorite_border, color: Colors.white, size: 16),
                       ),
                     ),
                   ],

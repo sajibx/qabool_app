@@ -99,6 +99,43 @@ class ChatService extends ChangeNotifier {
         print('Error parsing message: $e');
       }
     });
+    
+    _socket?.on('new_favorite', (data) {
+      print('New favorite received: $data');
+      try {
+        Map<String, dynamic> jsonData;
+        if (data is String) {
+          jsonData = jsonDecode(data);
+        } else {
+          try {
+            jsonData = jsonDecode(jsonEncode(data));
+          } catch (_) {
+            jsonData = Map<String, dynamic>.from(data as dynamic);
+          }
+        }
+        
+        final from = jsonData['from'];
+        if (from != null) {
+          final userName = from['firstName'] ?? 'Someone';
+          final profileImageUrl = from['profileImageUrl'];
+          
+          if (navigatorKey.currentContext != null) {
+            NotificationOverlay.show(
+              context: navigatorKey.currentContext!,
+              title: 'New Favorite! ⭐',
+              message: '$userName just added you to their favorites!',
+              imageUrl: profileImageUrl,
+              onTap: () {
+                // Navigate to discovery or who liked you if needed
+                // For now, it just shows who it is
+              },
+            );
+          }
+        }
+      } catch (e) {
+        print('Error parsing favorite notification: $e');
+      }
+    });
 
     _socket?.connect();
   }

@@ -228,6 +228,7 @@ class MessagesScreenState extends State<MessagesScreen> {
                       isTyping: false,
                       isActive: isSelected,
                       isOnline: otherUser.isOnline,
+                      isFavorited: otherUser.isFavorited,
                       unreadCount: chat.unreadCount,
                       onTap: () {
                         if (MediaQuery.of(context).size.width > 900) {
@@ -270,6 +271,7 @@ class MessagesScreenState extends State<MessagesScreen> {
     bool isTyping = false,
     bool isActive = false,
     bool isOnline = false,
+    bool isFavorited = false,
     int unreadCount = 0,
     VoidCallback? onTap,
     IconData? msgStatusIcon,
@@ -353,15 +355,25 @@ class MessagesScreenState extends State<MessagesScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: isDark ? Colors.white : Colors.grey[900],
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Text(
+                              name,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: isDark ? Colors.white : Colors.grey[900],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (isFavorited) ...[
+                              const SizedBox(width: 4),
+                              const Icon(Icons.star, color: Colors.amber, size: 14),
+                            ],
+                          ],
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         time,
