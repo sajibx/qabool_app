@@ -42,10 +42,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
       if (!mounted) return;
       
-      final token = await context.read<ApiService>().getToken();
-      if (token != null) chatService.initSocket(token);
-      
-      Navigator.pushReplacementNamed(context, '/main');
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green, size: 28),
+              SizedBox(width: 12),
+              Text('Registration Successful'),
+            ],
+          ),
+          content: const Text(
+            'Your account has been created successfully! Please wait for admin approval before you can sign in and start your journey.',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+              },
+              child: const Text(
+                'GOT IT',
+                style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
+              ),
+            ),
+          ],
+        ),
+      );
     } on Exception catch (e) {
       String message = 'Registration failed';
       if (e.toString().contains('409')) {

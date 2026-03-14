@@ -60,14 +60,8 @@ class AuthService extends ChangeNotifier {
       });
 
       if (response.statusCode == 201) {
-        final token = response.data['access_token'];
-        await _apiService.saveToken(token);
-        
-        final user = UserModel.fromJson(response.data['user']);
-        await _apiService.saveUserData(jsonEncode(user.toJson()));
-        
-        _currentUser = user;
-        _apiService.currentUserId = _currentUser?.id;
+        // Registration successful, but we don't sign in automatically
+        // as per the new requirement for admin approval.
         notifyListeners();
       }
     } catch (e) {
