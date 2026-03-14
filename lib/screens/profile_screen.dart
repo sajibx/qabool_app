@@ -334,20 +334,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Column(
                       children: [
                         ElevatedButton(
-                          onPressed: () async {
-                            try {
-                              final connectionService = context.read<ConnectionService>();
-                              await connectionService.sendConnectionRequest(_displayUser!.id);
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Connection request sent!')),
-                                );
+                          onPressed: _displayUser!.connectionStatus == 'PENDING' 
+                            ? null 
+                            : () async {
+                            if (_displayUser!.connectionStatus == 'ACCEPTED') {
+                              try {
+                                final chatService = context.read<ChatService>();
+                                final chat = await chatService.createChat(_displayUser!.id);
+                                if (context.mounted) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatScreen(
+                                        chatId: chat.id,
+                                        otherUser: _displayUser!,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Failed to open chat: $e')),
+                                  );
+                                }
                               }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Failed to send request: $e')),
-                                );
+                            } else {
+                              try {
+                                final connectionService = context.read<ConnectionService>();
+                                await connectionService.sendConnectionRequest(_displayUser!.id);
+                                if (mounted) {
+                                  setState(() {
+                                    _displayUser = _displayUser!.copyWith(connectionStatus: 'PENDING');
+                                  });
+                                }
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Connection request sent!')),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Failed to send request: $e')),
+                                  );
+                                }
                               }
                             }
                           },
@@ -365,8 +396,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           child: Ink(
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF800000), Color(0xFF4A0000)],
+                              gradient: LinearGradient(
+                                colors: _displayUser!.connectionStatus == 'ACCEPTED'
+                                    ? [const Color(0xFF2ECC71), const Color(0xFF27AE60)]
+                                    : (_displayUser!.connectionStatus == 'PENDING'
+                                        ? [Colors.grey, Colors.grey]
+                                        : [const Color(0xFF800000), const Color(0xFF4A0000)]),
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -375,14 +410,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Container(
                               alignment: Alignment.center,
                               constraints: const BoxConstraints(minHeight: 44),
-                              child: const Row(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
-                                  SizedBox(width: 8),
+                                  Icon(
+                                    _displayUser!.connectionStatus == 'ACCEPTED'
+                                        ? Icons.chat_bubble
+                                        : Icons.chat_bubble_outline,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    'CONNECT',
-                                    style: TextStyle(
+                                    _displayUser!.connectionStatus == 'ACCEPTED'
+                                        ? 'MESSAGE'
+                                        : (_displayUser!.connectionStatus == 'PENDING'
+                                            ? 'PENDING'
+                                            : 'CONNECT'),
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,

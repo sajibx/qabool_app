@@ -258,17 +258,52 @@ class HomeScreenState extends State<HomeScreen> {
                                       context: context,
                                       profile: profile,
                                       onConnect: () async {
-                                        try {
-                                          final connectionService = context.read<ConnectionService>();
-                                          await connectionService.sendConnectionRequest(profile.id);
-                                          if (!mounted) return;
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Connection request sent!')),
-                                          );
-                                        } catch (e) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text('Failed to send request: $e')),
-                                          );
+                                        if (profile.connectionStatus == 'ACCEPTED') {
+                                           // Open Chat
+                                           try {
+                                             final chatService = context.read<ChatService>();
+                                             final chat = await chatService.createChat(profile.id);
+                                             if (context.mounted) {
+                                               Navigator.push(
+                                                 context,
+                                                 MaterialPageRoute(
+                                                   builder: (context) => ChatScreen(
+                                                     chatId: chat.id,
+                                                     otherUser: profile,
+                                                   ),
+                                                 ),
+                                               );
+                                             }
+                                           } catch (e) {
+                                             if (context.mounted) {
+                                               ScaffoldMessenger.of(context).showSnackBar(
+                                                 SnackBar(content: Text('Failed to open chat: $e')),
+                                               );
+                                             }
+                                           }
+                                        } else {
+                                          try {
+                                            final connectionService = context.read<ConnectionService>();
+                                            await connectionService.sendConnectionRequest(profile.id);
+                                            if (mounted) {
+                                              setState(() {
+                                                final idx = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
+                                                if (idx != -1) {
+                                                  _nearbyProfiles[idx] = _nearbyProfiles[idx].copyWith(connectionStatus: 'PENDING');
+                                                }
+                                              });
+                                            }
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('Connection request sent!')),
+                                            );
+                                          } catch (e) {
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('Failed to send request: $e')),
+                                              );
+                                            }
+                                          }
                                         }
                                       },
                                     );
@@ -600,9 +635,11 @@ class HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: onConnect,
+                    onPressed: profile.connectionStatus == 'PENDING' ? null : onConnect,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: pColor,
+                      backgroundColor: profile.connectionStatus == 'ACCEPTED' 
+                          ? const Color(0xFF2ECC71)
+                          : (profile.connectionStatus == 'PENDING' ? Colors.grey : pColor),
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 32),
                       padding: EdgeInsets.zero,
@@ -611,9 +648,11 @@ class HomeScreenState extends State<HomeScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'CONNECT',
-                      style: TextStyle(
+                    child: Text(
+                      profile.connectionStatus == 'ACCEPTED' 
+                          ? 'MESSAGE' 
+                          : (profile.connectionStatus == 'PENDING' ? 'PENDING' : 'CONNECT'),
+                      style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1,

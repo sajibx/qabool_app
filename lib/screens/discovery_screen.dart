@@ -440,6 +440,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                           ],
                         ),
                       ),
+                    ),
                     if (profile.isOnline)
                       Positioned(
                         top: 8,
@@ -576,25 +577,61 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12)
                   .copyWith(bottom: 12),
               child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    final connectionService = context.read<ConnectionService>();
-                    await connectionService.sendConnectionRequest(profile.id);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Connection request sent!')),
-                      );
+                onPressed: profile.connectionStatus == 'PENDING'
+                  ? null 
+                  : () async {
+                  if (profile.connectionStatus == 'ACCEPTED') {
+                    try {
+                      final chatService = context.read<ChatService>();
+                      final chat = await chatService.createChat(profile.id);
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatScreen(
+                              chatId: chat.id,
+                              otherUser: profile,
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to open chat: $e')),
+                        );
+                      }
                     }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to send request: $e')),
-                      );
+                  } else {
+                    try {
+                      final connectionService = context.read<ConnectionService>();
+                      await connectionService.sendConnectionRequest(profile.id);
+                      if (mounted) {
+                        setState(() {
+                          final index = _profiles.indexWhere((p) => p.id == profile.id);
+                          if (index != -1) {
+                            _profiles[index] = _profiles[index].copyWith(connectionStatus: 'PENDING');
+                          }
+                        });
+                      }
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Connection request sent!')),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to send request: $e')),
+                        );
+                      }
                     }
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
+                  backgroundColor: profile.connectionStatus == 'ACCEPTED' 
+                      ? const Color(0xFF2ECC71) // Nice green
+                      : (profile.connectionStatus == 'PENDING' ? Colors.grey : primaryColor),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   minimumSize: const Size(double.infinity, 36),
@@ -602,9 +639,12 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                       borderRadius: BorderRadius.circular(8)),
                   elevation: 0,
                 ),
-                child: const Text('Connect',
-                    style:
-                        TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                child: Text(
+                  profile.connectionStatus == 'ACCEPTED' 
+                      ? 'MESSAGE' 
+                      : (profile.connectionStatus == 'PENDING' ? 'PENDING' : 'CONNECT'),
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
               ),
             ),
           ],

@@ -18,8 +18,12 @@ class UserModel {
   final String? profession;
   final String? education;
   final String? specialConsiderations;
+  final bool isVerified;
+  final bool isFavorited;
+  final String status;
   final bool isOnline;
   final DateTime? lastSeen;
+  final String connectionStatus; // NONE, PENDING, ACCEPTED, REJECTED
 
   UserModel({
     required this.id,
@@ -44,6 +48,7 @@ class UserModel {
     this.status = 'ACTIVE',
     this.isOnline = false,
     this.lastSeen,
+    this.connectionStatus = 'NONE',
   });
 
   String get fullName => '$firstName $lastName';
@@ -82,6 +87,7 @@ class UserModel {
       status: json['status']?.toString() ?? 'ACTIVE',
       isOnline: json['isOnline'] ?? false,
       lastSeen: json['lastSeen'] != null ? DateTime.parse(json['lastSeen']) : null,
+      connectionStatus: json['connectionStatus']?.toString() ?? 'NONE',
     );
   }
 
@@ -110,6 +116,7 @@ class UserModel {
       'status': status,
       'isOnline': isOnline,
       'lastSeen': lastSeen?.toIso8601String(),
+      'connectionStatus': connectionStatus,
     };
   }
 
@@ -136,6 +143,7 @@ class UserModel {
     String? status,
     bool? isOnline,
     DateTime? lastSeen,
+    String? connectionStatus,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -160,6 +168,7 @@ class UserModel {
       status: status ?? this.status,
       isOnline: isOnline ?? this.isOnline,
       lastSeen: lastSeen ?? this.lastSeen,
+      connectionStatus: connectionStatus ?? this.connectionStatus,
     );
   }
 }
