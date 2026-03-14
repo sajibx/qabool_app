@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qabool_app/utils/image_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import 'package:qabool_app/theme.dart';
@@ -317,7 +318,7 @@ class MessagesScreenState extends State<MessagesScreen> {
                   ),
                   child: ClipOval(
                     child: CachedNetworkImage(
-                      imageUrl: imageUrl,
+                      imageUrl: resolveImageUrl(imageUrl),
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                         color: isDark ? Colors.grey[800] : Colors.grey[200],

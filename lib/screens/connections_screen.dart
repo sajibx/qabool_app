@@ -1,3 +1,5 @@
+import 'package:qabool_app/utils/image_utils.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/connection_model.dart';
@@ -82,7 +84,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
           child: ListTile(
             leading: CircleAvatar(
               backgroundImage: otherUser?.profileImageUrl != null 
-                  ? NetworkImage(otherUser!.profileImageUrl!) 
+                  ? CachedNetworkImageProvider(resolveImageUrl(otherUser!.profileImageUrl!)) 
                   : null,
               child: otherUser?.profileImageUrl == null ? const Icon(Icons.person) : null,
             ),

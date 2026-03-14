@@ -492,6 +492,20 @@ class HomeScreenState extends State<HomeScreen> {
                             color: isDark ? Colors.grey[600] : Colors.grey[400]),
                       ),
                     ),
+                    if (profile.isOnline)
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                        ),
+                      ),
                     Positioned(
                       top: 8,
                       right: 8,
@@ -638,23 +652,19 @@ class HomeScreenState extends State<HomeScreen> {
           color: cardBgColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: borderColor),
-          boxShadow: cardBgColor != Colors.transparent
-              ? [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))]
-              : [],
         ),
         child: Row(
           children: [
             Stack(
               children: [
                 CircleAvatar(
-                  radius: 28,
+                  radius: 24,
                   backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
                   backgroundImage: imageUrl.isNotEmpty
                       ? CachedNetworkImageProvider(imageUrl)
                       : null,
                   child: imageUrl.isEmpty
-                      ? Icon(Icons.person,
-                          color: isDark ? Colors.grey[600] : Colors.grey[400])
+                      ? Icon(Icons.person, color: isDark ? Colors.grey[600] : Colors.grey[400])
                       : null,
                   onBackgroundImageError: imageUrl.isNotEmpty
                       ? (exception, stackTrace) {

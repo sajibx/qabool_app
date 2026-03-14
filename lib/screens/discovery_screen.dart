@@ -440,7 +440,20 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                           ],
                         ),
                       ),
-                    ),
+                    if (profile.isOnline)
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                        ),
+                      ),
                     Positioned(
                       top: 8,
                       right: 8,

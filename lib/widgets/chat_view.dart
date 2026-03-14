@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:qabool_app/utils/image_utils.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../theme.dart';
@@ -248,7 +249,7 @@ class _ChatViewState extends State<ChatView> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          otherUser.isOnline ? 'ONLINE NOW' : 'OFFLINE',
+                          otherUser.isOnline ? 'ONLINE NOW' : (otherUser.lastSeen != null ? 'LAST SEEN ${timeago.format(otherUser.lastSeen!).toUpperCase()}' : 'OFFLINE'),
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,

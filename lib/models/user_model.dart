@@ -18,9 +18,7 @@ class UserModel {
   final String? profession;
   final String? education;
   final String? specialConsiderations;
-  final bool isVerified;
-  final bool isFavorited;
-  final String status;
+  final bool isOnline;
   final DateTime? lastSeen;
 
   UserModel({
@@ -44,15 +42,11 @@ class UserModel {
     this.isVerified = false,
     this.isFavorited = false,
     this.status = 'ACTIVE',
+    this.isOnline = false,
     this.lastSeen,
   });
 
   String get fullName => '$firstName $lastName';
-
-  bool get isOnline {
-    if (lastSeen == null) return false;
-    return DateTime.now().difference(lastSeen!).inMinutes < 5;
-  }
 
   String get city {
     if (region == null) return "";
@@ -86,6 +80,7 @@ class UserModel {
       isVerified: json['isVerified'] ?? false,
       isFavorited: json['isFavorited'] ?? false,
       status: json['status']?.toString() ?? 'ACTIVE',
+      isOnline: json['isOnline'] ?? false,
       lastSeen: json['lastSeen'] != null ? DateTime.parse(json['lastSeen']) : null,
     );
   }
@@ -113,6 +108,7 @@ class UserModel {
       'isVerified': isVerified,
       'isFavorited': isFavorited,
       'status': status,
+      'isOnline': isOnline,
       'lastSeen': lastSeen?.toIso8601String(),
     };
   }
@@ -138,6 +134,7 @@ class UserModel {
     bool? isVerified,
     bool? isFavorited,
     String? status,
+    bool? isOnline,
     DateTime? lastSeen,
   }) {
     return UserModel(
@@ -161,6 +158,7 @@ class UserModel {
       isVerified: isVerified ?? this.isVerified,
       isFavorited: isFavorited ?? this.isFavorited,
       status: status ?? this.status,
+      isOnline: isOnline ?? this.isOnline,
       lastSeen: lastSeen ?? this.lastSeen,
     );
   }
