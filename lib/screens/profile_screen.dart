@@ -145,11 +145,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
-          if (_isMe)
-            IconButton(
-              icon: const Icon(Icons.settings, color: primaryColor),
-              onPressed: () {},
-            ),
         ],
       ),
       body: SingleChildScrollView(
@@ -521,37 +516,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   if (_isMe) ...[
                     const SizedBox(height: 32),
                     // Logout Button
-                    OutlinedButton(
-                      onPressed: () async {
-                        await context.read<AuthService>().logout();
-                        if (context.mounted) {
-                          context.read<ChatService>().disconnectSocket();
-                          Navigator.pushNamedAndRemoveUntil(
-                              context, '/login', (route) => false);
-                        }
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.redAccent,
-                        side: const BorderSide(color: Colors.redAccent, width: 2),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        minimumSize: const Size.fromHeight(56),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.logout),
-                          SizedBox(width: 12),
-                          Text(
-                            'LOGOUT',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 2,
-                            ),
+                    Center(
+                      child: TextButton.icon(
+                        onPressed: () async {
+                          await context.read<AuthService>().logout();
+                          if (context.mounted) {
+                            context.read<ChatService>().disconnectSocket();
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, '/login', (route) => false);
+                          }
+                        },
+                        icon: const Icon(Icons.logout, size: 16, color: Colors.redAccent),
+                        label: const Text(
+                          'Sign Out',
+                          style: TextStyle(
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
                           ),
-                        ],
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: Colors.redAccent.withOpacity(0.2)),
+                          ),
+                        ),
                       ),
                     ),
                   ],
