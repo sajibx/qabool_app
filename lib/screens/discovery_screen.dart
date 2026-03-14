@@ -279,7 +279,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
   }
 
   void _showLocationFilter() {
-    final locs = ['United Kingdom', 'USA', 'Canada', 'Australia', 'Pakistan', 'India', 'UAE'];
+    final locs = ['Bangladesh', 'India', 'Germany', 'Pakistan', 'Canada', 'USA'];
     showModalBottomSheet(
       context: context,
       builder: (context) => _buildSelectionList('Select Location', locs, _selectedLocation, (val) {
