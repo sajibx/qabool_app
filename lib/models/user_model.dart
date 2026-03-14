@@ -112,4 +112,50 @@ class UserModel {
       'lastSeen': lastSeen?.toIso8601String(),
     };
   }
+
+  UserModel copyWith({
+    String? id,
+    String? email,
+    String? firstName,
+    String? lastName,
+    String? profileImageUrl,
+    String? bio,
+    int? age,
+    DateTime? dob,
+    String? gender,
+    String? region,
+    String? religion,
+    String? ethnicity,
+    int? height,
+    int? weight,
+    String? profession,
+    String? education,
+    String? specialConsiderations,
+    bool? isVerified,
+    bool? isFavorited,
+    DateTime? lastSeen,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      bio: bio ?? this.bio,
+      age: age ?? this.age,
+      dob: dob ?? this.dob,
+      gender: gender ?? this.gender,
+      region: region ?? this.region,
+      religion: religion ?? this.religion,
+      ethnicity: ethnicity ?? this.ethnicity,
+      height: height ?? this.height,
+      weight: weight ?? this.weight,
+      profession: profession ?? this.profession,
+      education: education ?? this.education,
+      specialConsiderations: specialConsiderations ?? this.specialConsiderations,
+      isVerified: isVerified ?? this.isVerified,
+      isFavorited: isFavorited ?? this.isFavorited,
+      lastSeen: lastSeen ?? this.lastSeen,
+    );
+  }
 }

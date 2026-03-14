@@ -501,15 +501,33 @@ class HomeScreenState extends State<HomeScreen> {
                       child: GestureDetector(
                         onTap: () async {
                           final profileService = context.read<ProfileService>();
+                          final wasFavorited = profile.isFavorited;
+                          
                           try {
-                            if (profile.isFavorited) {
+                            // Optimistic update in the local list
+                            setState(() {
+                              final index = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
+                              if (index != -1) {
+                                _nearbyProfiles[index] = _nearbyProfiles[index].copyWith(isFavorited: !wasFavorited);
+                              }
+                            });
+
+                            if (wasFavorited) {
                               await profileService.unfavoriteUser(profile.id);
                             } else {
                               await profileService.favoriteUser(profile.id);
                             }
-                            // Refresh local state or parent handles it
+                            
+                            // Background refresh to ensure consistency
                             refreshData();
                           } catch (e) {
+                            // Rollback on error
+                            setState(() {
+                              final index = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
+                              if (index != -1) {
+                                _nearbyProfiles[index] = _nearbyProfiles[index].copyWith(isFavorited: wasFavorited);
+                              }
+                            });
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Error: $e')),
                             );

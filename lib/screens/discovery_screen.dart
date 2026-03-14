@@ -445,14 +445,32 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                       child: GestureDetector(
                         onTap: () async {
                           final profileService = context.read<ProfileService>();
+                          final wasFavorited = profile.isFavorited;
                           try {
-                            if (profile.isFavorited) {
+                            // Optimistic update
+                            setState(() {
+                              final index = _profiles.indexWhere((p) => p.id == profile.id);
+                              if (index != -1) {
+                                _profiles[index] = _profiles[index].copyWith(isFavorited: !wasFavorited);
+                              }
+                            });
+
+                            if (wasFavorited) {
                               await profileService.unfavoriteUser(profile.id);
                             } else {
                               await profileService.favoriteUser(profile.id);
                             }
+                            
+                            // Background sync
                             _fetchProfiles();
                           } catch (e) {
+                            // Rollback
+                            setState(() {
+                              final index = _profiles.indexWhere((p) => p.id == profile.id);
+                              if (index != -1) {
+                                _profiles[index] = _profiles[index].copyWith(isFavorited: wasFavorited);
+                              }
+                            });
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Error: $e')),
                             );

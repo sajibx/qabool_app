@@ -79,33 +79,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         actions: [
           if (!_isMe)
-            IconButton(
-              icon: Icon(
-                _displayUser!.isFavorited ? Icons.favorite : Icons.favorite_border,
-                color: _displayUser!.isFavorited ? Colors.red : primaryColor,
-              ),
-              onPressed: () async {
-                try {
-                  if (_displayUser!.isFavorited) {
-                    await profileService.unfavoriteUser(_displayUser!.id);
-                  } else {
-                    await profileService.favoriteUser(_displayUser!.id);
-                  }
-                  // Refresh profile to update local state
-                  final updatedUser = await profileService.getProfile(_displayUser!.id);
-                  if (mounted) {
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: GestureDetector(
+                onTap: () async {
+                  final previousState = _displayUser!.isFavorited;
+                  try {
+                    // Optimistic update
                     setState(() {
-                      _displayUser = updatedUser;
+                      _displayUser = _displayUser!.copyWith(isFavorited: !previousState);
                     });
+
+                    if (previousState) {
+                      await profileService.unfavoriteUser(_displayUser!.id);
+                    } else {
+                      await profileService.favoriteUser(_displayUser!.id);
+                    }
+                    
+                    // Final sync with reality
+                    final updatedUser = await profileService.getProfile(_displayUser!.id);
+                    if (mounted) {
+                      setState(() {
+                        _displayUser = updatedUser;
+                      });
+                    }
+                  } catch (e) {
+                    // Rollback on error
+                    if (mounted) {
+                      setState(() {
+                        _displayUser = _displayUser!.copyWith(isFavorited: previousState);
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: $e')),
+                      );
+                    }
                   }
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
-                    );
-                  }
-                }
-              },
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.black.withOpacity(0.3) : Colors.grey[100],
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: _displayUser!.isFavorited 
+                        ? Colors.red.withOpacity(0.2) 
+                        : (isDark ? Colors.white10 : Colors.black12),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    _displayUser!.isFavorited ? Icons.favorite : Icons.favorite_border,
+                    color: _displayUser!.isFavorited ? Colors.red : primaryColor,
+                    size: 20,
+                  ),
+                ),
+              ),
             ),
           if (_isMe)
             IconButton(
