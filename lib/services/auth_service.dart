@@ -48,6 +48,16 @@ class AuthService extends ChangeNotifier {
     required String firstName,
     required String lastName,
     String? gender,
+    String? dob,
+    String? ethnicity,
+    String? religion,
+    double? height,
+    double? weight,
+    String? profession,
+    String? education,
+    String? bio,
+    String? specialConsiderations,
+    String? region,
   }) async {
     try {
       _setLoading(true);
@@ -57,6 +67,16 @@ class AuthService extends ChangeNotifier {
         'firstName': firstName,
         'lastName': lastName,
         'gender': gender,
+        'dob': dob,
+        'ethnicity': ethnicity,
+        'religion': religion,
+        'height': height,
+        'weight': weight,
+        'profession': profession,
+        'education': education,
+        'bio': bio,
+        'specialConsiderations': specialConsiderations,
+        'region': region,
       });
 
       if (response.statusCode == 201) {

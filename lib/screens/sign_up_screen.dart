@@ -19,6 +19,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   String? _selectedGender;
+  DateTime? _selectedDob;
+  String? _selectedEthnicity;
+  String? _selectedCountry;
+  String? _selectedCity;
+  String? _selectedReligion;
+  
+  String _heightUnit = 'cm';
+  String _weightUnit = 'kg';
+
+  final _heightCmController = TextEditingController();
+  final _heightFtController = TextEditingController();
+  final _heightInController = TextEditingController();
+  final _weightController = TextEditingController();
+  final _jobController = TextEditingController();
+  final _educationController = TextEditingController();
+  final _bioController = TextEditingController();
+  final _specialController = TextEditingController();
+
+  final Map<String, List<String>> _countryCities = {
+    'Germany': ['Berlin', 'Munich', 'Hamburg', 'Frankfurt', 'Stuttgart'],
+    'Bangladesh': ['Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi', 'Khulna'],
+    'Pakistan': ['Karachi', 'Lahore', 'Islamabad', 'Faisalabad', 'Multan'],
+    'India': ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai'],
+    'Canada': ['Toronto', 'Vancouver', 'Montreal', 'Ottawa', 'Calgary'],
+    'USA': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Miami'],
+  };
+
+  final List<String> _ethnicities = [
+    'Arab', 'Asian', 'Caucasian', 'African', 'Hispanic', 
+    'Bengali', 'Punjabi', 'Sindhi', 'Pashtun', 'Other'
+  ];
 
   @override
   void dispose() {
@@ -26,19 +57,128 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _heightCmController.dispose();
+    _heightFtController.dispose();
+    _heightInController.dispose();
+    _weightController.dispose();
+    _jobController.dispose();
+    _educationController.dispose();
+    _bioController.dispose();
+    _specialController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: QaboolTheme.primary,
+              primary: QaboolTheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _selectedDob) {
+      setState(() => _selectedDob = picked);
+    }
   }
 
   void _handleSignUp() async {
     final auth = context.read<AuthService>();
-    final chatService = context.read<ChatService>();
+    
+    // 1. Mandatory Field Validation
+    if (_firstNameController.text.isEmpty ||
+        _lastNameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _selectedGender == null ||
+        _selectedCountry == null ||
+        _selectedCity == null ||
+        _selectedDob == null ||
+        _selectedEthnicity == null ||
+        _selectedReligion == null ||
+        _weightController.text.isEmpty ||
+        _jobController.text.isEmpty ||
+        _educationController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all mandatory fields')),
+      );
+      return;
+    }
+
+    // 2. Height Validation
+    if (_heightUnit == 'cm') {
+      if (_heightCmController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter your height')),
+        );
+        return;
+      }
+    } else {
+      if (_heightFtController.text.isEmpty || _heightInController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter your height in feet and inches')),
+        );
+        return;
+      }
+    }
+
+    // 3. Min Length Validation (Bio & Special Considerations)
+    if (_bioController.text.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bio must be at least 10 characters')),
+      );
+      return;
+    }
+    if (_specialController.text.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Special considerations must be at least 10 characters')),
+      );
+      return;
+    }
+
+    // 4. Data Processing & Registration
     try {
+      // Height Conversion
+      double? heightCm;
+      if (_heightUnit == 'cm') {
+        heightCm = double.tryParse(_heightCmController.text);
+      } else {
+        final ft = double.tryParse(_heightFtController.text) ?? 0;
+        final inc = double.tryParse(_heightInController.text) ?? 0;
+        heightCm = (ft * 30.48) + (inc * 2.54);
+      }
+
+      // Weight Conversion
+      double? weightKg = double.tryParse(_weightController.text);
+      if (_weightUnit == 'lbs' && weightKg != null) {
+        weightKg = weightKg * 0.453592;
+      }
+
       await auth.register(
         email: _emailController.text,
         password: _passwordController.text,
         firstName: _firstNameController.text,
         lastName: _lastNameController.text,
         gender: _selectedGender,
+        dob: _selectedDob?.toIso8601String(),
+        ethnicity: _selectedEthnicity,
+        religion: _selectedReligion,
+        height: heightCm,
+        weight: weightKg,
+        profession: _jobController.text,
+        education: _educationController.text,
+        bio: _bioController.text,
+        specialConsiderations: _specialController.text,
+        region: "${_selectedCity}, ${_selectedCountry}",
       );
       if (!mounted) return;
       
@@ -410,9 +550,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           // Personal Attributes
                           buildSectionHeader(
                               Icons.person_search, 'Personal Attributes'),
-                          buildLabel('Region'),
-                          TextField(
-                              decoration: inputDecoration('City, Country')),
+                          
+                          // Country Dropdown
+                          buildLabel('Country'),
+                          DropdownButtonFormField<String>(
+                            value: _selectedCountry,
+                            decoration: inputDecoration('Select Country'),
+                            items: _countryCities.keys
+                                .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                                .toList(),
+                            onChanged: (val) {
+                              setState(() {
+                                _selectedCountry = val;
+                                _selectedCity = null; // Reset city when country changes
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // City Dropdown
+                          buildLabel('City'),
+                          DropdownButtonFormField<String>(
+                            value: _selectedCity,
+                            decoration: inputDecoration('Select City'),
+                            items: (_selectedCountry != null
+                                    ? _countryCities[_selectedCountry]!
+                                    : <String>[])
+                                .map((city) =>
+                                    DropdownMenuItem(value: city, child: Text(city)))
+                                .toList(),
+                            onChanged: (val) {
+                              setState(() => _selectedCity = val);
+                            },
+                          ),
                           const SizedBox(height: 16),
                           Row(
                             children: [
@@ -422,6 +592,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   children: [
                                     buildLabel('Religion'),
                                     DropdownButtonFormField<String>(
+                                      value: _selectedReligion,
                                       decoration: inputDecoration('Select'),
                                       items: [
                                         'Islam (Sunni)',
@@ -431,7 +602,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           .map((e) => DropdownMenuItem(
                                               value: e, child: Text(e)))
                                           .toList(),
-                                      onChanged: (val) {},
+                                      onChanged: (val) => setState(() => _selectedReligion = val),
                                     ),
                                   ],
                                 ),
@@ -442,9 +613,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     buildLabel('Date of Birth'),
-                                    TextField(
-                                      decoration: inputDecoration('DD/MM/YYYY'),
-                                      keyboardType: TextInputType.datetime,
+                                    InkWell(
+                                      onTap: () => _selectDate(context),
+                                      child: IgnorePointer(
+                                        child: TextField(
+                                          decoration: inputDecoration(
+                                            _selectedDob == null
+                                                ? 'Select Date'
+                                                : "${_selectedDob!.day}/${_selectedDob!.month}/${_selectedDob!.year}",
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -453,8 +632,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           const SizedBox(height: 16),
                           buildLabel('Race/Ethnicity'),
-                          TextField(
-                              decoration: inputDecoration('e.g. Arab, Asian')),
+                          DropdownButtonFormField<String>(
+                            value: _selectedEthnicity,
+                            decoration: inputDecoration('Select Ethnicity'),
+                            items: _ethnicities
+                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (val) => setState(() => _selectedEthnicity = val),
+                          ),
                           const SizedBox(height: 16),
                           Row(
                             children: [
@@ -465,46 +650,57 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     buildLabel('Height'),
                                     Row(
                                       children: [
-                                        Expanded(
-                                          flex: 2,
-                                          child: TextField(
-                                            keyboardType: TextInputType.number,
-                                            decoration: inputDecoration(
-                                              'Value',
-                                              borderRadius:
-                                                  const BorderRadius.horizontal(
-                                                      left:
-                                                          Radius.circular(12)),
+                                        if (_heightUnit == 'cm')
+                                          Expanded(
+                                            flex: 2,
+                                            child: TextField(
+                                              controller: _heightCmController,
+                                              keyboardType: TextInputType.number,
+                                              decoration: inputDecoration('cm'),
+                                            ),
+                                          )
+                                        else ...[
+                                          Expanded(
+                                            child: TextField(
+                                              controller: _heightFtController,
+                                              keyboardType: TextInputType.number,
+                                              decoration: inputDecoration('ft'),
                                             ),
                                           ),
-                                        ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: TextField(
+                                              controller: _heightInController,
+                                              keyboardType: TextInputType.number,
+                                              decoration: inputDecoration('in'),
+                                            ),
+                                          ),
+                                        ],
+                                        const SizedBox(width: 8),
                                         Expanded(
                                           flex: 1,
                                           child: InputDecorator(
                                             decoration: inputDecoration(
                                               '',
-                                              borderRadius:
-                                                  const BorderRadius.horizontal(
-                                                      right:
-                                                          Radius.circular(12)),
+                                              borderRadius: BorderRadius.circular(12),
                                             ).copyWith(
                                               contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8),
+                                                  const EdgeInsets.symmetric(horizontal: 8),
                                             ),
                                             child: DropdownButtonHideUnderline(
                                               child: DropdownButton<String>(
-                                                value: 'cm',
+                                                value: _heightUnit,
                                                 isExpanded: true,
-                                                icon: const Icon(
-                                                    Icons.arrow_drop_down),
+                                                icon: const Icon(Icons.arrow_drop_down),
                                                 items: ['cm', 'ft']
-                                                    .map((e) =>
-                                                        DropdownMenuItem(
-                                                            value: e,
-                                                            child: Text(e)))
+                                                    .map((e) => DropdownMenuItem(
+                                                        value: e, child: Text(e)))
                                                     .toList(),
-                                                onChanged: (val) {},
+                                                onChanged: (val) {
+                                                  if (val != null) {
+                                                    setState(() => _heightUnit = val);
+                                                  }
+                                                },
                                               ),
                                             ),
                                           ),
@@ -525,43 +721,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         Expanded(
                                           flex: 2,
                                           child: TextField(
+                                            controller: _weightController,
                                             keyboardType: TextInputType.number,
-                                            decoration: inputDecoration(
-                                              'Value',
-                                              borderRadius:
-                                                  const BorderRadius.horizontal(
-                                                      left:
-                                                          Radius.circular(12)),
-                                            ),
+                                            decoration: inputDecoration('Value'),
                                           ),
                                         ),
+                                        const SizedBox(width: 8),
                                         Expanded(
                                           flex: 1,
                                           child: InputDecorator(
                                             decoration: inputDecoration(
                                               '',
-                                              borderRadius:
-                                                  const BorderRadius.horizontal(
-                                                      right:
-                                                          Radius.circular(12)),
+                                              borderRadius: BorderRadius.circular(12),
                                             ).copyWith(
                                               contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8),
+                                                  const EdgeInsets.symmetric(horizontal: 8),
                                             ),
                                             child: DropdownButtonHideUnderline(
                                               child: DropdownButton<String>(
-                                                value: 'kg',
+                                                value: _weightUnit,
                                                 isExpanded: true,
-                                                icon: const Icon(
-                                                    Icons.arrow_drop_down),
+                                                icon: const Icon(Icons.arrow_drop_down),
                                                 items: ['kg', 'lbs']
-                                                    .map((e) =>
-                                                        DropdownMenuItem(
-                                                            value: e,
-                                                            child: Text(e)))
+                                                    .map((e) => DropdownMenuItem(
+                                                        value: e, child: Text(e)))
                                                     .toList(),
-                                                onChanged: (val) {},
+                                                onChanged: (val) {
+                                                  if (val != null) {
+                                                    setState(() => _weightUnit = val);
+                                                  }
+                                                },
                                               ),
                                             ),
                                           ),
@@ -585,11 +774,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               Icons.school, 'Professional & Educational'),
                           buildLabel('Work / Profession'),
                           TextField(
+                              controller: _jobController,
                               decoration:
                                   inputDecoration('Current occupation')),
                           const SizedBox(height: 16),
                           buildLabel('Studies / Education'),
                           TextField(
+                              controller: _educationController,
                               decoration:
                                   inputDecoration('Highest degree earned')),
                           const SizedBox(height: 24),
@@ -601,11 +792,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                           // Bio
                           buildSectionHeader(Icons.description, 'Bio'),
-                          buildLabel('Tell us a bit about yourself'),
+                          buildLabel('Tell us a bit about yourself (Min 10 characters)'),
                           TextField(
+                            controller: _bioController,
                             maxLines: 4,
-                            decoration: inputDecoration(
-                                'Tell us a bit about yourself...'),
+                            decoration: inputDecoration('Tell us about yourself...'),
                           ),
                           const SizedBox(height: 24),
                           Divider(
@@ -615,13 +806,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const SizedBox(height: 24),
 
                           // Special Considerations
-                          buildSectionHeader(
-                              Icons.info, 'Special Considerations'),
-                          buildLabel('Accessibility or Special Cases'),
+                          buildSectionHeader(Icons.info, 'Special Considerations'),
+                          buildLabel('Accessibility or Special Cases (Min 10 characters)'),
                           TextField(
+                            controller: _specialController,
                             maxLines: 4,
                             decoration: inputDecoration(
-                                "Please mention any physical accessibility requirements..."),
+                                "Physical accessibility requirements, etc..."),
                           ),
                           const SizedBox(height: 32),
 
