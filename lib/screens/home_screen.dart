@@ -180,7 +180,7 @@ class HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 8),
 
                     // Who Liked You Section
-                    if (_likedMeProfiles.isNotEmpty || _isLoadingLikedMe) ...[
+                    if (_likedMeProfiles.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Text(

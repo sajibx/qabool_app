@@ -78,6 +78,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
         ),
         actions: [
+          if (!_isMe)
+            IconButton(
+              icon: Icon(
+                _displayUser!.isFavorited ? Icons.favorite : Icons.favorite_border,
+                color: _displayUser!.isFavorited ? Colors.red : primaryColor,
+              ),
+              onPressed: () async {
+                try {
+                  if (_displayUser!.isFavorited) {
+                    await profileService.unfavoriteUser(_displayUser!.id);
+                  } else {
+                    await profileService.favoriteUser(_displayUser!.id);
+                  }
+                  // Refresh profile to update local state
+                  final updatedUser = await profileService.getProfile(_displayUser!.id);
+                  if (mounted) {
+                    setState(() {
+                      _displayUser = updatedUser;
+                    });
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                }
+              },
+            ),
           if (_isMe)
             IconButton(
               icon: const Icon(Icons.settings, color: primaryColor),
@@ -339,57 +368,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ],
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        OutlinedButton(
-                          onPressed: () async {
-                            try {
-                              if (_displayUser!.isFavorited) {
-                                await profileService.unfavoriteUser(_displayUser!.id);
-                              } else {
-                                await profileService.favoriteUser(_displayUser!.id);
-                              }
-                              // Re-fetch profile to update local state
-                              final updatedUser = await profileService.getProfile(_displayUser!.id);
-                              setState(() {
-                                _displayUser = updatedUser;
-                              });
-                            } catch (e) {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error: $e')),
-                                );
-                              }
-                            }
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            side: BorderSide(
-                                color: _displayUser!.isFavorited ? Colors.red : primaryColor.withOpacity(0.2),
-                                width: 2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            minimumSize: const Size.fromHeight(52),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                _displayUser!.isFavorited ? Icons.favorite : Icons.favorite_border,
-                                color: _displayUser!.isFavorited ? Colors.red : primaryColor,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                _displayUser!.isFavorited ? 'UNFAVORITE' : 'ADD TO FAVORITES',
-                                style: TextStyle(
-                                  color: _displayUser!.isFavorited ? Colors.red : primaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                            ],
                           ),
                         ),
                       ],
