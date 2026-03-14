@@ -179,68 +179,6 @@ class HomeScreenState extends State<HomeScreen> {
                   children: [
                     const SizedBox(height: 8),
 
-                    // Who Liked You Section
-                    if (_likedMeProfiles.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          'Who Liked You',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.grey[100] : Colors.grey[800],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        height: 100,
-                        child: _isLoadingLikedMe
-                            ? const Center(child: CircularProgressIndicator())
-                            : ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                itemCount: _likedMeProfiles.length,
-                                itemBuilder: (context, index) {
-                                  final profile = _likedMeProfiles[index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ProfileScreen(user: profile),
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      width: 80,
-                                      margin: const EdgeInsets.only(right: 12),
-                                      child: Column(
-                                        children: [
-                                          CircleAvatar(
-                                            radius: 30,
-                                            backgroundImage: profile.profileImageUrl != null
-                                                ? CachedNetworkImageProvider(profile.profileImageUrl!)
-                                                : null,
-                                            child: profile.profileImageUrl == null
-                                                ? const Icon(Icons.person)
-                                                : null,
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            profile.firstName,
-                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
 
                     // People Nearby Header
                     Padding(
@@ -342,6 +280,69 @@ class HomeScreenState extends State<HomeScreen> {
                                 ),
                     ),
                     const SizedBox(height: 24),
+
+                    // Who Liked You Section
+                    if (_likedMeProfiles.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'Who Liked You',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.grey[100] : Colors.grey[800],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 100,
+                        child: _isLoadingLikedMe
+                            ? const Center(child: CircularProgressIndicator())
+                            : ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                itemCount: _likedMeProfiles.length,
+                                itemBuilder: (context, index) {
+                                  final profile = _likedMeProfiles[index];
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ProfileScreen(user: profile),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      width: 80,
+                                      margin: const EdgeInsets.only(right: 12),
+                                      child: Column(
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 30,
+                                            backgroundImage: profile.profileImageUrl != null
+                                                ? CachedNetworkImageProvider(profile.profileImageUrl!)
+                                                : null,
+                                            child: profile.profileImageUrl == null
+                                                ? const Icon(Icons.person)
+                                                : null,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            profile.firstName,
+                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
 
                     // Chat Section
                     Padding(
@@ -542,7 +543,7 @@ class HomeScreenState extends State<HomeScreen> {
                           ),
                           child: Icon(
                             profile.isFavorited ? Icons.favorite : Icons.favorite_border,
-                            color: profile.isFavorited ? Colors.red : Colors.white,
+                            color: profile.isFavorited ? const Color(0xFFFF7074) : Colors.white,
                             size: 16,
                           ),
                         ),

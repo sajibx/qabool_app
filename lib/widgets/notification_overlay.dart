@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qabool_app/theme.dart';
+import 'package:qabool_app/main.dart';
 import 'dart:async';
 
 class NotificationOverlay {
@@ -14,7 +15,8 @@ class NotificationOverlay {
     String? imageUrl,
     VoidCallback? onTap,
   }) {
-    final overlay = Overlay.of(context);
+    final overlay = navigatorKey.currentState?.overlay;
+    if (overlay == null) return;
     
     _hideTimer?.cancel();
     _currentEntry?.remove();

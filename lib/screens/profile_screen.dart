@@ -132,14 +132,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: _displayUser!.isFavorited 
-                        ? Colors.red.withOpacity(0.2) 
+                        ? const Color(0xFFFF7074).withOpacity(0.2) 
                         : (isDark ? Colors.white10 : Colors.black12),
                       width: 1,
                     ),
                   ),
                   child: Icon(
                     _displayUser!.isFavorited ? Icons.favorite : Icons.favorite_border,
-                    color: _displayUser!.isFavorited ? Colors.red : primaryColor,
+                    color: _displayUser!.isFavorited ? const Color(0xFFFF7074) : primaryColor,
                     size: 20,
                   ),
                 ),

@@ -485,7 +485,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                           ),
                           child: Icon(
                             profile.isFavorited ? Icons.favorite : Icons.favorite_border,
-                            color: profile.isFavorited ? Colors.red : Colors.white,
+                            color: profile.isFavorited ? const Color(0xFFFF7074) : Colors.white,
                             size: 16,
                           ),
                         ),
