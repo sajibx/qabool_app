@@ -3,7 +3,36 @@ import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
+import '../models/user_model.dart'; // Added
 import 'api_service.dart';
+import '../widgets/notification_overlay.dart';
+import '../main.dart'; // To access navigatorKey
+import '../screens/chat_screen.dart'; // To navigate on tap
+
+class PaginationMeta {
+  final int total;
+  final int page;
+  final int limit;
+  final int totalPages;
+
+  PaginationMeta({
+    required this.total,
+    required this.page,
+    required this.limit,
+    required this.totalPages,
+  });
+
+  factory PaginationMeta.fromJson(Map<String, dynamic> json) {
+    return PaginationMeta(
+      total: json['total'] ?? 0,
+      page: json['page'] ?? 1,
+      limit: json['limit'] ?? 20,
+      totalPages: json['totalPages'] ?? 1,
+    );
+  }
+
+  bool get hasMore => page < totalPages;
+}
 
 class ChatService extends ChangeNotifier {
   final ApiService _apiService;
@@ -11,12 +40,22 @@ class ChatService extends ChangeNotifier {
   
   List<ChatModel> _chats = [];
   Map<String, List<MessageModel>> _messages = {}; // chatId -> messages
+  Map<String, PaginationMeta> _paginationMeta = {}; // chatId -> meta
+  Map<String, bool> _isLoadingMore = {}; // chatId -> isloading
+  String? _activeChatId;
 
   ChatService(this._apiService);
 
   List<ChatModel> get chats => _chats;
   int get totalUnreadCount => _chats.fold(0, (sum, chat) => sum + chat.unreadCount);
   List<MessageModel> getMessages(String chatId) => _messages[chatId] ?? [];
+  bool hasMoreMessages(String chatId) => _paginationMeta[chatId]?.hasMore ?? false;
+  bool isLoadingMore(String chatId) => _isLoadingMore[chatId] ?? false;
+
+  void setActiveChat(String? chatId) {
+    _activeChatId = chatId;
+    notifyListeners();
+  }
 
   void initSocket(String token) {
     if (_socket != null && _socket!.connected) return;
@@ -110,11 +149,38 @@ class ChatService extends ChangeNotifier {
       // Move to top (Stack approach)
       _chats.removeAt(chatIndex);
       _chats.insert(0, updatedChat);
+
+      // Show notification if NOT from me and NOT active chat
+      if (!isFromMe && message.chatId != _activeChatId) {
+        _showNotification(message, otherParticipant);
+      }
+
       notifyListeners();
     } else {
       // If chat not in list, refetch to be sure
       fetchChats();
     }
+  }
+
+  void _showNotification(MessageModel message, UserModel otherUser) {
+    if (navigatorKey.currentContext == null) return;
+
+    NotificationOverlay.show(
+      context: navigatorKey.currentContext!,
+      title: otherUser.fullName,
+      message: message.content,
+      imageUrl: otherUser.profileImageUrl,
+      onTap: () {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              chatId: message.chatId,
+              otherUser: otherUser,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<ChatModel> createChat(String recipientId) async {
@@ -174,17 +240,49 @@ class ChatService extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchMessages(String chatId) async {
+  Future<void> fetchMessages(String chatId, {int page = 1, int limit = 20}) async {
     try {
-      final response = await _apiService.client.get('/chats/$chatId/messages');
+      final response = await _apiService.client.get(
+        '/chats/$chatId/messages',
+        queryParameters: {'page': page, 'limit': limit},
+      );
+      
       if (response.statusCode == 200) {
-        _messages[chatId] = (response.data as List)
+        final List<MessageModel> newMessages = (response.data['messages'] as List)
             .map((m) => MessageModel.fromJson(m))
             .toList();
+        
+        final meta = PaginationMeta.fromJson(response.data['meta']);
+        _paginationMeta[chatId] = meta;
+        
+        if (page == 1) {
+          _messages[chatId] = newMessages;
+        } else {
+          // Prepend older messages
+          final currentMsgs = _messages[chatId] ?? [];
+          _messages[chatId] = [...newMessages, ...currentMsgs];
+        }
+        
         notifyListeners();
       }
     } catch (e) {
+      print('Error fetching messages: $e');
       rethrow;
+    }
+  }
+
+  Future<void> fetchMoreMessages(String chatId) async {
+    final meta = _paginationMeta[chatId];
+    if (meta == null || !meta.hasMore || (_isLoadingMore[chatId] ?? false)) return;
+
+    _isLoadingMore[chatId] = true;
+    notifyListeners();
+
+    try {
+      await fetchMessages(chatId, page: meta.page + 1);
+    } finally {
+      _isLoadingMore[chatId] = false;
+      notifyListeners();
     }
   }
 

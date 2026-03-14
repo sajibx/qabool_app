@@ -6,6 +6,7 @@ class ApiService {
   final Dio _dio = Dio(BaseOptions(baseUrl: baseUrl));
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   String? currentUserId;
+  Function? onUnauthorized;
 
   ApiService() {
     _dio.interceptors.add(
@@ -19,8 +20,7 @@ class ApiService {
         },
         onError: (DioException e, handler) {
           if (e.response?.statusCode == 401) {
-            // Handle unauthorized - potentially log out or refresh token
-            print('Unauthorized: Logging out...');
+            onUnauthorized?.call();
           }
           return handler.next(e);
         },
@@ -40,5 +40,17 @@ class ApiService {
 
   Future<String?> getToken() async {
     return await _storage.read(key: 'access_token');
+  }
+
+  Future<void> saveUserData(String userData) async {
+    await _storage.write(key: 'user_data', value: userData);
+  }
+
+  Future<String?> getUserData() async {
+    return await _storage.read(key: 'user_data');
+  }
+
+  Future<void> deleteUserData() async {
+    await _storage.delete(key: 'user_data');
   }
 }

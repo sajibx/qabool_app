@@ -70,33 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SafeArea(
               child: Column(
                 children: [
-                  // Top Navigation
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          onPressed: () {
-                            if (Navigator.canPop(context)) {
-                              Navigator.pop(context);
-                            }
-                          },
-                        ),
-                        const Expanded(
-                          child: Text(
-                            'Login to Qabool',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        const SizedBox(width: 48), // Balance for centering
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1, thickness: 1),
+                  const SizedBox(height: 16),
 
                   // Scrollable form area
                   Expanded(

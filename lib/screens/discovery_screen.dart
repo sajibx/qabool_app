@@ -19,6 +19,16 @@ class DiscoveryScreen extends StatefulWidget {
 class DiscoveryScreenState extends State<DiscoveryScreen> {
   bool _isLoading = true;
   List<UserModel> _profiles = [];
+  
+  // Search and Filter State
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  
+  String? _selectedReligion;
+  String? _selectedLocation;
+  RangeValues _ageRange = const RangeValues(18, 80);
+  String? _selectedEducation;
 
   Future<void> refreshData() async {
     await _fetchProfiles();
@@ -30,11 +40,22 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
     _fetchProfiles();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _fetchProfiles() async {
+    if (mounted) setState(() => _isLoading = true);
     final profileService = context.read<ProfileService>();
     final authService = context.read<AuthService>();
     try {
-      final profiles = await profileService.getDiscoveryList();
+      final profiles = await profileService.getDiscoveryList(
+        search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        religion: _selectedReligion,
+        region: _selectedLocation,
+      );
       if (mounted) {
         final currentUser = authService.currentUser;
         setState(() {
@@ -42,13 +63,22 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
             // Filter out self
             if (p.id == currentUser?.id) return false;
             
-            // If current user has gender set, show only opposite gender
+            // If current user has gender set, show only opposite gender (strict)
             if (currentUser?.gender != null) {
               if (currentUser!.gender == 'Male') {
-                return p.gender == 'Female';
+                if (p.gender != 'Female') return false;
               } else if (currentUser.gender == 'Female') {
-                return p.gender == 'Male';
+                if (p.gender != 'Male') return false;
               }
+            }
+
+            // Local filters for fields not supported by backend yet
+            if (p.age != null && (p.age! < _ageRange.start || p.age! > _ageRange.end)) {
+              return false;
+            }
+            
+            if (_selectedEducation != null && p.education != _selectedEducation) {
+              return false;
             }
             
             return true;
@@ -84,65 +114,68 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
               decoration: BoxDecoration(
-                color: isDark
-                    ? bgDark.withOpacity(0.8)
-                    : Colors.white.withOpacity(0.8),
+                color: isDark ? bgDark : Colors.white,
                 border: Border(
                   bottom: BorderSide(
                     color: primaryColor.withOpacity(0.1),
                   ),
                 ),
               ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Icon(Icons.search,
-                          color: isDark ? primaryColor : primaryColor,
-                          size: 28),
-                      Text(
-                        'Qabool',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          fontStyle: FontStyle.italic,
-                          color: isDark ? primaryColor : primaryColor,
-                          letterSpacing: -0.5,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    if (_isSearching)
+                      Container(
+                        width: 200,
+                        margin: const EdgeInsets.only(right: 12),
+                        child: TextField(
+                          controller: _searchController,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            hintText: 'Search...',
+                            hintStyle: const TextStyle(fontSize: 14),
+                            border: InputBorder.none,
+                            prefixIcon: const Icon(Icons.search, size: 20, color: primaryColor),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.close, size: 16),
+                              onPressed: () {
+                                setState(() {
+                                  _isSearching = false;
+                                  _searchController.clear();
+                                  _searchQuery = '';
+                                });
+                                _fetchProfiles();
+                              },
+                            ),
+                          ),
+                          onChanged: (val) {
+                            _searchQuery = val;
+                            _fetchProfiles();
+                          },
                         ),
+                      )
+                    else
+                      IconButton(
+                        icon: const Icon(Icons.search, color: primaryColor, size: 28),
+                        onPressed: () => setState(() => _isSearching = true),
+                        padding: const EdgeInsets.only(right: 16),
+                        constraints: const BoxConstraints(),
                       ),
-                      Icon(Icons.tune,
-                          color: isDark ? primaryColor : primaryColor,
-                          size: 28),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Advanced Filters
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildFilterButton(
-                            'Age', primaryColor, accentGold, isDark),
-                        const SizedBox(width: 12),
-                        _buildFilterButton(
-                            'Religion', primaryColor, accentGold, isDark),
-                        const SizedBox(width: 12),
-                        _buildFilterButton(
-                            'Education', primaryColor, accentGold, isDark),
-                        const SizedBox(width: 12),
-                        _buildFilterButton(
-                            'Location', primaryColor, accentGold, isDark),
-                      ],
-                    ),
-                  ),
-                ],
+                    
+                    _buildFilterButton('Age', _ageRange != const RangeValues(18, 80), () => _showAgeFilter(), primaryColor, accentGold, isDark),
+                    const SizedBox(width: 8),
+                    _buildFilterButton('Religion', _selectedReligion != null, () => _showReligionFilter(), primaryColor, accentGold, isDark),
+                    const SizedBox(width: 8),
+                    _buildFilterButton('Education', _selectedEducation != null, () => _showEducationFilter(), primaryColor, accentGold, isDark),
+                    const SizedBox(width: 8),
+                    _buildFilterButton('Location', _selectedLocation != null, () => _showLocationFilter(), primaryColor, accentGold, isDark),
+                  ],
+                ),
               ),
             ),
 
@@ -184,32 +217,153 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
     );
   }
 
-  Widget _buildFilterButton(
-      String label, Color primaryColor, Color secondaryColor, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+  void _showAgeFilter() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Select Age Range', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              RangeSlider(
+                values: _ageRange,
+                min: 18,
+                max: 80,
+                divisions: 62,
+                labels: RangeLabels(_ageRange.start.round().toString(), _ageRange.end.round().toString()),
+                activeColor: QaboolTheme.primary,
+                onChanged: (values) {
+                  setModalState(() => _ageRange = values);
+                  setState(() => _ageRange = values);
+                },
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _fetchProfiles();
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: QaboolTheme.primary, minimumSize: const Size(double.infinity, 45)),
+                child: const Text('Apply', style: TextStyle(color: Colors.white)),
+              )
+            ],
+          ),
         ),
       ),
-      child: Row(
+    );
+  }
+
+  void _showReligionFilter() {
+    final religions = ['Islam', 'Christianity', 'Hinduism', 'Sikhism', 'Buddhism', 'Other'];
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => _buildSelectionList('Select Religion', religions, _selectedReligion, (val) {
+        setState(() => _selectedReligion = val);
+        _fetchProfiles();
+      }),
+    );
+  }
+
+  void _showEducationFilter() {
+    final edus = ['Bachelors', 'Masters', 'PhD', 'Diploma', 'High School'];
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => _buildSelectionList('Select Education', edus, _selectedEducation, (val) {
+        setState(() => _selectedEducation = val);
+        _fetchProfiles();
+      }),
+    );
+  }
+
+  void _showLocationFilter() {
+    final locs = ['United Kingdom', 'USA', 'Canada', 'Australia', 'Pakistan', 'India', 'UAE'];
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => _buildSelectionList('Select Location', locs, _selectedLocation, (val) {
+        setState(() => _selectedLocation = val);
+        _fetchProfiles();
+      }),
+    );
+  }
+
+  Widget _buildSelectionList(String title, List<String> options, String? current, Function(String?) onSelected) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: isDark ? Colors.grey[300] : Colors.grey[700],
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
+          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          Flexible(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: options.length + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return ListTile(
+                    title: const Text('All'),
+                    leading: Radio<String?>(value: null, groupValue: current, onChanged: (v) {
+                      onSelected(null);
+                      Navigator.pop(context);
+                    }),
+                    onTap: () {
+                      onSelected(null);
+                      Navigator.pop(context);
+                    },
+                  );
+                }
+                final opt = options[index - 1];
+                return ListTile(
+                  title: Text(opt),
+                  leading: Radio<String?>(value: opt, groupValue: current, onChanged: (v) {
+                    onSelected(opt);
+                    Navigator.pop(context);
+                  }),
+                  onTap: () {
+                    onSelected(opt);
+                    Navigator.pop(context);
+                  },
+                );
+              },
             ),
           ),
-          const SizedBox(width: 4),
-          Icon(Icons.keyboard_arrow_down,
-              size: 16, color: isDark ? Colors.grey[400] : Colors.grey[600]),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(
+      String label, bool isActive, VoidCallback onTap, Color primaryColor, Color secondaryColor, bool isDark) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? primaryColor : (isDark ? const Color(0xFF1E293B) : Colors.white),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? primaryColor : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive ? Colors.white : (isDark ? Colors.grey[300] : Colors.grey[700]),
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(Icons.keyboard_arrow_down,
+                size: 16, color: isActive ? Colors.white : (isDark ? Colors.grey[400] : Colors.grey[600])),
+          ],
+        ),
       ),
     );
   }

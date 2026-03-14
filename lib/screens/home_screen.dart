@@ -10,7 +10,8 @@ import 'package:qabool_app/screens/chat_screen.dart';
 import 'package:qabool_app/screens/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final Function(int index)? onNavigate;
+  const HomeScreen({super.key, this.onNavigate});
 
   @override
   State<HomeScreen> createState() => HomeScreenState();
@@ -104,22 +105,18 @@ class HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Navigation Bar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              decoration: BoxDecoration(
-                color: isDark ? bgDark.withOpacity(0.8) : Colors.white.withOpacity(0.8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (!_isSearching)
-                    const SizedBox.shrink() // Replace with empty space to keep search button on the right
-                  else
+            // Top Navigation Bar (Cleaned up to avoid empty space)
+            if (_isSearching)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                decoration: BoxDecoration(
+                  color: isDark ? bgDark.withOpacity(0.8) : Colors.white.withOpacity(0.8),
+                ),
+                child: Row(
+                  children: [
                     Expanded(
                       child: Container(
                         height: 40,
-                        margin: const EdgeInsets.only(right: 12),
                         child: TextField(
                           controller: _searchController,
                           autofocus: true,
@@ -149,17 +146,9 @@ class HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                  if (!_isSearching)
-                    IconButton(
-                      icon: const Icon(Icons.search, color: pColor),
-                      onPressed: () => setState(() => _isSearching = true),
-                      style: IconButton.styleFrom(
-                        backgroundColor: isDark ? Colors.grey[800] : Colors.grey[100],
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
             Expanded(
               child: RefreshIndicator(
@@ -170,7 +159,7 @@ class HomeScreenState extends State<HomeScreen> {
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
 
                     // People Nearby Header
                     Padding(
@@ -180,8 +169,16 @@ class HomeScreenState extends State<HomeScreen> {
                         children: [
                           Row(
                             children: [
+                              if (!_isSearching)
+                                IconButton(
+                                  icon: const Icon(Icons.search, color: pColor, size: 20),
+                                  onPressed: () => setState(() => _isSearching = true),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                ),
+                              if (!_isSearching) const SizedBox(width: 8),
                               Text(
-                                'People Nearby',
+                                _isSearching ? 'Search Results' : 'People Nearby',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -207,12 +204,15 @@ class HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           ),
-                          const Text(
-                            'View all',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: pColor,
+                          GestureDetector(
+                            onTap: () => widget.onNavigate?.call(1), // Switch to Discovery tab
+                            child: const Text(
+                              'View all',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: pColor,
+                              ),
                             ),
                           ),
                         ],
@@ -325,7 +325,7 @@ class HomeScreenState extends State<HomeScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () => widget.onNavigate?.call(2), // Switch to Messages tab
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.grey[400],
                           side: BorderSide(

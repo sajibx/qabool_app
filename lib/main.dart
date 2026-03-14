@@ -9,6 +9,8 @@ import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/services/profile_service.dart';
 import 'package:qabool_app/services/chat_service.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -48,6 +50,7 @@ class QaboolApp extends StatelessWidget {
     
     return MaterialApp(
       title: 'Qabool App',
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: QaboolTheme.lightTheme,
       darkTheme: QaboolTheme.darkTheme,

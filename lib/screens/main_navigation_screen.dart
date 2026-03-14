@@ -22,7 +22,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   // The screens we will navigate between
   late final List<Widget> _screens = [
-    HomeScreen(key: _homeKey),
+    HomeScreen(
+      key: _homeKey,
+      onNavigate: (index) => _onItemTapped(index),
+    ),
     DiscoveryScreen(key: _discoveryKey),
     MessagesScreen(key: _messagesKey),
     const ProfileScreen(),

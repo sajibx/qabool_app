@@ -5,6 +5,9 @@ import 'package:qabool_app/theme.dart';
 import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
+import 'package:qabool_app/widgets/chat_view.dart';
+import 'package:qabool_app/models/user_model.dart';
+import 'package:qabool_app/models/chat_model.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -15,6 +18,13 @@ class MessagesScreen extends StatefulWidget {
 
 class MessagesScreenState extends State<MessagesScreen> {
   bool _isLoading = true;
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  
+  // Master-Detail State
+  String? _selectedChatId;
+  UserModel? _selectedUser;
 
   Future<void> refreshData() async {
     await _fetchChats();
@@ -24,6 +34,12 @@ class MessagesScreenState extends State<MessagesScreen> {
   void initState() {
     super.initState();
     _fetchChats();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchChats() async {
@@ -49,121 +65,196 @@ class MessagesScreenState extends State<MessagesScreen> {
     return Scaffold(
       backgroundColor: isDark ? bgDark : bgLight,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              decoration: BoxDecoration(
-                color: isDark ? bgDark : Colors.white,
-                border: Border(
-                  bottom: BorderSide(
-                    color: isDark
-                        ? const Color(0xFF1E293B)
-                        : const Color(0xFFF1F5F9),
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isLargeScreen = constraints.maxWidth > 900;
+            
+            if (isLargeScreen) {
+              return Row(
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Qabool',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: isDark ? primaryColor : primaryColor,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      Text(
-                        'MESSAGES',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.grey[400] : Colors.grey[500],
-                          letterSpacing: 2.0,
-                        ),
-                      ),
-                    ],
+                  // Left Pane: Conversation List
+                  SizedBox(
+                    width: 350,
+                    child: _buildConversationsList(isDark, primaryColor, accentGold),
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF1E293B)
-                          : const Color(0xFFF8FAFC),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: Icon(Icons.search,
-                          color: isDark ? Colors.grey[200] : Colors.grey[700]),
-                      onPressed: () {},
-                    ),
-                  )
-                ],
-              ),
-            ),
-
-            // Main List
-            Expanded(
-              child: Consumer2<ChatService, AuthService>(
-                builder: (context, chatService, authService, _) {
-                  if (_isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  final chats = chatService.chats;
-                  if (chats.isEmpty) {
-                    return const Center(child: Text('No messages yet'));
-                  }
-                  final currentUserId = authService.currentUser?.id ?? "";
-                  return RefreshIndicator(
-                    onRefresh: refreshData,
-                    color: primaryColor,
-                    child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: chats.length,
-                      itemBuilder: (context, index) {
-                        final chat = chats[index];
-                        final otherUser = chat.otherParticipant(currentUserId);
-                        if (otherUser == null) return const SizedBox.shrink();
-                        return _buildMessageItem(
-                          context: context,
-                          isDark: isDark,
-                          primaryColor: primaryColor,
-                          accentGold: accentGold,
-                          imageUrl: otherUser.profileImageUrl ?? 'https://via.placeholder.com/150',
-                          name: otherUser.fullName,
-                          time: chat.lastMessage?.timeString ?? '',
-                          message: chat.lastMessage?.content ?? '',
-                          isTyping: false,
-                          isActive: false,
-                          isOnline: otherUser.isOnline,
-                          unreadCount: chat.unreadCount,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatScreen(
-                                  chatId: chat.id,
-                                  otherUser: otherUser,
+                  // Divider
+                  VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                  ),
+                  // Right Pane: Active Chat
+                  Expanded(
+                    child: _selectedChatId != null
+                        ? ChatView(
+                            key: ValueKey(_selectedChatId),
+                            chatId: _selectedChatId,
+                            otherUser: _selectedUser,
+                            showBackButton: false,
+                          )
+                        : Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.chat_bubble_outline, size: 64, color: isDark ? Colors.grey[700] : Colors.grey[300]),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Select a conversation to start chatting',
+                                  style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[400]),
                                 ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
+                              ],
+                            ),
+                          ),
+                  ),
+                ],
+              );
+            }
+
+            // Mobile View
+            return _buildConversationsList(isDark, primaryColor, accentGold);
+          },
         ),
       ),
+    );
+  }
+
+  Widget _buildConversationsList(bool isDark, Color primaryColor, Color accentGold) {
+    return Column(
+      children: [
+        // Header
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+          decoration: BoxDecoration(
+            color: isDark ? QaboolTheme.backgroundDark : Colors.white,
+            border: Border(
+              bottom: BorderSide(
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+              ),
+            ),
+          ),
+          child: _isSearching
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          hintText: 'Search people or messages...',
+                          hintStyle: const TextStyle(fontSize: 14),
+                          border: InputBorder.none,
+                          prefixIcon: Icon(Icons.search, size: 20, color: primaryColor),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.close, size: 16),
+                            onPressed: () {
+                              setState(() {
+                                _isSearching = false;
+                                _searchController.clear();
+                                _searchQuery = '';
+                              });
+                            },
+                          ),
+                        ),
+                        onChanged: (val) {
+                          setState(() => _searchQuery = val.toLowerCase());
+                        },
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.search, color: isDark ? Colors.grey[200] : Colors.grey[700]),
+                        onPressed: () => setState(() => _isSearching = true),
+                      ),
+                    )
+                  ],
+                ),
+        ),
+
+        // Main List
+        Expanded(
+          child: Consumer2<ChatService, AuthService>(
+            builder: (context, chatService, authService, _) {
+              final currentUserId = authService.currentUser?.id ?? "";
+              final chats = chatService.chats.where((chat) {
+                if (_searchQuery.isEmpty) return true;
+                final otherUser = chat.otherParticipant(currentUserId);
+                if (otherUser == null) return false;
+                
+                final nameMatch = otherUser.fullName.toLowerCase().contains(_searchQuery);
+                final messageMatch = chat.lastMessage?.content.toLowerCase().contains(_searchQuery) ?? false;
+                
+                return nameMatch || messageMatch;
+              }).toList();
+
+              if (_isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (chats.isEmpty) {
+                return Center(
+                  child: Text(_searchQuery.isEmpty ? 'No messages yet' : 'No matching conversations'),
+                );
+              }
+              return RefreshIndicator(
+                onRefresh: refreshData,
+                color: primaryColor,
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: chats.length,
+                  itemBuilder: (context, index) {
+                    final chat = chats[index];
+                    final otherUser = chat.otherParticipant(currentUserId);
+                    if (otherUser == null) return const SizedBox.shrink();
+                    
+                    final isSelected = _selectedChatId == chat.id;
+
+                    return _buildMessageItem(
+                      context: context,
+                      isDark: isDark,
+                      primaryColor: primaryColor,
+                      accentGold: accentGold,
+                      imageUrl: otherUser.profileImageUrl ?? 'https://via.placeholder.com/150',
+                      name: otherUser.fullName,
+                      time: chat.lastMessage?.timeString ?? '',
+                      message: chat.lastMessage?.content ?? '',
+                      isTyping: false,
+                      isActive: isSelected,
+                      isOnline: otherUser.isOnline,
+                      unreadCount: chat.unreadCount,
+                      onTap: () {
+                        if (MediaQuery.of(context).size.width > 900) {
+                          setState(() {
+                            _selectedChatId = chat.id;
+                            _selectedUser = otherUser;
+                          });
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatScreen(
+                                chatId: chat.id,
+                                otherUser: otherUser,
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
