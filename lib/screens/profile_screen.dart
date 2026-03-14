@@ -7,6 +7,7 @@ import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/screens/edit_profile_screen.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
+import 'package:qabool_app/services/profile_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel? user;
@@ -202,7 +203,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                   const SizedBox(height: 32),
-                  if (isMe)
+                  if (_isMe)
                     Row(
                       children: [
                         Expanded(
