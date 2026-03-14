@@ -257,7 +257,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
   }
 
   void _showReligionFilter() {
-    final religions = ['Islam', 'Christianity', 'Hinduism', 'Sikhism', 'Buddhism', 'Other'];
+    final religions = ['Islam (Sunni)', 'Islam (Shia)', 'Islam (Other)', 'Christianity', 'Hinduism', 'Sikhism', 'Buddhism', 'Other'];
     showModalBottomSheet(
       context: context,
       builder: (context) => _buildSelectionList('Select Religion', religions, _selectedReligion, (val) {
