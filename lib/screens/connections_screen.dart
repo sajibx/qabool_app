@@ -38,8 +38,8 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
           centerTitle: true,
           bottom: const TabBar(
             tabs: [
-              Tab(text: 'Pending'),
               Tab(text: 'Connected'),
+              Tab(text: 'Pending'),
             ],
             labelColor: QaboolTheme.primary,
             indicatorColor: QaboolTheme.primary,
@@ -47,8 +47,8 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
         ),
         body: TabBarView(
           children: [
-            _buildList(connectionService.pendingRequests, isPending: true),
             _buildList(connectionService.acceptedConnections, isPending: false),
+            _buildList(connectionService.pendingRequests, isPending: true),
           ],
         ),
       ),

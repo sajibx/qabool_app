@@ -164,6 +164,41 @@ class ChatService extends ChangeNotifier {
       }
     });
 
+    _socket?.on('new_connection_request', (data) {
+      print('New connection request received: $data');
+      try {
+        Map<String, dynamic> jsonData;
+        if (data is String) {
+          jsonData = jsonDecode(data);
+        } else {
+          try {
+            jsonData = jsonDecode(jsonEncode(data));
+          } catch (_) {
+            jsonData = Map<String, dynamic>.from(data as dynamic);
+          }
+        }
+        
+        final requester = jsonData['requester'];
+        final message = jsonData['message'] ?? 'Someone sent you a connection request';
+        
+        if (requester != null && navigatorKey.currentContext != null) {
+          final profileImageUrl = requester['profileImageUrl'];
+          
+          NotificationOverlay.show(
+            context: navigatorKey.currentContext!,
+            title: 'Connection Request! 🤝',
+            message: message,
+            imageUrl: profileImageUrl,
+            onTap: () {
+              // Navigation can be handled here if needed
+            },
+          );
+        }
+      } catch (e) {
+        print('Error parsing connection notification: $e');
+      }
+    });
+
     _socket?.connect();
   }
 
