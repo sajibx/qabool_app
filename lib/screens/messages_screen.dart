@@ -64,8 +64,7 @@ class MessagesScreenState extends State<MessagesScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? bgDark : bgLight,
-      body: SafeArea(
-        child: LayoutBuilder(
+      body: LayoutBuilder(
           builder: (context, constraints) {
             final isLargeScreen = constraints.maxWidth > 900;
             
@@ -75,7 +74,7 @@ class MessagesScreenState extends State<MessagesScreen> {
                   // Left Pane: Conversation List
                   SizedBox(
                     width: 350,
-                    child: _buildConversationsList(isDark, primaryColor, accentGold),
+                    child: _buildConversationsList(isDark, primaryColor, accentGold, bgDark),
                   ),
                   // Divider
                   VerticalDivider(
@@ -111,72 +110,89 @@ class MessagesScreenState extends State<MessagesScreen> {
             }
 
             // Mobile View
-            return _buildConversationsList(isDark, primaryColor, accentGold);
+            return _buildConversationsList(isDark, primaryColor, accentGold, bgDark);
           },
         ),
-      ),
     );
   }
 
-  Widget _buildConversationsList(bool isDark, Color primaryColor, Color accentGold) {
+  Widget _buildConversationsList(bool isDark, Color primaryColor, Color accentGold, Color bgDark) {
     return Column(
       children: [
-        // Header
+        // Polished Header
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
           decoration: BoxDecoration(
-            color: isDark ? QaboolTheme.backgroundDark : Colors.white,
-            border: Border(
-              bottom: BorderSide(
-                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+            color: isDark ? bgDark : Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            ),
+            ],
           ),
-          child: _isSearching
-              ? Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        autofocus: true,
-                        decoration: InputDecoration(
-                          hintText: 'Search people or messages...',
-                          hintStyle: const TextStyle(fontSize: 14),
-                          border: InputBorder.none,
-                          prefixIcon: Icon(Icons.search, size: 20, color: primaryColor),
-                          suffixIcon: IconButton(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Connections',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: _isSearching ? primaryColor.withOpacity(0.3) : Colors.transparent,
+                    width: 1.5,
+                  ),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onTap: () => setState(() => _isSearching = true),
+                  onChanged: (val) {
+                    setState(() {
+                      _searchQuery = val.toLowerCase();
+                      _isSearching = val.isNotEmpty;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Search people or messages...',
+                    hintStyle: TextStyle(
+                      color: isDark ? Colors.grey[500] : Colors.grey[400],
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: 20,
+                      color: _isSearching ? primaryColor : Colors.grey[400],
+                    ),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
                             icon: const Icon(Icons.close, size: 16),
                             onPressed: () {
                               setState(() {
-                                _isSearching = false;
                                 _searchController.clear();
                                 _searchQuery = '';
+                                _isSearching = false;
                               });
                             },
-                          ),
-                        ),
-                        onChanged: (val) {
-                          setState(() => _searchQuery = val.toLowerCase());
-                        },
-                      ),
-                    ),
-                  ],
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: Icon(Icons.search, color: isDark ? Colors.grey[200] : Colors.grey[700]),
-                        onPressed: () => setState(() => _isSearching = true),
-                      ),
-                    )
-                  ],
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
                 ),
+              ),
+            ],
+          ),
         ),
 
         // Main List

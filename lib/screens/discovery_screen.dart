@@ -192,7 +192,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                         physics: const AlwaysScrollableScrollPhysics(),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 2,
-                          childAspectRatio: 0.55,
+                          childAspectRatio: 0.63,
                           mainAxisSpacing: 16,
                           crossAxisSpacing: 16,
                         ),

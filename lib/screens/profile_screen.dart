@@ -65,18 +65,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               )
             : null,
         centerTitle: true,
+        automaticallyImplyLeading: false,
         backgroundColor:
             isDark ? bgDark.withOpacity(0.8) : Colors.white.withOpacity(0.8),
         elevation: 0,
         scrolledUnderElevation: 1,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: QaboolTheme.primary),
-          onPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            }
-          },
-        ),
         actions: [
           if (!_isMe)
             Padding(
