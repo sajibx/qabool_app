@@ -475,33 +475,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  // Bio Section
-                  _buildCard(
-                    isDark: isDark,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionHeader(
-                          icon: Icons.account_circle,
-                          title: 'ABOUT ME',
-                          accentGold: QaboolTheme.accentGold,
-                          primaryColor: primaryColor,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _displayUser!.bio ?? (_isMe ? 'No bio added yet. Tell others bit about yourself!' : 'No bio provided.'),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            height: 1.5,
-                            color: isDark ? Colors.grey[400] : Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
                   if (_isMe) ...[
                     _buildSectionHeader(
                       icon: Icons.flash_on,
@@ -516,12 +489,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: _buildActivityCard(
                             icon: Icons.people_outline,
                             label: 'Connections',
-                            count: context.watch<ConnectionService>().pendingRequests.length,
+                            count: context
+                                .watch<ConnectionService>()
+                                .pendingRequests
+                                .length,
                             color: Colors.blueAccent,
                             isDark: isDark,
                             onTap: () => Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const ConnectionsScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ConnectionsScreen()),
                             ),
                           ),
                         ),
@@ -534,7 +512,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             isDark: isDark,
                             onTap: () => Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => const FavoritesScreen()),
                             ),
                           ),
                         ),
@@ -542,6 +521,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 24),
                   ],
+
+                  // Bio Section
+                  _buildCard(
+                    isDark: isDark,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          icon: Icons.account_circle,
+                          title: 'ABOUT ME',
+                          accentGold: QaboolTheme.accentGold,
+                          primaryColor: primaryColor,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _displayUser!.bio ??
+                              (_isMe
+                                  ? 'No bio added yet. Tell others bit about yourself!'
+                                  : 'No bio provided.'),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            height: 1.5,
+                            color: isDark ? Colors.grey[400] : Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
                   // Personal Details
                   _buildCard(
