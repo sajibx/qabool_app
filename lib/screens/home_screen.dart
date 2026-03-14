@@ -499,6 +499,7 @@ class HomeScreenState extends State<HomeScreen> {
                       top: 8,
                       right: 8,
                       child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap: () async {
                           final profileService = context.read<ProfileService>();
                           final wasFavorited = profile.isFavorited;

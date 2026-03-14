@@ -82,28 +82,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 12.0),
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () async {
+                  debugPrint('>>> PROFILE_SCREEN: Favorite heart tapped for user: ${_displayUser?.id}');
+                  debugPrint('>>> PROFILE_SCREEN: Current isFavorited: ${_displayUser?.isFavorited}');
                   final previousState = _displayUser!.isFavorited;
+                  final pService = context.read<ProfileService>();
                   try {
                     // Optimistic update
                     setState(() {
                       _displayUser = _displayUser!.copyWith(isFavorited: !previousState);
                     });
+                    debugPrint('Optimistic update set to: ${_displayUser?.isFavorited}');
 
                     if (previousState) {
-                      await profileService.unfavoriteUser(_displayUser!.id);
+                      debugPrint('Calling unfavoriteUser...');
+                      await pService.unfavoriteUser(_displayUser!.id);
                     } else {
-                      await profileService.favoriteUser(_displayUser!.id);
+                      debugPrint('Calling favoriteUser...');
+                      await pService.favoriteUser(_displayUser!.id);
                     }
+                    debugPrint('API call successful.');
                     
                     // Final sync with reality
-                    final updatedUser = await profileService.getProfile(_displayUser!.id);
+                    final updatedUser = await pService.getProfile(_displayUser!.id);
+                    debugPrint('Fetched updated profile. isFavorited: ${updatedUser.isFavorited}');
                     if (mounted) {
                       setState(() {
                         _displayUser = updatedUser;
                       });
                     }
                   } catch (e) {
+                    debugPrint('Error in favorite/unfavorite: $e');
                     // Rollback on error
                     if (mounted) {
                       setState(() {

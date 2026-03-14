@@ -39,6 +39,7 @@ class ProfileService extends ChangeNotifier {
   Future<UserModel> getProfile(String id) async {
     try {
       final response = await _apiService.client.get('/profiles/$id');
+      debugPrint('GET /profiles/$id response: ${response.data}');
       if (response.statusCode == 200) {
         return UserModel.fromJson(response.data);
       }
