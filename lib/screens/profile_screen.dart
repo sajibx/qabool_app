@@ -30,6 +30,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _displayUser = widget.user;
+    
+    // Check if it's not the current user efficiently
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final auth = context.read<AuthService>();
+        final currentUser = auth.currentUser;
+        if (_displayUser != null && _displayUser?.id != currentUser?.id) {
+          _refreshProfile();
+        }
+      }
+    });
+  }
+
+  Future<void> _refreshProfile() async {
+    if (_displayUser == null) return;
+    try {
+      final updatedUser = await context.read<ProfileService>().getProfile(_displayUser!.id);
+      if (mounted) {
+        setState(() {
+          _displayUser = updatedUser;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error refreshing profile: $e');
+    }
   }
 
   @override
