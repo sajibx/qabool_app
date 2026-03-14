@@ -13,13 +13,14 @@ class UserModel {
   final String? region;
   final String? religion;
   final String? ethnicity;
-  final int? height;
-  final int? weight;
+  final double? height;
+  final double? weight;
   final String? profession;
   final String? education;
   final String? specialConsiderations;
   final bool isVerified;
   final bool isFavorited;
+  final String status;
   final DateTime? lastSeen;
 
   UserModel({
@@ -42,6 +43,7 @@ class UserModel {
     this.specialConsiderations,
     this.isVerified = false,
     this.isFavorited = false,
+    this.status = 'ACTIVE',
     this.lastSeen,
   });
 
@@ -76,13 +78,14 @@ class UserModel {
       region: json['region'],
       religion: json['religion'],
       ethnicity: json['ethnicity'],
-      height: json['height'],
-      weight: json['weight'],
+      height: json['height']?.toDouble(),
+      weight: json['weight']?.toDouble(),
       profession: json['profession'],
       education: json['education'],
       specialConsiderations: json['specialConsiderations'],
       isVerified: json['isVerified'] ?? false,
       isFavorited: json['isFavorited'] ?? false,
+      status: json['status']?.toString() ?? 'ACTIVE',
       lastSeen: json['lastSeen'] != null ? DateTime.parse(json['lastSeen']) : null,
     );
   }
@@ -109,6 +112,7 @@ class UserModel {
       'specialConsiderations': specialConsiderations,
       'isVerified': isVerified,
       'isFavorited': isFavorited,
+      'status': status,
       'lastSeen': lastSeen?.toIso8601String(),
     };
   }
@@ -126,13 +130,14 @@ class UserModel {
     String? region,
     String? religion,
     String? ethnicity,
-    int? height,
-    int? weight,
+    double? height,
+    double? weight,
     String? profession,
     String? education,
     String? specialConsiderations,
     bool? isVerified,
     bool? isFavorited,
+    String? status,
     DateTime? lastSeen,
   }) {
     return UserModel(
@@ -155,6 +160,7 @@ class UserModel {
       specialConsiderations: specialConsiderations ?? this.specialConsiderations,
       isVerified: isVerified ?? this.isVerified,
       isFavorited: isFavorited ?? this.isFavorited,
+      status: status ?? this.status,
       lastSeen: lastSeen ?? this.lastSeen,
     );
   }

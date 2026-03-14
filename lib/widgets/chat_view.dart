@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:qabool_app/utils/image_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../theme.dart';
@@ -31,6 +33,8 @@ class _ChatViewState extends State<ChatView> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = true;
   String? _activeChatId;
+  Timer? _typingTimer;
+  bool _isMeTyping = false;
 
   @override
   void initState() {
@@ -40,6 +44,32 @@ class _ChatViewState extends State<ChatView> {
     
     _updateActiveChat();
     _loadMessages();
+    _messageController.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() {
+    if (_activeChatId == null || widget.otherUser == null) return;
+
+    if (!_isMeTyping) {
+      _isMeTyping = true;
+      context.read<ChatService>().setTypingStatus(
+        chatId: _activeChatId!,
+        recipientId: widget.otherUser!.id,
+        isTyping: true,
+      );
+    }
+
+    _typingTimer?.cancel();
+    _typingTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted && _isMeTyping) {
+        _isMeTyping = false;
+        context.read<ChatService>().setTypingStatus(
+          chatId: _activeChatId!,
+          recipientId: widget.otherUser!.id,
+          isTyping: false,
+        );
+      }
+    });
   }
 
   @override
@@ -70,8 +100,10 @@ class _ChatViewState extends State<ChatView> {
 
   @override
   void dispose() {
+    _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
     _scrollController.dispose();
+    _typingTimer?.cancel();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       navigatorKey.currentContext?.read<ChatService>().setActiveChat(null);
     });
@@ -178,7 +210,7 @@ class _ChatViewState extends State<ChatView> {
                         radius: 20,
                         backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
                         backgroundImage: otherUser.profileImageUrl != null && otherUser.profileImageUrl!.isNotEmpty
-                            ? CachedNetworkImageProvider(otherUser.profileImageUrl!)
+                            ? CachedNetworkImageProvider(resolveImageUrl(otherUser.profileImageUrl!))
                             : null,
                         child: (otherUser.profileImageUrl == null || otherUser.profileImageUrl!.isEmpty)
                             ? Icon(Icons.person, color: isDark ? Colors.grey[600] : Colors.grey[400])
@@ -224,6 +256,15 @@ class _ChatViewState extends State<ChatView> {
                             letterSpacing: 0.5,
                           ),
                         ),
+                        if (context.watch<ChatService>().isTyping(_activeChatId ?? ""))
+                          Text(
+                            'typing...',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontStyle: FontStyle.italic,
+                              color: primaryColor.withOpacity(0.7),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -293,7 +334,7 @@ class _ChatViewState extends State<ChatView> {
                     } else {
                       return _buildReceivedMessage(
                         isDark: isDark,
-                        imageUrl: otherUser?.profileImageUrl ?? '',
+                        imageUrl: resolveImageUrl(otherUser?.profileImageUrl),
                         message: message.content,
                         time: message.timeString,
                       );
@@ -302,6 +343,34 @@ class _ChatViewState extends State<ChatView> {
                 );
               },
             ),
+          ),
+          
+          // Typing Indicator above input
+          Consumer<ChatService>(
+            builder: (context, chatService, _) {
+              if (chatService.isTyping(_activeChatId ?? "")) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        '${widget.otherUser?.firstName ?? "Someone"} is typing',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500], fontStyle: FontStyle.italic),
+                      ),
+                      const SizedBox(width: 4),
+                      SizedBox(
+                        width: 20,
+                        child: Text(
+                          '.',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: primaryColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
 
           // Input Area

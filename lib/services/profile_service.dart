@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import 'api_service.dart';
+import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ProfileService extends ChangeNotifier {
   final ApiService _apiService;
@@ -24,9 +27,27 @@ class ProfileService extends ChangeNotifier {
     }
   }
 
-  Future<UserModel> updateProfile(Map<String, dynamic> data) async {
+  Future<UserModel> updateProfile(Map<String, dynamic> data, {XFile? image}) async {
     try {
-      final response = await _apiService.client.put('/profiles/me', data: data);
+      final formData = FormData.fromMap(data);
+      if (image != null) {
+        if (kIsWeb) {
+          formData.files.add(MapEntry(
+            'profileImage',
+            MultipartFile.fromBytes(
+              await image.readAsBytes(),
+              filename: image.name,
+            ),
+          ));
+        } else {
+          formData.files.add(MapEntry(
+            'profileImage',
+            await MultipartFile.fromFile(image.path, filename: image.name),
+          ));
+        }
+      }
+
+      final response = await _apiService.client.put('/profiles/me', data: formData);
       if (response.statusCode == 200) {
         return UserModel.fromJson(response.data);
       }

@@ -3,6 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import 'package:qabool_app/theme.dart';
 import 'package:qabool_app/services/profile_service.dart';
+import 'package:qabool_app/services/connection_service.dart';
+import 'package:qabool_app/utils/image_utils.dart';
 import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/models/user_model.dart';
@@ -257,21 +259,15 @@ class HomeScreenState extends State<HomeScreen> {
                                       profile: profile,
                                       onConnect: () async {
                                         try {
-                                          final chatService = context.read<ChatService>();
-                                          final chat = await chatService.createChat(profile.id);
+                                          final connectionService = context.read<ConnectionService>();
+                                          await connectionService.sendConnectionRequest(profile.id);
                                           if (!mounted) return;
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => ChatScreen(
-                                                chatId: chat.id,
-                                                otherUser: profile,
-                                              ),
-                                            ),
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Connection request sent!')),
                                           );
                                         } catch (e) {
                                           ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text('Failed to connect: $e')),
+                                            SnackBar(content: Text('Failed to send request: $e')),
                                           );
                                         }
                                       },
@@ -322,7 +318,7 @@ class HomeScreenState extends State<HomeScreen> {
                                           CircleAvatar(
                                             radius: 30,
                                             backgroundImage: profile.profileImageUrl != null
-                                                ? CachedNetworkImageProvider(profile.profileImageUrl!)
+                                                ? CachedNetworkImageProvider(resolveImageUrl(profile.profileImageUrl))
                                                 : null,
                                             child: profile.profileImageUrl == null
                                                 ? const Icon(Icons.person)
@@ -377,7 +373,7 @@ class HomeScreenState extends State<HomeScreen> {
                               return _buildChatItem(
                                 context: context,
                                 isDark: isDark,
-                                imageUrl: otherUser.profileImageUrl ?? 'https://via.placeholder.com/150',
+                                imageUrl: resolveImageUrl(otherUser.profileImageUrl),
                                 name: otherUser.fullName,
                                 time: chat.lastMessage?.timeString ?? 'No messages',
                                 message: chat.lastMessage?.content ?? '',
@@ -442,7 +438,7 @@ class HomeScreenState extends State<HomeScreen> {
     const aColor = QaboolTheme.accentGold;
     const pColor = QaboolTheme.primary;
     
-    final imageUrl = profile.profileImageUrl ?? 'https://via.placeholder.com/150';
+    final imageUrl = resolveImageUrl(profile.profileImageUrl);
     final name = profile.firstName;
     final age = profile.age?.toString() ?? "";
     final verified = profile.isVerified;

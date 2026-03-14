@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import 'api_service.dart';
+import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AuthService extends ChangeNotifier {
   final ApiService _apiService;
@@ -58,10 +61,12 @@ class AuthService extends ChangeNotifier {
     String? bio,
     String? specialConsiderations,
     String? region,
+    XFile? profileImage,
   }) async {
     try {
       _setLoading(true);
-      final response = await _apiService.client.post('/auth/register', data: {
+      
+      final Map<String, dynamic> dataMap = {
         'email': email,
         'password': password,
         'firstName': firstName,
@@ -77,7 +82,28 @@ class AuthService extends ChangeNotifier {
         'bio': bio,
         'specialConsiderations': specialConsiderations,
         'region': region,
-      });
+      };
+
+      final formData = FormData.fromMap(dataMap);
+
+      if (profileImage != null) {
+        if (kIsWeb) {
+          formData.files.add(MapEntry(
+            'profileImage',
+            MultipartFile.fromBytes(
+              await profileImage.readAsBytes(),
+              filename: profileImage.name,
+            ),
+          ));
+        } else {
+          formData.files.add(MapEntry(
+            'profileImage',
+            await MultipartFile.fromFile(profileImage.path, filename: profileImage.name),
+          ));
+        }
+      }
+
+      final response = await _apiService.client.post('/auth/register', data: formData);
 
       if (response.statusCode == 201) {
         // Registration successful, but we don't sign in automatically

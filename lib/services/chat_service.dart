@@ -42,6 +42,7 @@ class ChatService extends ChangeNotifier {
   Map<String, List<MessageModel>> _messages = {}; // chatId -> messages
   Map<String, PaginationMeta> _paginationMeta = {}; // chatId -> meta
   Map<String, bool> _isLoadingMore = {}; // chatId -> isloading
+  Map<String, bool> _typingStates = {}; // chatId -> isTyping
   String? _activeChatId;
 
   ChatService(this._apiService);
@@ -51,6 +52,7 @@ class ChatService extends ChangeNotifier {
   List<MessageModel> getMessages(String chatId) => _messages[chatId] ?? [];
   bool hasMoreMessages(String chatId) => _paginationMeta[chatId]?.hasMore ?? false;
   bool isLoadingMore(String chatId) => _isLoadingMore[chatId] ?? false;
+  bool isTyping(String chatId) => _typingStates[chatId] ?? false;
 
   void setActiveChat(String? chatId) {
     _activeChatId = chatId;
@@ -134,6 +136,31 @@ class ChatService extends ChangeNotifier {
         }
       } catch (e) {
         print('Error parsing favorite notification: $e');
+      }
+    });
+
+    _socket?.on('typing_status', (data) {
+      try {
+        Map<String, dynamic> jsonData;
+        if (data is String) {
+          jsonData = jsonDecode(data);
+        } else {
+          try {
+            jsonData = jsonDecode(jsonEncode(data));
+          } catch (_) {
+            jsonData = Map<String, dynamic>.from(data as dynamic);
+          }
+        }
+        
+        final chatId = jsonData['chatId'];
+        final isTyping = jsonData['isTyping'] ?? false;
+        
+        if (chatId != null) {
+          _typingStates[chatId] = isTyping;
+          notifyListeners();
+        }
+      } catch (e) {
+        print('Error parsing typing status: $e');
       }
     });
 
@@ -333,6 +360,18 @@ class ChatService extends ChangeNotifier {
       'recipientId': recipientId,
       'content': content,
       'type': 'TEXT',
+    });
+  }
+
+  void setTypingStatus({
+    required String chatId,
+    required String recipientId,
+    required bool isTyping,
+  }) {
+    _socket?.emit('typing_status', {
+      'chatId': chatId,
+      'recipientId': recipientId,
+      'isTyping': isTyping,
     });
   }
 

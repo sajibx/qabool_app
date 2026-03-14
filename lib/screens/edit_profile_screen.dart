@@ -3,6 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:qabool_app/theme.dart';
 import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/services/profile_service.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:qabool_app/services/api_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -16,12 +20,44 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _bioController;
-  late TextEditingController _regionController;
-  late TextEditingController _religionController;
   late TextEditingController _professionController;
   late TextEditingController _educationController;
+  late TextEditingController _specialController;
+  late TextEditingController _weightController;
+  late TextEditingController _heightCmController;
+  late TextEditingController _heightFtController;
+  late TextEditingController _heightInController;
+  
+  DateTime? _selectedDob;
+  String? _selectedGender;
+  String? _selectedEthnicity;
+  String? _selectedCountry;
+  String? _selectedCity;
+  String? _selectedReligion;
+  String _heightUnit = 'cm';
+  String _weightUnit = 'kg';
+  XFile? _pickedImage;
   
   bool _isLoading = false;
+
+  final Map<String, List<String>> _countryCities = {
+    'Germany': ['Berlin', 'Munich', 'Hamburg', 'Frankfurt', 'Stuttgart'],
+    'Bangladesh': ['Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi', 'Khulna'],
+    'Pakistan': ['Karachi', 'Lahore', 'Islamabad', 'Faisalabad', 'Multan'],
+    'India': ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai'],
+    'Canada': ['Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa'],
+    'USA': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Miami'],
+  };
+
+  final List<String> _ethnicities = [
+    'South Asian',
+    'East Asian',
+    'Middle Eastern',
+    'White / Caucasian',
+    'Black / African',
+    'Hispanic / Latino',
+    'Mixed / Other',
+  ];
 
   @override
   void initState() {
@@ -30,10 +66,41 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _firstNameController = TextEditingController(text: user?.firstName);
     _lastNameController = TextEditingController(text: user?.lastName);
     _bioController = TextEditingController(text: user?.bio);
-    _regionController = TextEditingController(text: user?.region);
-    _religionController = TextEditingController(text: user?.religion);
     _professionController = TextEditingController(text: user?.profession);
     _educationController = TextEditingController(text: user?.education);
+    _specialController = TextEditingController(text: user?.specialConsiderations);
+    _weightController = TextEditingController(text: user?.weight?.toStringAsFixed(1));
+    _heightCmController = TextEditingController(text: user?.height?.toStringAsFixed(0));
+    _heightFtController = TextEditingController();
+    _heightInController = TextEditingController();
+
+    _selectedDob = user?.dob;
+    _selectedGender = user?.gender;
+    _selectedEthnicity = user?.ethnicity;
+    _selectedReligion = user?.religion;
+
+    // Handle Region Decomposition
+    if (user?.region != null && user!.region!.contains(',')) {
+      final parts = user.region!.split(',');
+      final cityPart = parts.first.trim();
+      final countryPart = parts.last.trim();
+      
+      if (_countryCities.containsKey(countryPart)) {
+        _selectedCountry = countryPart;
+        if (_countryCities[countryPart]!.contains(cityPart)) {
+          _selectedCity = cityPart;
+        }
+      }
+    }
+
+    // Initialize Ft/In if height exists
+    if (user?.height != null) {
+      final totalInches = user!.height! / 2.54;
+      final feet = (totalInches / 12).floor();
+      final inches = (totalInches % 12).round();
+      _heightFtController.text = feet.toString();
+      _heightInController.text = inches.toString();
+    }
   }
 
   @override
@@ -41,30 +108,100 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _bioController.dispose();
-    _regionController.dispose();
-    _religionController.dispose();
     _professionController.dispose();
     _educationController.dispose();
+    _specialController.dispose();
+    _weightController.dispose();
+    _heightCmController.dispose();
+    _heightFtController.dispose();
+    _heightInController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() => _pickedImage = image);
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDob ?? DateTime.now().subtract(const Duration(days: 365 * 18)),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: QaboolTheme.primary,
+              primary: QaboolTheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _selectedDob) {
+      setState(() => _selectedDob = picked);
+    }
   }
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_firstNameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('First Name is required')));
+      return;
+    }
+
+    if (_bioController.text.isNotEmpty && _bioController.text.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bio must be at least 10 characters')));
+      return;
+    }
+
+    if (_specialController.text.isNotEmpty && _specialController.text.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Special considerations must be at least 10 characters')));
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
+      // Height Conversion
+      double? heightCm;
+      if (_heightUnit == 'cm') {
+        heightCm = double.tryParse(_heightCmController.text);
+      } else {
+        final ft = double.tryParse(_heightFtController.text) ?? 0;
+        final inc = double.tryParse(_heightInController.text) ?? 0;
+        heightCm = (ft * 30.48) + (inc * 2.54);
+      }
+
+      // Weight Conversion
+      double? weightKg = double.tryParse(_weightController.text);
+      if (_weightUnit == 'lbs' && weightKg != null) {
+        weightKg = weightKg * 0.453592;
+      }
+
       final updatedData = {
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
         'bio': _bioController.text,
         'gender': _selectedGender,
-        'region': _regionController.text,
-        'religion': _religionController.text,
+        'dob': _selectedDob?.toIso8601String(),
+        'ethnicity': _selectedEthnicity,
+        'religion': _selectedReligion,
+        'height': heightCm,
+        'weight': weightKg,
         'profession': _professionController.text,
         'education': _educationController.text,
+        'specialConsiderations': _specialController.text,
+        'region': _selectedCountry != null && _selectedCity != null ? "${_selectedCity}, ${_selectedCountry}" : null,
       };
 
-      await context.read<ProfileService>().updateProfile(updatedData);
+      await context.read<ProfileService>().updateProfile(updatedData, image: _pickedImage);
       // Also update currentUser in AuthService to reflect changes locally immediately
       await context.read<AuthService>().checkAuthStatus();
       
@@ -122,6 +259,70 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 16),
+              
+              // Profile Photo
+              Center(
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDark ? const Color(0xFF2D2626) : Colors.grey[200],
+                              border: Border.all(color: QaboolTheme.primary, width: 2),
+                              image: _pickedImage != null
+                                  ? DecorationImage(
+                                      image: kIsWeb
+                                          ? NetworkImage(_pickedImage!.path)
+                                          : FileImage(File(_pickedImage!.path)) as ImageProvider,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : (context.read<AuthService>().currentUser?.profileImageUrl != null
+                                      ? DecorationImage(
+                                          image: NetworkImage('${ApiService.baseUrl.replaceAll('/api/v1', '')}${context.read<AuthService>().currentUser!.profileImageUrl}'),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : null),
+                            ),
+                            child: _pickedImage == null && context.read<AuthService>().currentUser?.profileImageUrl == null
+                                ? const Icon(Icons.person, size: 50, color: QaboolTheme.primary)
+                                : null,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: QaboolTheme.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.camera_alt, color: Colors.white, size: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Change Photo',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: QaboolTheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
               _buildSectionTitle('BASIC INFORMATION'),
               const SizedBox(height: 16),
               _buildTextField(controller: _firstNameController, label: 'First Name', icon: Icons.person),
@@ -130,14 +331,116 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 16),
               _buildGenderDropdown(),
               const SizedBox(height: 16),
+
+              // Date of Birth
+              Text('Date of Birth', style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 12)),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () => _selectDate(context),
+                child: IgnorePointer(
+                  child: _buildTextField(
+                    controller: TextEditingController(
+                      text: _selectedDob == null ? '' : "${_selectedDob!.day}/${_selectedDob!.month}/${_selectedDob!.year}",
+                    ),
+                    label: 'Date of Birth',
+                    icon: Icons.calendar_today,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               _buildTextField(controller: _bioController, label: 'Bio', icon: Icons.edit, maxLines: 3),
               const SizedBox(height: 32),
               
               _buildSectionTitle('LOCATION & BACKGROUND'),
               const SizedBox(height: 16),
-              _buildTextField(controller: _regionController, label: 'Region/Location', icon: Icons.location_on),
+
+              // Country Dropdown
+              _buildDropdownField(
+                label: 'Country',
+                icon: Icons.public,
+                value: _selectedCountry,
+                items: _countryCities.keys.toList(),
+                onChanged: (val) {
+                  setState(() {
+                    _selectedCountry = val;
+                    _selectedCity = null;
+                  });
+                },
+              ),
               const SizedBox(height: 16),
-              _buildTextField(controller: _religionController, label: 'Religion/Caste', icon: Icons.church),
+
+              // City Dropdown
+              _buildDropdownField(
+                label: 'City',
+                icon: Icons.location_city,
+                value: _selectedCity,
+                items: _selectedCountry != null ? _countryCities[_selectedCountry]! : [],
+                onChanged: (val) => setState(() => _selectedCity = val),
+              ),
+              const SizedBox(height: 16),
+
+              // Race/Ethnicity
+              _buildDropdownField(
+                label: 'Race/Ethnicity',
+                icon: Icons.people_outline,
+                value: _selectedEthnicity,
+                items: _ethnicities,
+                onChanged: (val) => setState(() => _selectedEthnicity = val),
+              ),
+              const SizedBox(height: 16),
+
+              // Religion
+              _buildDropdownField(
+                label: 'Religion/Caste',
+                icon: Icons.church,
+                value: _selectedReligion,
+                items: ['Islam (Sunni)', 'Islam (Shia)', 'Islam (Other)', 'Other'],
+                onChanged: (val) => setState(() => _selectedReligion = val),
+              ),
+              const SizedBox(height: 32),
+
+              _buildSectionTitle('PHYSICAL ATTRIBUTES'),
+              const SizedBox(height: 16),
+
+              // Height
+              Text('Height', style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 12)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  if (_heightUnit == 'cm')
+                    Expanded(
+                      flex: 2,
+                      child: _buildTextField(controller: _heightCmController, label: 'cm', icon: Icons.height),
+                    )
+                  else ...[
+                    Expanded(
+                      child: _buildTextField(controller: _heightFtController, label: 'ft', icon: Icons.height),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildTextField(controller: _heightInController, label: 'in', icon: Icons.straighten),
+                    ),
+                  ],
+                  const SizedBox(width: 8),
+                  _buildUnitSelector(_heightUnit, (val) => setState(() => _heightUnit = val!), ['cm', 'ft']),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Weight
+              Text('Weight', style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 12)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: _buildTextField(controller: _weightController, label: 'Weight', icon: Icons.monitor_weight),
+                  ),
+                  const SizedBox(width: 8),
+                  _buildUnitSelector(_weightUnit, (val) => setState(() => _weightUnit = val!), ['kg', 'lbs']),
+                ],
+              ),
               const SizedBox(height: 32),
               
               _buildSectionTitle('PROFESSIONAL'),
@@ -145,6 +448,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _buildTextField(controller: _professionController, label: 'Profession', icon: Icons.work),
               const SizedBox(height: 16),
               _buildTextField(controller: _educationController, label: 'Education', icon: Icons.school),
+              const SizedBox(height: 16),
+              _buildTextField(controller: _specialController, label: 'Special Considerations', icon: Icons.info, maxLines: 2),
               const SizedBox(height: 40),
             ],
           ),
@@ -200,8 +505,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  String? _selectedGender;
-
   Widget _buildGenderDropdown() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final user = context.read<AuthService>().currentUser;
@@ -233,6 +536,62 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           _selectedGender = val;
         });
       },
+    );
+  }
+
+  Widget _buildDropdownField({
+    required String label,
+    required IconData icon,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return DropdownButtonFormField<String>(
+      value: value,
+      style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: QaboolTheme.primary),
+        labelStyle: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600]),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: QaboolTheme.primary.withOpacity(0.1)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: QaboolTheme.primary),
+        ),
+        filled: true,
+        fillColor: isDark ? const Color(0xFF2D2626) : Colors.white,
+      ),
+      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _buildUnitSelector(String value, Function(String?) onChanged, List<String> units) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Expanded(
+      flex: 1,
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF2D2626) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: QaboolTheme.primary.withOpacity(0.3)),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: value,
+            isExpanded: true,
+            icon: const Icon(Icons.arrow_drop_down, color: QaboolTheme.primary),
+            items: units.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+            onChanged: onChanged,
+          ),
+        ),
+      ),
     );
   }
 }

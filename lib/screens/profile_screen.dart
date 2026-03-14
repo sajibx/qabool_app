@@ -8,6 +8,10 @@ import 'package:qabool_app/screens/edit_profile_screen.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
 import 'package:qabool_app/services/profile_service.dart';
+import 'package:qabool_app/services/connection_service.dart';
+import 'package:qabool_app/screens/connections_screen.dart';
+import 'package:qabool_app/screens/favorites_screen.dart';
+import 'package:qabool_app/utils/image_utils.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel? user;
@@ -65,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               )
             : null,
         centerTitle: true,
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: !_isMe,
         backgroundColor:
             isDark ? bgDark.withOpacity(0.8) : Colors.white.withOpacity(0.8),
         elevation: 0,
@@ -154,8 +158,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     alignment: Alignment.bottomRight,
                     children: [
                       Container(
-                        width: 144,
-                        height: 144,
+                        width: 180,
+                        height: 180,
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
@@ -178,7 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         child: ClipOval(
                           child: CachedNetworkImage(
-                            imageUrl: _displayUser!.profileImageUrl ?? '',
+                           imageUrl: resolveImageUrl(_displayUser!.profileImageUrl),
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
                               color: isDark ? Colors.grey[800] : Colors.grey[200],
@@ -293,14 +297,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               child: Container(
                                 alignment: Alignment.center,
-                                constraints: const BoxConstraints(minHeight: 52),
+                                constraints: const BoxConstraints(minHeight: 44),
                                 child: const Text(
                                   'EDIT PROFILE',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    letterSpacing: 1.5,
+                                    fontSize: 13,
+                                    letterSpacing: 1.2,
                                   ),
                                 ),
                               ),
@@ -319,9 +323,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              minimumSize: const Size.fromHeight(52),
+                              minimumSize: const Size.fromHeight(44),
                             ),
-                            child: const Icon(Icons.share, color: primaryColor),
+                            child: const Icon(Icons.share, color: primaryColor, size: 20),
                           ),
                         ),
                       ],
@@ -332,23 +336,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ElevatedButton(
                           onPressed: () async {
                             try {
-                              final chatService = context.read<ChatService>();
-                              final chat = await chatService.createChat(_displayUser!.id);
+                              final connectionService = context.read<ConnectionService>();
+                              await connectionService.sendConnectionRequest(_displayUser!.id);
                               if (context.mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ChatScreen(
-                                      chatId: chat.id,
-                                      otherUser: _displayUser!,
-                                    ),
-                                  ),
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Connection request sent!')),
                                 );
                               }
                             } catch (e) {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Failed to initiate chat: $e')),
+                                  SnackBar(content: Text('Failed to send request: $e')),
                                 );
                               }
                             }
@@ -376,19 +374,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             child: Container(
                               alignment: Alignment.center,
-                              constraints: const BoxConstraints(minHeight: 52),
+                              constraints: const BoxConstraints(minHeight: 44),
                               child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.chat_bubble_outline, color: Colors.white),
-                                  SizedBox(width: 12),
+                                  Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
+                                  SizedBox(width: 8),
                                   Text(
                                     'CONNECT',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      letterSpacing: 1.5,
+                                      fontSize: 13,
+                                      letterSpacing: 1.2,
                                     ),
                                   ),
                                 ],
@@ -413,24 +411,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Transform.scale(
-                              scale: 0.9,
-                              child: const Icon(Icons.account_circle,
-                                  color: primaryColor),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'ABOUT ME',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w900,
-                                color: QaboolTheme.accentGold,
-                                letterSpacing: 2,
-                              ),
-                            ),
-                          ],
+                        _buildSectionHeader(
+                          icon: Icons.account_circle,
+                          title: 'ABOUT ME',
+                          accentGold: QaboolTheme.accentGold,
+                          primaryColor: primaryColor,
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -446,6 +431,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  if (_isMe) ...[
+                    _buildSectionHeader(
+                      icon: Icons.flash_on,
+                      title: 'MY ACTIVITY',
+                      accentGold: QaboolTheme.accentGold,
+                      primaryColor: primaryColor,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildActivityCard(
+                            icon: Icons.people_outline,
+                            label: 'Connections',
+                            count: context.watch<ConnectionService>().pendingRequests.length,
+                            color: Colors.blueAccent,
+                            isDark: isDark,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ConnectionsScreen()),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildActivityCard(
+                            icon: Icons.favorite_border,
+                            label: 'Favorites',
+                            color: const Color(0xFFFF7074),
+                            isDark: isDark,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
 
                   // Personal Details
                   _buildCard(
@@ -497,12 +523,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 24),
                         _buildDetailRow(
+                          icon: Icons.monitor_weight,
+                          label: 'WEIGHT',
+                          value: _displayUser!.weight != null ? "${_displayUser!.weight!.toStringAsFixed(1)} kg" : 'Not specified',
+                          primaryColor: primaryColor,
+                          isDark: isDark,
+                        ),
+                        const SizedBox(height: 24),
+                        _buildDetailRow(
                           icon: Icons.church,
                           label: 'RELIGION & CASTE',
                           value: '${_displayUser!.religion ?? "Not specified"}${_displayUser!.ethnicity != null ? ", ${_displayUser!.ethnicity}" : ""}',
                           primaryColor: primaryColor,
                           isDark: isDark,
                         ),
+                        if (_displayUser!.specialConsiderations != null && _displayUser!.specialConsiderations!.isNotEmpty) ...[
+                          const SizedBox(height: 24),
+                          _buildDetailRow(
+                            icon: Icons.info_outline,
+                            label: 'SPECIAL CONSIDERATIONS',
+                            value: _displayUser!.specialConsiderations!,
+                            primaryColor: primaryColor,
+                            isDark: isDark,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -616,6 +660,99 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required IconData icon,
+    required String title,
+    required Color accentGold,
+    required Color primaryColor,
+  }) {
+    return Row(
+      children: [
+        Transform.scale(
+          scale: 0.9,
+          child: Icon(icon, color: primaryColor),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
+            color: accentGold,
+            letterSpacing: 2,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActivityCard({
+    required IconData icon,
+    required String label,
+    int? count,
+    required Color color,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E293B).withOpacity(0.4) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.1)),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(icon, color: color, size: 28),
+                if (count != null && count > 0)
+                  Positioned(
+                    top: -5,
+                    right: -10,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.redAccent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '$count',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.grey[300] : Colors.grey[700],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:qabool_app/services/api_service.dart';
 import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/services/profile_service.dart';
 import 'package:qabool_app/services/chat_service.dart';
+import 'package:qabool_app/services/connection_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -18,6 +19,7 @@ void main() async {
   final authService = AuthService(apiService);
   final profileService = ProfileService(apiService);
   final chatService = ChatService(apiService);
+  final connectionService = ConnectionService(apiService);
 
   // Check initial auth status
   await authService.checkAuthStatus();
@@ -35,6 +37,7 @@ void main() async {
         ChangeNotifierProvider.value(value: authService),
         ChangeNotifierProvider.value(value: profileService),
         ChangeNotifierProvider.value(value: chatService),
+        ChangeNotifierProvider.value(value: connectionService),
       ],
       child: const QaboolApp(),
     ),

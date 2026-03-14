@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/services/api_service.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -24,6 +27,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? _selectedCountry;
   String? _selectedCity;
   String? _selectedReligion;
+  XFile? _pickedImage;
   
   String _heightUnit = 'cm';
   String _weightUnit = 'kg';
@@ -36,6 +40,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _educationController = TextEditingController();
   final _bioController = TextEditingController();
   final _specialController = TextEditingController();
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() => _pickedImage = image);
+    }
+  }
 
   final Map<String, List<String>> _countryCities = {
     'Germany': ['Berlin', 'Munich', 'Hamburg', 'Frankfurt', 'Stuttgart'],
@@ -91,8 +103,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  void _handleSignUp() async {
-    final auth = context.read<AuthService>();
+  void _handleSignUp(AuthService auth) async {
+    debugPrint('SignUp: _handleSignUp called');
     
     // 1. Mandatory Field Validation
     if (_firstNameController.text.isEmpty ||
@@ -108,11 +120,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _weightController.text.isEmpty ||
         _jobController.text.isEmpty ||
         _educationController.text.isEmpty) {
+      debugPrint('SignUp: Mandatory fields validation failed');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all mandatory fields')),
       );
       return;
     }
+    debugPrint('SignUp: Mandatory fields OK');
 
     // 2. Height Validation
     if (_heightUnit == 'cm') {
@@ -133,17 +147,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     // 3. Min Length Validation (Bio & Special Considerations)
     if (_bioController.text.length < 10) {
+      debugPrint('SignUp: Bio validation failed');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Bio must be at least 10 characters')),
       );
       return;
     }
-    if (_specialController.text.length < 10) {
+    
+    if (_specialController.text.isNotEmpty && _specialController.text.length < 10) {
+      debugPrint('SignUp: Special considerations validation failed');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Special considerations must be at least 10 characters')),
       );
       return;
     }
+    debugPrint('SignUp: All validations passed');
 
     // 4. Data Processing & Registration
     try {
@@ -179,6 +197,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         bio: _bioController.text,
         specialConsiderations: _specialController.text,
         region: "${_selectedCity}, ${_selectedCountry}",
+        profileImage: _pickedImage,
       );
       if (!mounted) return;
       
@@ -212,7 +231,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ],
         ),
       );
-    } on Exception catch (e) {
+    } catch (e) {
+      debugPrint('SignUp: Registration failed with error: $e');
       String message = 'Registration failed';
       if (e.toString().contains('409')) {
         message = 'This email is already registered. Please try logging in.';
@@ -323,9 +343,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   IconButton(
                     icon:
                         Icon(Icons.arrow_back, color: isDark ? pColor : aColor),
-                    onPressed: () {
-                      if (Navigator.canPop(context)) Navigator.pop(context);
-                    },
+                    onPressed: () => Navigator.pop(context),
                   ),
                   Expanded(
                     child: Text(
@@ -382,67 +400,67 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Center(
                             child: Column(
                               children: [
-                                Stack(
-                                  children: [
-                                    Container(
-                                      width: 128,
-                                      height: 128,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: isDark
-                                            ? const Color(0xFF1E293B)
-                                            : const Color(0xFFF1F5F9),
-                                        border: Border.all(
-                                          color: pColor,
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: const Icon(Icons.add_a_photo,
-                                          size: 48, color: Colors.grey),
-                                    ),
-                                    Positioned(
-                                      bottom: 0,
-                                      right: 0,
-                                      child: Container(
-                                        width: 40,
-                                        height: 40,
+                                GestureDetector(
+                                  onTap: _pickImage,
+                                  child: Stack(
+                                    children: [
+                                      Container(
+                                        width: 128,
+                                        height: 128,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: aColor,
+                                          color: isDark
+                                              ? const Color(0xFF1E293B)
+                                              : const Color(0xFFF1F5F9),
                                           border: Border.all(
-                                              color: isDark
-                                                  ? const Color(0xFF0F172A)
-                                                  : Colors.white,
-                                              width: 2),
-                                          boxShadow: const [
-                                            BoxShadow(
-                                                color: Colors.black26,
-                                                blurRadius: 4,
-                                                offset: Offset(0, 2)),
-                                          ],
+                                            color: pColor,
+                                            width: 2,
+                                          ),
+                                          image: _pickedImage != null
+                                              ? DecorationImage(
+                                                  image: kIsWeb
+                                                      ? NetworkImage(_pickedImage!.path)
+                                                      : FileImage(File(_pickedImage!.path)) as ImageProvider,
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : null,
                                         ),
-                                        child: const Icon(Icons.upload,
-                                            color: Colors.white, size: 20),
+                                        child: _pickedImage == null
+                                            ? const Icon(Icons.add_a_photo,
+                                                size: 40, color: QaboolTheme.primary)
+                                            : null,
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                                GestureDetector(
-                                  onTap: () {},
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Upload Photo',
-                                        style: TextStyle(
-                                            color: isDark ? pColor : aColor,
-                                            fontWeight: FontWeight.bold),
+                                      Positioned(
+                                        bottom: 0,
+                                        right: 0,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: const BoxDecoration(
+                                            color: QaboolTheme.primary,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.edit,
+                                            color: Colors.white,
+                                            size: 16,
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Profile Picture',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.grey[400] : Colors.grey[700],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                                 RichText(
                                   text: TextSpan(
                                     style: TextStyle(
@@ -463,9 +481,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
                           const SizedBox(height: 32),
 
                           // Contact & Credentials
@@ -807,7 +822,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                           // Special Considerations
                           buildSectionHeader(Icons.info, 'Special Considerations'),
-                          buildLabel('Accessibility or Special Cases (Min 10 characters)'),
+                          buildLabel('Accessibility or Special Cases (Optional)'),
                           TextField(
                             controller: _specialController,
                             maxLines: 4,
@@ -820,7 +835,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                            Consumer<AuthService>(
                              builder: (context, auth, _) {
                                return ElevatedButton(
-                                 onPressed: auth.isLoading ? null : _handleSignUp,
+                                 onPressed: auth.isLoading ? null : () => _handleSignUp(auth),
                                  style: ElevatedButton.styleFrom(
                                    backgroundColor: aColor,
                                    foregroundColor: Colors.white,

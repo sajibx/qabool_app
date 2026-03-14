@@ -3,6 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import 'package:qabool_app/theme.dart';
 import 'package:qabool_app/services/profile_service.dart';
+import 'package:qabool_app/services/connection_service.dart';
+import 'package:qabool_app/utils/image_utils.dart';
 import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
@@ -407,7 +409,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                   fit: StackFit.expand,
                   children: [
                     CachedNetworkImage(
-                      imageUrl: profile.profileImageUrl ?? '',
+                      imageUrl: resolveImageUrl(profile.profileImageUrl),
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                         color: isDark ? Colors.grey[800] : Colors.grey[200],
@@ -563,23 +565,17 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
               child: ElevatedButton(
                 onPressed: () async {
                   try {
-                    final chatService = context.read<ChatService>();
-                    final chat = await chatService.createChat(profile.id);
+                    final connectionService = context.read<ConnectionService>();
+                    await connectionService.sendConnectionRequest(profile.id);
                     if (context.mounted) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatScreen(
-                            chatId: chat.id,
-                            otherUser: profile,
-                          ),
-                        ),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Connection request sent!')),
                       );
                     }
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to initiate chat: $e')),
+                        SnackBar(content: Text('Failed to send request: $e')),
                       );
                     }
                   }
