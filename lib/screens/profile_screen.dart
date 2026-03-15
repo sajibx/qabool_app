@@ -551,7 +551,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Icon(
                                       _displayUser!.connectionStatus == 'ACCEPTED'
                                           ? Icons.chat_bubble
-                                          : Icons.chat_bubble_outline,
+                                          : (_displayUser!.connectionStatus == 'PENDING_RECEIVED' 
+                                              ? Icons.check_circle_outline 
+                                              : Icons.chat_bubble_outline),
                                       color: Colors.white,
                                       size: 20,
                                     ),
@@ -559,9 +561,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Text(
                                       _displayUser!.connectionStatus == 'ACCEPTED'
                                           ? 'MESSAGE'
-                                          : ((_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING')
-                                              ? 'CANCEL REQUEST'
-                                              : 'CONNECT'),
+                                          : (_displayUser!.connectionStatus == 'PENDING_RECEIVED'
+                                              ? 'RESPOND'
+                                              : (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING'
+                                                  ? 'CANCEL REQUEST'
+                                                  : 'CONNECT')),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,

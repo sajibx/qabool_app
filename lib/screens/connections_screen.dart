@@ -48,21 +48,19 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
-            expandedHeight: 120,
             floating: true,
             pinned: true,
             elevation: 0,
+            toolbarHeight: 50,
             backgroundColor: isDark ? QaboolTheme.backgroundDark : QaboolTheme.backgroundLight,
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              title: Text(
-                'My Network', 
-                style: TextStyle(
-                  fontWeight: FontWeight.w900, 
-                  fontSize: 24,
-                  letterSpacing: -1,
-                  color: isDark ? Colors.white : QaboolTheme.primary,
-                ),
+            centerTitle: false,
+            title: Text(
+              'My Network', 
+              style: TextStyle(
+                fontWeight: FontWeight.w900, 
+                fontSize: 18,
+                letterSpacing: -0.5,
+                color: isDark ? Colors.white : QaboolTheme.primary,
               ),
             ),
           ),
