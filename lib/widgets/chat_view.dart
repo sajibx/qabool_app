@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../theme.dart';
 import '../services/chat_service.dart';
 import '../services/auth_service.dart';
+import '../services/profile_service.dart';
 import '../models/message_model.dart';
 import '../models/user_model.dart';
 import '../main.dart';
@@ -46,6 +47,35 @@ class _ChatViewState extends State<ChatView> {
     _updateActiveChat();
     _loadMessages();
     _messageController.addListener(_onTextChanged);
+    _startStatusRefresh();
+  }
+
+  Timer? _statusRefreshTimer;
+  UserModel? _freshOtherUser;
+
+  void _startStatusRefresh() {
+    _statusRefreshTimer?.cancel();
+    _statusRefreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      _refreshOtherUserStatus();
+    });
+  }
+
+  UserModel get _effectiveOtherUser => _freshOtherUser ?? widget.otherUser!;
+
+  Future<void> _refreshOtherUserStatus() async {
+    final otherUserId = widget.otherUser?.id;
+    if (otherUserId == null || !mounted) return;
+
+    try {
+      final user = await context.read<ProfileService>().getProfile(otherUserId);
+      if (mounted) {
+        setState(() {
+          _freshOtherUser = user;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error refreshing user status: $e');
+    }
   }
 
   void _onTextChanged() {
@@ -105,6 +135,7 @@ class _ChatViewState extends State<ChatView> {
     _messageController.dispose();
     _scrollController.dispose();
     _typingTimer?.cancel();
+    _statusRefreshTimer?.cancel();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       navigatorKey.currentContext?.read<ChatService>().setActiveChat(null);
     });
@@ -210,14 +241,14 @@ class _ChatViewState extends State<ChatView> {
                       CircleAvatar(
                         radius: 20,
                         backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-                        backgroundImage: otherUser.profileImageUrl != null && otherUser.profileImageUrl!.isNotEmpty
-                            ? CachedNetworkImageProvider(resolveImageUrl(otherUser.profileImageUrl!))
+                        backgroundImage: _effectiveOtherUser.profileImageUrl != null && _effectiveOtherUser.profileImageUrl!.isNotEmpty
+                            ? CachedNetworkImageProvider(resolveImageUrl(_effectiveOtherUser.profileImageUrl!))
                             : null,
-                        child: (otherUser.profileImageUrl == null || otherUser.profileImageUrl!.isEmpty)
+                        child: (_effectiveOtherUser.profileImageUrl == null || _effectiveOtherUser.profileImageUrl!.isEmpty)
                             ? Icon(Icons.person, color: isDark ? Colors.grey[600] : Colors.grey[400])
                             : null,
                       ),
-                      if (otherUser.isOnline)
+                      if (_effectiveOtherUser.isOnline)
                         Positioned(
                           bottom: 0,
                           right: 0,
@@ -239,7 +270,7 @@ class _ChatViewState extends State<ChatView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          otherUser.fullName,
+                          _effectiveOtherUser.fullName,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -249,11 +280,11 @@ class _ChatViewState extends State<ChatView> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          otherUser.isOnline ? 'ONLINE NOW' : (otherUser.lastSeen != null ? 'LAST SEEN ${timeago.format(otherUser.lastSeen!).toUpperCase()}' : 'OFFLINE'),
+                          _effectiveOtherUser.isOnline ? 'ONLINE NOW' : (_effectiveOtherUser.lastSeen != null ? 'LAST SEEN ${timeago.format(_effectiveOtherUser.lastSeen!).toUpperCase()}' : 'OFFLINE'),
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: otherUser.isOnline ? primaryColor : Colors.grey,
+                            color: _effectiveOtherUser.isOnline ? primaryColor : Colors.grey,
                             letterSpacing: 0.5,
                           ),
                         ),

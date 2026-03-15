@@ -218,9 +218,27 @@ class ChatService extends ChangeNotifier {
     });
 
     _socket?.connect();
+    _startHeartbeat();
+  }
+
+  Timer? _heartbeatTimer;
+
+  void _startHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
+      if (_socket != null && _socket!.connected) {
+        _socket!.emit('heartbeat');
+      }
+    });
+  }
+
+  void _stopHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
   }
 
   void disconnectSocket() {
+    _stopHeartbeat();
     _socket?.disconnect();
     _socket?.dispose();
     _socket = null;
