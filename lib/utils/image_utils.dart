@@ -5,5 +5,5 @@
 String resolveImageUrl(String? path) {
   if (path == null || path.isEmpty) return '';
   if (path.startsWith('http')) return path;
-  return 'http://localhost:3000$path';
+  return 'http://127.0.0.1:3000$path';
 }

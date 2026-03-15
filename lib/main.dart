@@ -20,6 +20,14 @@ void main() async {
   final profileService = ProfileService(apiService);
   final chatService = ChatService(apiService);
   final connectionService = ConnectionService(apiService);
+  // Set up logout callback to disconnect socket
+  // Set up logout callback to disconnect socket and clear states
+  authService.onLogout = () {
+    chatService.disconnectSocket();
+    chatService.clearData();
+    connectionService.clearData();
+    profileService.clearData(); // If implemented
+  };
 
   // Check initial auth status
   await authService.checkAuthStatus();

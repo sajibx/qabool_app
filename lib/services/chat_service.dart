@@ -42,7 +42,7 @@ class ChatService extends ChangeNotifier {
   Map<String, List<MessageModel>> _messages = {}; // chatId -> messages
   Map<String, PaginationMeta> _paginationMeta = {}; // chatId -> meta
   Map<String, bool> _isLoadingMore = {}; // chatId -> isloading
-  Map<String, bool> _typingStates = {}; // chatId -> isTyping
+  Map<String, String?> _typingStates = {}; // chatId -> senderId of user typing
   String? _activeChatId;
 
   ChatService(this._apiService);
@@ -52,7 +52,11 @@ class ChatService extends ChangeNotifier {
   List<MessageModel> getMessages(String chatId) => _messages[chatId] ?? [];
   bool hasMoreMessages(String chatId) => _paginationMeta[chatId]?.hasMore ?? false;
   bool isLoadingMore(String chatId) => _isLoadingMore[chatId] ?? false;
-  bool isTyping(String chatId) => _typingStates[chatId] ?? false;
+  bool isTyping(String chatId, String? currentUserId) {
+    final typingUserId = _typingStates[chatId];
+    if (typingUserId == null || currentUserId == null) return false;
+    return typingUserId.trim().toLowerCase() != currentUserId.trim().toLowerCase();
+  }
 
   void setActiveChat(String? chatId) {
     _activeChatId = chatId;
@@ -60,9 +64,15 @@ class ChatService extends ChangeNotifier {
   }
 
   void initSocket(String token) {
-    if (_socket != null && _socket!.connected) return;
-    
-    _socket?.dispose(); // Clean up existing if any
+    if (_socket != null && _socket!.connected) {
+      // Check if we are already connected with this token
+      final currentOptions = _socket!.io.options;
+      final currentToken = (currentOptions as Map)['auth']?['token'];
+      if (currentToken == token) return;
+      
+      // Different token, disconnect existing
+      _socket?.dispose();
+    }
     
     _socket = IO.io('http://127.0.0.1:3000', 
       IO.OptionBuilder()
@@ -153,10 +163,18 @@ class ChatService extends ChangeNotifier {
         }
         
         final chatId = jsonData['chatId'];
+        final senderId = jsonData['senderId'];
         final isTyping = jsonData['isTyping'] ?? false;
         
         if (chatId != null) {
-          _typingStates[chatId] = isTyping;
+          if (isTyping) {
+            _typingStates[chatId] = senderId;
+          } else {
+            // Only clear if the user who was typing is the one who stopped
+            if (_typingStates[chatId] == senderId) {
+              _typingStates[chatId] = null;
+            }
+          }
           notifyListeners();
         }
       } catch (e) {
@@ -209,6 +227,16 @@ class ChatService extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearData() {
+    _chats = [];
+    _messages = {};
+    _paginationMeta = {};
+    _isLoadingMore = {};
+    _typingStates = {};
+    _activeChatId = null;
+    notifyListeners();
+  }
+
   bool get isConnected => _socket?.connected ?? false;
 
   void _addMessage(MessageModel message) {
@@ -232,7 +260,8 @@ class ChatService extends ChangeNotifier {
         orElse: () => chat.participants.first, // Fallback
       );
       
-      final isFromMe = message.senderId.trim().toLowerCase() != otherParticipant.id.trim().toLowerCase();
+      final isFromMe = _apiService.currentUserId != null && 
+          message.senderId.trim().toLowerCase() == _apiService.currentUserId!.trim().toLowerCase();
 
       print('--- DEBUG UNREAD ---');
       print('Message Sender ID: "${message.senderId}"');

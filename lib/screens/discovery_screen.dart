@@ -577,7 +577,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12)
                   .copyWith(bottom: 12),
               child: ElevatedButton(
-                onPressed: profile.connectionStatus == 'PENDING'
+                onPressed: (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING')
                   ? null 
                   : () async {
                   if (profile.connectionStatus == 'ACCEPTED') {
@@ -610,7 +610,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                         setState(() {
                           final index = _profiles.indexWhere((p) => p.id == profile.id);
                           if (index != -1) {
-                            _profiles[index] = _profiles[index].copyWith(connectionStatus: 'PENDING');
+                            _profiles[index] = _profiles[index].copyWith(connectionStatus: 'PENDING_SENT');
                           }
                         });
                       }
@@ -631,7 +631,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: profile.connectionStatus == 'ACCEPTED' 
                       ? const Color(0xFF2ECC71) // Nice green
-                      : (profile.connectionStatus == 'PENDING' ? Colors.grey : primaryColor),
+                      : ((profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING') ? Colors.grey : (profile.connectionStatus == 'PENDING_RECEIVED' ? accentGold : primaryColor)),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   minimumSize: const Size(double.infinity, 36),
@@ -640,9 +640,9 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                   elevation: 0,
                 ),
                 child: Text(
-                  profile.connectionStatus == 'ACCEPTED' 
+                   profile.connectionStatus == 'ACCEPTED' 
                       ? 'MESSAGE' 
-                      : (profile.connectionStatus == 'PENDING' ? 'PENDING' : 'CONNECT'),
+                      : ((profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING') ? 'PENDING' : (profile.connectionStatus == 'PENDING_RECEIVED' ? 'RESPOND' : 'CONNECT')),
                   style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                 ),
               ),

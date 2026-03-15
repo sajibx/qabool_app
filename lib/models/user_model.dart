@@ -23,7 +23,8 @@ class UserModel {
   final String status;
   final bool isOnline;
   final DateTime? lastSeen;
-  final String connectionStatus; // NONE, PENDING, ACCEPTED, REJECTED
+  final String connectionStatus; // NONE, PENDING_SENT, PENDING_RECEIVED, ACCEPTED, REJECTED
+  final String? connectionId;
 
   UserModel({
     required this.id,
@@ -49,6 +50,7 @@ class UserModel {
     this.isOnline = false,
     this.lastSeen,
     this.connectionStatus = 'NONE',
+    this.connectionId,
   });
 
   String get fullName => '$firstName $lastName';
@@ -88,6 +90,7 @@ class UserModel {
       isOnline: json['isOnline'] ?? false,
       lastSeen: json['lastSeen'] != null ? DateTime.parse(json['lastSeen']) : null,
       connectionStatus: json['connectionStatus']?.toString() ?? 'NONE',
+      connectionId: json['connectionId']?.toString(),
     );
   }
 
@@ -117,6 +120,7 @@ class UserModel {
       'isOnline': isOnline,
       'lastSeen': lastSeen?.toIso8601String(),
       'connectionStatus': connectionStatus,
+      'connectionId': connectionId,
     };
   }
 
@@ -144,6 +148,7 @@ class UserModel {
     bool? isOnline,
     DateTime? lastSeen,
     String? connectionStatus,
+    String? connectionId,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -169,6 +174,7 @@ class UserModel {
       isOnline: isOnline ?? this.isOnline,
       lastSeen: lastSeen ?? this.lastSeen,
       connectionStatus: connectionStatus ?? this.connectionStatus,
+      connectionId: connectionId ?? this.connectionId,
     );
   }
 }

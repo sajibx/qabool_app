@@ -112,4 +112,8 @@ class ProfileService extends ChangeNotifier {
       rethrow;
     }
   }
+
+  void clearData() {
+    notifyListeners();
+  }
 }

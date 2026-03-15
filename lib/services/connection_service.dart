@@ -58,4 +58,10 @@ class ConnectionService extends ChangeNotifier {
       rethrow;
     }
   }
+
+  void clearData() {
+    _connections = [];
+    _isLoading = false;
+    notifyListeners();
+  }
 }

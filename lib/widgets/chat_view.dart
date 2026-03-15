@@ -257,7 +257,7 @@ class _ChatViewState extends State<ChatView> {
                             letterSpacing: 0.5,
                           ),
                         ),
-                        if (context.watch<ChatService>().isTyping(_activeChatId ?? ""))
+                        if (context.watch<ChatService>().isTyping(_activeChatId ?? "", context.read<AuthService>().currentUser?.id))
                           Text(
                             'typing...',
                             style: TextStyle(
@@ -322,8 +322,9 @@ class _ChatViewState extends State<ChatView> {
                     }
 
                     final message = displayMessages[index];
-                    final isMe = otherUser != null && 
-                        message.senderId.trim().toLowerCase() != otherUser.id.trim().toLowerCase();
+                    final currentUserId = context.read<AuthService>().currentUser?.id;
+                    final isMe = currentUserId != null && 
+                        message.senderId.trim().toLowerCase() == currentUserId.trim().toLowerCase();
                     
                     if (isMe) {
                       return _buildSentMessage(
@@ -347,9 +348,9 @@ class _ChatViewState extends State<ChatView> {
           ),
           
           // Typing Indicator above input
-          Consumer<ChatService>(
-            builder: (context, chatService, _) {
-              if (chatService.isTyping(_activeChatId ?? "")) {
+          Consumer2<ChatService, AuthService>(
+            builder: (context, chatService, authService, _) {
+              if (chatService.isTyping(_activeChatId ?? "", authService.currentUser?.id)) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(

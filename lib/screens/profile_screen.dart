@@ -12,6 +12,7 @@ import 'package:qabool_app/services/connection_service.dart';
 import 'package:qabool_app/screens/connections_screen.dart';
 import 'package:qabool_app/screens/favorites_screen.dart';
 import 'package:qabool_app/utils/image_utils.dart';
+import 'package:qabool_app/models/connection_model.dart' as v_conn;
 
 class ProfileScreen extends StatefulWidget {
   final UserModel? user;
@@ -31,14 +32,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _displayUser = widget.user;
     
-    // Check if it's not the current user efficiently
+    // Always refresh profile from server to ensure full details
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final auth = context.read<AuthService>();
-        final currentUser = auth.currentUser;
-        if (_displayUser != null && _displayUser?.id != currentUser?.id) {
-          _refreshProfile();
-        }
+      if (mounted && _displayUser != null) {
+        _refreshProfile();
       }
     });
   }
@@ -358,114 +355,273 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   else
                     Column(
                       children: [
-                        ElevatedButton(
-                          onPressed: _displayUser!.connectionStatus == 'PENDING' 
-                            ? null 
-                            : () async {
-                            if (_displayUser!.connectionStatus == 'ACCEPTED') {
-                              try {
-                                final chatService = context.read<ChatService>();
-                                final chat = await chatService.createChat(_displayUser!.id);
-                                if (context.mounted) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ChatScreen(
-                                        chatId: chat.id,
-                                        otherUser: _displayUser!,
+                        if (_displayUser!.connectionStatus == 'PENDING_RECEIVED')
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    try {
+                                      final connectionService = context.read<ConnectionService>();
+                                      await connectionService.respondToRequest(
+                                          _displayUser!.connectionId!,
+                                          v_conn.ConnectionStatus.ACCEPTED);
+                                      if (mounted) {
+                                        setState(() {
+                                          _displayUser = _displayUser!.copyWith(
+                                              connectionStatus: 'ACCEPTED');
+                                        });
+                                      }
+                                    } catch (e) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                              content:
+                                                  Text('Failed to accept: $e')),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
+                                    backgroundColor: const Color(0xFF2ECC71),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: const Text('ACCEPT',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    try {
+                                      final connectionService = context.read<ConnectionService>();
+                                      await connectionService.respondToRequest(
+                                          _displayUser!.connectionId!,
+                                          v_conn.ConnectionStatus.REJECTED);
+                                      if (mounted) {
+                                        setState(() {
+                                          _displayUser = _displayUser!.copyWith(
+                                              connectionStatus: 'NONE');
+                                        });
+                                      }
+                                    } catch (e) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                              content:
+                                                  Text('Failed to reject: $e')),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
+                                    backgroundColor: Colors.grey[800],
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: const Text('REJECT',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          ElevatedButton(
+                            onPressed: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING')
+                                ? () async {
+                                    // CANCEL REQUEST
+                                    try {
+                                      final connectionService = context.read<ConnectionService>();
+                                      await connectionService.respondToRequest(
+                                          _displayUser!.connectionId!,
+                                          v_conn.ConnectionStatus.REJECTED);
+                                      if (mounted) {
+                                        setState(() {
+                                          _displayUser = _displayUser!.copyWith(
+                                              connectionStatus: 'NONE');
+                                        });
+                                      }
+                                    } catch (e) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Failed to cancel request: $e')),
+                                        );
+                                      }
+                                    }
+                                  }
+                                : () async {
+                                    if (_displayUser!.connectionStatus == 'ACCEPTED') {
+                                      try {
+                                        final chatService = context.read<ChatService>();
+                                        final chat = await chatService
+                                            .createChat(_displayUser!.id);
+                                        if (context.mounted) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ChatScreen(
+                                                chatId: chat.id,
+                                                otherUser: _displayUser!,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    'Failed to open chat: $e')),
+                                          );
+                                        }
+                                      }
+                                    } else {
+                                      try {
+                                        final connectionService =
+                                            context.read<ConnectionService>();
+                                        await connectionService
+                                            .sendConnectionRequest(_displayUser!.id);
+                                        if (mounted) {
+                                          setState(() {
+                                            _displayUser = _displayUser!.copyWith(
+                                                connectionStatus: 'PENDING_SENT');
+                                          });
+                                        }
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Connection request sent!')),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    'Failed to send request: $e')),
+                                          );
+                                        }
+                                      }
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: Colors.transparent,
+                              shadowColor: primaryColor.withOpacity(0.2),
+                              elevation: 8,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ).copyWith(
+                              backgroundColor:
+                                  WidgetStateProperty.all(Colors.transparent),
+                            ),
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: _displayUser!.connectionStatus == 'ACCEPTED'
+                                      ? [const Color(0xFF2ECC71), const Color(0xFF27AE60)]
+                                      : ((_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING')
+                                          ? [Colors.grey, Colors.grey]
+                                          : [const Color(0xFF800000), const Color(0xFF4A0000)]),
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Container(
+                                alignment: Alignment.center,
+                                constraints: const BoxConstraints(minHeight: 44),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      _displayUser!.connectionStatus == 'ACCEPTED'
+                                          ? Icons.chat_bubble
+                                          : Icons.chat_bubble_outline,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _displayUser!.connectionStatus == 'ACCEPTED'
+                                          ? 'MESSAGE'
+                                          : ((_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING')
+                                              ? 'CANCEL REQUEST'
+                                              : 'CONNECT'),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                        letterSpacing: 1.2,
                                       ),
                                     ),
-                                  );
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Failed to open chat: $e')),
-                                  );
-                                }
-                              }
-                            } else {
-                              try {
-                                final connectionService = context.read<ConnectionService>();
-                                await connectionService.sendConnectionRequest(_displayUser!.id);
-                                if (mounted) {
-                                  setState(() {
-                                    _displayUser = _displayUser!.copyWith(connectionStatus: 'PENDING');
-                                  });
-                                }
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Connection request sent!')),
-                                  );
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Failed to send request: $e')),
-                                  );
-                                }
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            backgroundColor: Colors.transparent,
-                            shadowColor: primaryColor.withOpacity(0.2),
-                            elevation: 8,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ).copyWith(
-                            backgroundColor:
-                                WidgetStateProperty.all(Colors.transparent),
-                          ),
-                          child: Ink(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: _displayUser!.connectionStatus == 'ACCEPTED'
-                                    ? [const Color(0xFF2ECC71), const Color(0xFF27AE60)]
-                                    : (_displayUser!.connectionStatus == 'PENDING'
-                                        ? [Colors.grey, Colors.grey]
-                                        : [const Color(0xFF800000), const Color(0xFF4A0000)]),
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Container(
-                              alignment: Alignment.center,
-                              constraints: const BoxConstraints(minHeight: 44),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    _displayUser!.connectionStatus == 'ACCEPTED'
-                                        ? Icons.chat_bubble
-                                        : Icons.chat_bubble_outline,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    _displayUser!.connectionStatus == 'ACCEPTED'
-                                        ? 'MESSAGE'
-                                        : (_displayUser!.connectionStatus == 'PENDING'
-                                            ? 'PENDING'
-                                            : 'CONNECT'),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      letterSpacing: 1.2,
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                          if (_displayUser!.connectionStatus == 'ACCEPTED') ...[
+                            const SizedBox(height: 12),
+                            TextButton(
+                              onPressed: () async {
+                                final confirmed = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Remove Connection'),
+                                    content: const Text('Are you sure you want to remove this connection?'),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCEL')),
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, true), 
+                                        child: const Text('REMOVE', style: TextStyle(color: Colors.red)),
+                                      ),
+                                    ],
+                                  ),
+                                );
+
+                                if (confirmed == true) {
+                                  try {
+                                    final connectionService = context.read<ConnectionService>();
+                                    await connectionService.respondToRequest(
+                                        _displayUser!.connectionId!,
+                                        v_conn.ConnectionStatus.REJECTED);
+                                    if (mounted) {
+                                      setState(() {
+                                        _displayUser = _displayUser!.copyWith(
+                                            connectionStatus: 'NONE');
+                                      });
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Failed to remove connection: $e')),
+                                      );
+                                    }
+                                  }
+                                }
+                              },
+                              child: const Text(
+                                'REMOVE CONNECTION',
+                                style: TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                 ],
               ),
             ),

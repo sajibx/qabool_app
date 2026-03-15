@@ -10,10 +10,13 @@ class AuthService extends ChangeNotifier {
   final ApiService _apiService;
   UserModel? _currentUser;
   bool _isLoading = false;
+  VoidCallback? _onLogout;
 
   AuthService(this._apiService) {
     _apiService.onUnauthorized = logout;
   }
+
+  set onLogout(VoidCallback callback) => _onLogout = callback;
 
   UserModel? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
@@ -118,6 +121,7 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    _onLogout?.call();
     await _apiService.deleteToken();
     await _apiService.deleteUserData();
     _currentUser = null;
