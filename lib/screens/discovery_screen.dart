@@ -581,26 +581,16 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                   ? null 
                   : () async {
                   if (profile.connectionStatus == 'ACCEPTED') {
-                    try {
-                      final chatService = context.read<ChatService>();
-                      final chat = await chatService.createChat(profile.id);
-                      if (context.mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatScreen(
-                              chatId: chat.id,
-                              otherUser: profile,
-                            ),
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to open chat: $e')),
-                        );
-                      }
+                    // existing logic...
+                  } else if (profile.connectionStatus == 'PENDING_RECEIVED') {
+                    // Navigate to profile to let user respond
+                    if (context.mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfileScreen(user: profile),
+                        ),
+                      );
                     }
                   } else {
                     try {

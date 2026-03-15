@@ -257,9 +257,8 @@ class HomeScreenState extends State<HomeScreen> {
                                     return _buildProfileCard(
                                       context: context,
                                       profile: profile,
-                                      onConnect: () async {
+                                       onConnect: () async {
                                         if (profile.connectionStatus == 'ACCEPTED') {
-                                           // Open Chat
                                            try {
                                              final chatService = context.read<ChatService>();
                                              final chat = await chatService.createChat(profile.id);
@@ -277,10 +276,20 @@ class HomeScreenState extends State<HomeScreen> {
                                            } catch (e) {
                                              if (context.mounted) {
                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                 SnackBar(content: Text('Failed to open chat: $e')),
+                                                 SnackBar(content: Text("Failed to open chat: $e")),
                                                );
                                              }
                                            }
+                                        } else if (profile.connectionStatus == 'PENDING_RECEIVED') {
+                                          // Navigate to profile
+                                          if (mounted) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ProfileScreen(user: profile),
+                                              ),
+                                            );
+                                          }
                                         } else {
                                           try {
                                             final connectionService = context.read<ConnectionService>();
@@ -289,7 +298,7 @@ class HomeScreenState extends State<HomeScreen> {
                                               setState(() {
                                                 final idx = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
                                                 if (idx != -1) {
-                                                  _nearbyProfiles[idx] = _nearbyProfiles[idx].copyWith(connectionStatus: 'PENDING');
+                                                  _nearbyProfiles[idx] = _nearbyProfiles[idx].copyWith(connectionStatus: 'PENDING_SENT');
                                                 }
                                               });
                                             }
@@ -635,11 +644,13 @@ class HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: profile.connectionStatus == 'PENDING' ? null : onConnect,
+                    onPressed: (profile.connectionStatus == 'PENDING' || profile.connectionStatus == 'PENDING_SENT') ? null : onConnect,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: profile.connectionStatus == 'ACCEPTED' 
                           ? const Color(0xFF2ECC71)
-                          : (profile.connectionStatus == 'PENDING' ? Colors.grey : pColor),
+                          : (profile.connectionStatus == 'PENDING_RECEIVED' 
+                              ? aColor 
+                              : (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING' ? Colors.grey : pColor)),
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 32),
                       padding: EdgeInsets.zero,
@@ -651,7 +662,9 @@ class HomeScreenState extends State<HomeScreen> {
                     child: Text(
                       profile.connectionStatus == 'ACCEPTED' 
                           ? 'MESSAGE' 
-                          : (profile.connectionStatus == 'PENDING' ? 'PENDING' : 'CONNECT'),
+                          : (profile.connectionStatus == 'PENDING_RECEIVED' 
+                              ? 'RESPOND' 
+                              : (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING' ? 'PENDING' : 'CONNECT')),
                       style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,

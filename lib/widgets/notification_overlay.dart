@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qabool_app/theme.dart';
-import 'package:qabool_app/main.dart';
+import '../utils/image_utils.dart';
 import 'dart:async';
 
 class NotificationOverlay {
@@ -146,7 +146,7 @@ class _NotificationWidgetState extends State<_NotificationWidget> with SingleTic
                     borderRadius: BorderRadius.circular(25),
                     child: widget.imageUrl != null && widget.imageUrl!.isNotEmpty
                         ? CachedNetworkImage(
-                            imageUrl: widget.imageUrl!,
+                            imageUrl: resolveImageUrl(widget.imageUrl),
                             fit: BoxFit.cover,
                             placeholder: (context, url) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                             errorWidget: (context, url, error) => Icon(Icons.person, color: QaboolTheme.primary),
