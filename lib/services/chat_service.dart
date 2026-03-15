@@ -83,17 +83,17 @@ class ChatService extends ChangeNotifier {
     );
 
     _socket?.onConnect((_) {
-      print('Connected to socket');
+      print('[socket] Connected. SocketID: ${_socket?.id}');
       notifyListeners();
     });
 
-    _socket?.onDisconnect((_) {
-      print('Disconnected from socket');
+    _socket?.onDisconnect((reason) {
+      print('[socket] Disconnected: $reason');
       notifyListeners();
     });
 
     _socket?.on('new_message', (data) {
-      print('New message received: $data');
+      print('[socket] new_message received: $data');
       try {
         Map<String, dynamic> jsonData;
         if (data is String) {
@@ -106,10 +106,11 @@ class ChatService extends ChangeNotifier {
             jsonData = Map<String, dynamic>.from(data as dynamic);
           }
         }
+        print('[socket] Parsed message ID: ${jsonData['id']}');
         final message = MessageModel.fromJson(jsonData);
         _addMessage(message);
       } catch (e) {
-        print('Error parsing message: $e');
+        print('[socket] Error parsing message: $e');
       }
     });
     
