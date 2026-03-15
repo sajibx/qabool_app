@@ -10,6 +10,7 @@ import '../services/auth_service.dart';
 import '../services/profile_service.dart';
 import '../models/message_model.dart';
 import '../models/user_model.dart';
+import '../screens/profile_screen.dart';
 import '../main.dart';
 
 class ChatView extends StatefulWidget {
@@ -236,70 +237,85 @@ class _ChatViewState extends State<ChatView> {
                   ),
                 if (widget.showBackButton) const SizedBox(width: 8),
                 if (otherUser != null) ...[
-                  Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-                        backgroundImage: _effectiveOtherUser.profileImageUrl != null && _effectiveOtherUser.profileImageUrl!.isNotEmpty
-                            ? CachedNetworkImageProvider(resolveImageUrl(_effectiveOtherUser.profileImageUrl!))
-                            : null,
-                        child: (_effectiveOtherUser.profileImageUrl == null || _effectiveOtherUser.profileImageUrl!.isEmpty)
-                            ? Icon(Icons.person, color: isDark ? Colors.grey[600] : Colors.grey[400])
-                            : null,
-                      ),
-                      if (_effectiveOtherUser.isOnline)
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: Colors.green,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
-                            ),
-                          ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfileScreen(user: _effectiveOtherUser),
                         ),
-                    ],
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      );
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          _effectiveOtherUser.fullName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: isDark ? Colors.grey[100] : Colors.grey[900],
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          _effectiveOtherUser.isOnline ? 'ONLINE NOW' : (_effectiveOtherUser.lastSeen != null ? 'LAST SEEN ${timeago.format(_effectiveOtherUser.lastSeen!).toUpperCase()}' : 'OFFLINE'),
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: _effectiveOtherUser.isOnline ? primaryColor : Colors.grey,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        if (context.watch<ChatService>().isTyping(_activeChatId ?? "", context.read<AuthService>().currentUser?.id))
-                          Text(
-                            'typing...',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontStyle: FontStyle.italic,
-                              color: primaryColor.withOpacity(0.7),
+                        Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                              backgroundImage: _effectiveOtherUser.profileImageUrl != null && _effectiveOtherUser.profileImageUrl!.isNotEmpty
+                                  ? CachedNetworkImageProvider(resolveImageUrl(_effectiveOtherUser.profileImageUrl!))
+                                  : null,
+                              child: (_effectiveOtherUser.profileImageUrl == null || _effectiveOtherUser.profileImageUrl!.isEmpty)
+                                  ? Icon(Icons.person, color: isDark ? Colors.grey[600] : Colors.grey[400])
+                                  : null,
                             ),
-                          ),
+                            if (_effectiveOtherUser.isOnline)
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white, width: 2),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _effectiveOtherUser.fullName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: isDark ? Colors.grey[100] : Colors.grey[900],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              _effectiveOtherUser.isOnline ? 'ONLINE NOW' : (_effectiveOtherUser.lastSeen != null ? 'LAST SEEN ${timeago.format(_effectiveOtherUser.lastSeen!).toUpperCase()}' : 'OFFLINE'),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: _effectiveOtherUser.isOnline ? primaryColor : Colors.grey,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            if (context.watch<ChatService>().isTyping(_activeChatId ?? "", context.read<AuthService>().currentUser?.id))
+                              Text(
+                                'typing...',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontStyle: FontStyle.italic,
+                                  color: primaryColor.withOpacity(0.7),
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
+                  const Spacer(),
                 ],
               ],
             ),

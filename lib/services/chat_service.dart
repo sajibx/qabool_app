@@ -184,6 +184,42 @@ class ChatService extends ChangeNotifier {
       }
     });
 
+    _socket?.on('messages_read', (data) {
+      print('[socket] messages_read received: $data');
+      try {
+        Map<String, dynamic> jsonData;
+        if (data is String) {
+          jsonData = jsonDecode(data);
+        } else {
+          try {
+            jsonData = jsonDecode(jsonEncode(data));
+          } catch (_) {
+            jsonData = Map<String, dynamic>.from(data as dynamic);
+          }
+        }
+        
+        final chatId = jsonData['chatId'];
+        if (chatId != null) {
+          // Update all messages in this chat to READ
+          if (_messages[chatId] != null) {
+            _messages[chatId] = _messages[chatId]!.map((m) {
+              if (m.senderId.trim().toLowerCase() == _apiService.currentUserId?.trim().toLowerCase()) {
+                // If it was sent by me, it's now read by the other person
+                return MessageModel.fromJson({
+                  ...m.toJson(),
+                  'status': 'READ',
+                });
+              }
+              return m;
+            }).toList();
+          }
+          notifyListeners();
+        }
+      } catch (e) {
+        print('Error parsing messages_read: $e');
+      }
+    });
+
     _socket?.on('new_connection_request', (data) {
       print('New connection request received: $data');
       try {
@@ -374,15 +410,15 @@ class ChatService extends ChangeNotifier {
   }
 
   Future<void> markAsRead(String chatId) async {
+    // Optimistic update
+    final index = _chats.indexWhere((c) => c.id == chatId);
+    if (index != -1) {
+      _chats[index] = _chats[index].copyWith(unreadCount: 0);
+      notifyListeners();
+    }
+
     try {
-      final response = await _apiService.client.post('/chats/$chatId/read');
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        final index = _chats.indexWhere((c) => c.id == chatId);
-        if (index != -1) {
-          _chats[index] = _chats[index].copyWith(unreadCount: 0);
-          notifyListeners();
-        }
-      }
+      await _apiService.client.post('/chats/$chatId/read');
     } catch (e) {
       print('Error marking chat as read: $e');
     }
