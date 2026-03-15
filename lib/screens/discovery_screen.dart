@@ -102,10 +102,8 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Tailwind extracted colors
-    // Theme-based colors
-    const primaryColor = QaboolTheme.primary; 
-    const accentGold = QaboolTheme.accentGold; 
+    const primaryColor = QaboolTheme.primary;
+    const accentGold = QaboolTheme.accentGold;
     const bgLight = QaboolTheme.backgroundLight;
     const bgDark = QaboolTheme.backgroundDark;
     const cardBgLight = Colors.white;
@@ -114,109 +112,324 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
     return Scaffold(
       backgroundColor: isDark ? bgDark : bgLight,
       body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                color: isDark ? bgDark : Colors.white,
-                border: Border(
-                  bottom: BorderSide(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isLargeScreen = constraints.maxWidth > 900;
+
+            if (isLargeScreen) {
+              return Row(
+                children: [
+                  // Sidebar Filters
+                  SizedBox(
+                    width: 280,
+                    child: _buildSidebarFilters(isDark, primaryColor, accentGold, bgDark, cardBgDark),
+                  ),
+                  // Divider
+                  VerticalDivider(
+                    width: 1,
+                    thickness: 1,
                     color: primaryColor.withOpacity(0.1),
                   ),
+                  // Main Content
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _buildSearchBar(isDark, primaryColor, bgDark),
+                        Expanded(
+                          child: _buildGrid(isDark, primaryColor, accentGold, cardBgLight, cardBgDark),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            // Mobile View
+            return Column(
+              children: [
+                _buildMobileFilters(isDark, primaryColor, accentGold, bgDark),
+                Expanded(
+                  child: _buildGrid(isDark, primaryColor, accentGold, cardBgLight, cardBgDark),
                 ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(bool isDark, Color primaryColor, Color bgDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      decoration: BoxDecoration(
+        color: isDark ? bgDark : Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            color: primaryColor.withOpacity(0.05),
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    if (_isSearching)
-                      Container(
-                        width: 200,
-                        margin: const EdgeInsets.only(right: 12),
-                        child: TextField(
-                          controller: _searchController,
-                          autofocus: true,
-                          decoration: InputDecoration(
-                            hintText: 'Search...',
-                            hintStyle: const TextStyle(fontSize: 14),
-                            border: InputBorder.none,
-                            prefixIcon: const Icon(Icons.search, size: 20, color: primaryColor),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                            suffixIcon: IconButton(
-                              icon: const Icon(Icons.close, size: 16),
-                              onPressed: () {
-                                setState(() {
-                                  _isSearching = false;
-                                  _searchController.clear();
-                                  _searchQuery = '';
-                                });
-                                _fetchProfiles();
-                              },
-                            ),
-                          ),
-                          onChanged: (val) {
-                            _searchQuery = val;
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search people...',
+                  hintStyle: TextStyle(fontSize: 14, color: isDark ? Colors.grey[400] : Colors.grey[600]),
+                  border: InputBorder.none,
+                  prefixIcon: const Icon(Icons.search, size: 20, color: QaboolTheme.primary),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.close, size: 16),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            });
                             _fetchProfiles();
                           },
-                        ),
-                      )
-                    else
-                      IconButton(
-                        icon: const Icon(Icons.search, color: primaryColor, size: 28),
-                        onPressed: () => setState(() => _isSearching = true),
-                        padding: const EdgeInsets.only(right: 16),
-                        constraints: const BoxConstraints(),
-                      ),
-                    
-                    _buildFilterButton('Age', _ageRange != const RangeValues(18, 80), () => _showAgeFilter(), primaryColor, accentGold, isDark),
-                    const SizedBox(width: 8),
-                    _buildFilterButton('Religion', _selectedReligion != null, () => _showReligionFilter(), primaryColor, accentGold, isDark),
-                    const SizedBox(width: 8),
-                    _buildFilterButton('Education', _selectedEducation != null, () => _showEducationFilter(), primaryColor, accentGold, isDark),
-                    const SizedBox(width: 8),
-                    _buildFilterButton('Location', _selectedLocation != null, () => _showLocationFilter(), primaryColor, accentGold, isDark),
-                  ],
+                        )
+                      : null,
                 ),
+                onChanged: (val) {
+                  _searchQuery = val;
+                  _fetchProfiles();
+                },
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Main Grid
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _profiles.isEmpty
-                      ? const Center(child: Text('No profiles found Match your criteria'))
-                      : RefreshIndicator(
-                      onRefresh: refreshData,
-                      color: primaryColor,
-                      child: GridView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 2,
-                          childAspectRatio: 0.63,
-                          mainAxisSpacing: 16,
-                          crossAxisSpacing: 16,
-                        ),
-                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
-                        itemCount: _profiles.length,
-                        itemBuilder: (context, index) {
-                          final profile = _profiles[index];
-                          return _buildProfileCard(
-                            profile: profile,
-                            isDark: isDark,
-                            cardBg: isDark ? cardBgDark : cardBgLight,
-                            primaryColor: primaryColor,
-                            accentGold: accentGold,
-                          );
-                        },
-                      ),
+  Widget _buildMobileFilters(bool isDark, Color primaryColor, Color accentGold, Color bgDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: isDark ? bgDark : Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            color: primaryColor.withOpacity(0.1),
+          ),
+        ),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            if (_isSearching)
+              Container(
+                width: 200,
+                margin: const EdgeInsets.only(right: 12),
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Search...',
+                    hintStyle: const TextStyle(fontSize: 14),
+                    border: InputBorder.none,
+                    prefixIcon: Icon(Icons.search, size: 20, color: primaryColor),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.close, size: 16),
+                      onPressed: () {
+                        setState(() {
+                          _isSearching = false;
+                          _searchController.clear();
+                          _searchQuery = '';
+                        });
+                        _fetchProfiles();
+                      },
                     ),
+                  ),
+                  onChanged: (val) {
+                    _searchQuery = val;
+                    _fetchProfiles();
+                  },
+                ),
+              )
+            else
+              IconButton(
+                icon: Icon(Icons.search, color: primaryColor, size: 28),
+                onPressed: () => setState(() => _isSearching = true),
+                padding: const EdgeInsets.only(right: 16),
+                constraints: const BoxConstraints(),
+              ),
+            
+            _buildFilterButton('Age', _ageRange != const RangeValues(18, 80), () => _showAgeFilter(), primaryColor, accentGold, isDark),
+            const SizedBox(width: 8),
+            _buildFilterButton('Religion', _selectedReligion != null, () => _showReligionFilter(), primaryColor, accentGold, isDark),
+            const SizedBox(width: 8),
+            _buildFilterButton('Education', _selectedEducation != null, () => _showEducationFilter(), primaryColor, accentGold, isDark),
+            const SizedBox(width: 8),
+            _buildFilterButton('Location', _selectedLocation != null, () => _showLocationFilter(), primaryColor, accentGold, isDark),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSidebarFilters(bool isDark, Color primaryColor, Color accentGold, Color bgDark, Color cardBgDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(24, 32, 24, 24),
+          child: Text(
+            'Filters',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            children: [
+              _buildSidebarFilterItem(
+                'Age Range',
+                '${_ageRange.start.toInt()} - ${_ageRange.end.toInt()}',
+                _ageRange != const RangeValues(18, 80),
+                () => _showAgeFilter(),
+                isDark,
+                primaryColor,
+              ),
+              _buildSidebarFilterItem(
+                'Religion',
+                _selectedReligion ?? 'All Religions',
+                _selectedReligion != null,
+                () => _showReligionFilter(),
+                isDark,
+                primaryColor,
+              ),
+              _buildSidebarFilterItem(
+                'Education',
+                _selectedEducation ?? 'Any Education',
+                _selectedEducation != null,
+                () => _showEducationFilter(),
+                isDark,
+                primaryColor,
+              ),
+              _buildSidebarFilterItem(
+                'Location',
+                _selectedLocation ?? 'Everywhere',
+                _selectedLocation != null,
+                () => _showLocationFilter(),
+                isDark,
+                primaryColor,
+              ),
+              const SizedBox(height: 24),
+              if (_ageRange != const RangeValues(18, 80) || _selectedReligion != null || _selectedEducation != null || _selectedLocation != null)
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _ageRange = const RangeValues(18, 80);
+                      _selectedReligion = null;
+                      _selectedEducation = null;
+                      _selectedLocation = null;
+                    });
+                    _fetchProfiles();
+                  },
+                  child: const Text('Reset All Filters', style: TextStyle(color: QaboolTheme.primary)),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSidebarFilterItem(String title, String value, bool isActive, VoidCallback onTap, bool isDark, Color primaryColor) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isActive ? primaryColor.withOpacity(0.1) : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC)),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive ? primaryColor : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12,
+                color: isActive ? primaryColor : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  size: 16,
+                  color: isActive ? primaryColor : Colors.grey[400],
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildGrid(bool isDark, Color primaryColor, Color accentGold, Color cardBgLight, Color cardBgDark) {
+    return _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : _profiles.isEmpty
+            ? const Center(child: Text('No profiles found Match your criteria'))
+            : RefreshIndicator(
+            onRefresh: refreshData,
+            color: primaryColor,
+            child: GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 6 : (MediaQuery.of(context).size.width > 900 ? 4 : (MediaQuery.of(context).size.width > 600 ? 3 : 2)),
+                childAspectRatio: 0.63,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+              ),
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
+              itemCount: _profiles.length,
+              itemBuilder: (context, index) {
+                final profile = _profiles[index];
+                return _buildProfileCard(
+                  profile: profile,
+                  isDark: isDark,
+                  cardBg: isDark ? cardBgDark : cardBgLight,
+                  primaryColor: primaryColor,
+                  accentGold: accentGold,
+                );
+              },
+            ),
+          );
   }
 
   void _showAgeFilter() {

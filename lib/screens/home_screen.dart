@@ -123,52 +123,89 @@ class HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: isDark ? bgDark : bgLight,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Top Navigation Bar (Cleaned up to avoid empty space)
-            if (_isSearching)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                decoration: BoxDecoration(
-                  color: isDark ? bgDark.withOpacity(0.8) : Colors.white.withOpacity(0.8),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 40,
-                        child: TextField(
-                          controller: _searchController,
-                          autofocus: true,
-                          decoration: InputDecoration(
-                            hintText: 'Search people...',
-                            hintStyle: const TextStyle(fontSize: 14),
-                            prefixIcon: const Icon(Icons.search, size: 20, color: pColor),
-                            filled: true,
-                            fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                            contentPadding: EdgeInsets.zero,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
-                            ),
-                            suffixIcon: IconButton(
-                              icon: const Icon(Icons.close, size: 16),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() => _isSearching = false);
-                                _fetchProfiles();
-                              },
-                            ),
-                          ),
-                          onSubmitted: (val) {
-                            _fetchProfiles(query: val);
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isLargeScreen = constraints.maxWidth > 900;
+
+            if (isLargeScreen) {
+              return Row(
+                children: [
+                  // Main Content Area
+                  Expanded(
+                    flex: 3,
+                    child: _buildMainContent(isDark, pColor, bgDark, bgLight),
+                  ),
+                  // Divider
+                  VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                  ),
+                  // Sidebar Area (Recent Conversations)
+                  SizedBox(
+                    width: 350,
+                    child: _buildSidebarConversations(isDark, pColor, bgDark, bgLight, neutralSoftUrlLight),
+                  ),
+                ],
+              );
+            }
+
+            // Mobile View
+            return _buildMainContent(isDark, pColor, bgDark, bgLight);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent(bool isDark, Color pColor, Color bgDark, Color bgLight) {
+    const neutralSoftUrlLight = Color(0xFFF4F1F0);
+    return Column(
+      children: [
+        // Top Navigation Bar (Cleaned up to avoid empty space)
+        if (_isSearching)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: isDark ? bgDark.withOpacity(0.8) : Colors.white.withOpacity(0.8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 40,
+                    child: TextField(
+                      controller: _searchController,
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: 'Search people...',
+                        hintStyle: const TextStyle(fontSize: 14),
+                        prefixIcon: Icon(Icons.search, size: 20, color: pColor),
+                        filled: true,
+                        fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                        contentPadding: EdgeInsets.zero,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide.none,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.close, size: 16),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _isSearching = false);
+                            _fetchProfiles();
                           },
                         ),
                       ),
+                      onSubmitted: (val) {
+                        _fetchProfiles(query: val);
+                      },
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
+            ),
+          ),
 
             Expanded(
               child: RefreshIndicator(
@@ -192,7 +229,7 @@ class HomeScreenState extends State<HomeScreen> {
                             children: [
                               if (!_isSearching)
                                 IconButton(
-                                  icon: const Icon(Icons.search, color: pColor, size: 20),
+                                  icon: Icon(Icons.search, color: pColor, size: 20),
                                   onPressed: () => setState(() => _isSearching = true),
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(),
@@ -213,7 +250,7 @@ class HomeScreenState extends State<HomeScreen> {
                                   color: pColor.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'NEW',
                                   style: TextStyle(
                                     fontSize: 10,
@@ -227,7 +264,7 @@ class HomeScreenState extends State<HomeScreen> {
                           ),
                           GestureDetector(
                             onTap: () => widget.onNavigate?.call(1), // Switch to Discovery tab
-                            child: const Text(
+                            child: Text(
                               'View all',
                               style: TextStyle(
                                 fontSize: 12,
@@ -257,64 +294,7 @@ class HomeScreenState extends State<HomeScreen> {
                                     return _buildProfileCard(
                                       context: context,
                                       profile: profile,
-                                       onConnect: () async {
-                                        if (profile.connectionStatus == 'ACCEPTED') {
-                                           try {
-                                             final chatService = context.read<ChatService>();
-                                             final chat = await chatService.createChat(profile.id);
-                                             if (context.mounted) {
-                                               Navigator.push(
-                                                 context,
-                                                 MaterialPageRoute(
-                                                   builder: (context) => ChatScreen(
-                                                     chatId: chat.id,
-                                                     otherUser: profile,
-                                                   ),
-                                                 ),
-                                               );
-                                             }
-                                           } catch (e) {
-                                             if (context.mounted) {
-                                               ScaffoldMessenger.of(context).showSnackBar(
-                                                 SnackBar(content: Text("Failed to open chat: $e")),
-                                               );
-                                             }
-                                           }
-                                        } else if (profile.connectionStatus == 'PENDING_RECEIVED') {
-                                          // Navigate to profile
-                                          if (mounted) {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => ProfileScreen(user: profile),
-                                              ),
-                                            );
-                                          }
-                                        } else {
-                                          try {
-                                            final connectionService = context.read<ConnectionService>();
-                                            await connectionService.sendConnectionRequest(profile.id);
-                                            if (mounted) {
-                                              setState(() {
-                                                final idx = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
-                                                if (idx != -1) {
-                                                  _nearbyProfiles[idx] = _nearbyProfiles[idx].copyWith(connectionStatus: 'PENDING_SENT');
-                                                }
-                                              });
-                                            }
-                                            if (!context.mounted) return;
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('Connection request sent!')),
-                                            );
-                                          } catch (e) {
-                                            if (context.mounted) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('Failed to send request: $e')),
-                                              );
-                                            }
-                                          }
-                                        }
-                                      },
+                                       onConnect: () => _handleConnect(profile),
                                     );
                                   },
                                 ),
@@ -384,94 +364,197 @@ class HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 24),
                     ],
 
-                    // Chat Section
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        'Recent Conversations',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.grey[100] : Colors.grey[800],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Consumer2<ChatService, AuthService>(
-                        builder: (context, chatService, authService, _) {
-                          if (_isLoadingChats) {
-                            return const Center(child: CircularProgressIndicator());
-                          }
-                          final chats = chatService.chats;
-                          if (chats.isEmpty) {
-                            return const Center(child: Text('No recent conversations'));
-                          }
-                          final currentUserId = authService.currentUser?.id ?? "";
-                          return Column(
-                            children: chats.take(3).map((chat) {
-                              final otherUser = chat.otherParticipant(currentUserId);
-                              if (otherUser == null) return const SizedBox.shrink();
-                              return _buildChatItem(
-                                context: context,
-                                isDark: isDark,
-                                imageUrl: resolveImageUrl(otherUser.profileImageUrl),
-                                name: otherUser.fullName,
-                                time: chat.lastMessage?.timeString ?? 'No messages',
-                                message: chat.lastMessage?.content ?? '',
-                                isOnline: otherUser.isOnline,
-                                isUnread: false, 
-                                accentColor: pColor,
-                                cardBgColor: isDark ? bgDark : Colors.white,
-                                borderColor: isDark ? const Color(0xFF1E293B) : neutralSoftUrlLight,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ChatScreen(
-                                        chatId: chat.id,
-                                        otherUser: otherUser,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }).toList(),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: OutlinedButton(
-                        onPressed: () => widget.onNavigate?.call(2), // Switch to Messages tab
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.grey[400],
-                          side: BorderSide(
-                            color: isDark ? const Color(0xFF1E293B) : neutralSoftUrlLight,
-                            width: 2,
+                  // Mobile-only Chat Section (Hidden on large screens because it's in the sidebar)
+                  LayoutBuilder(builder: (context, constraints) {
+                    final isLarge = MediaQuery.of(context).size.width > 900;
+                    if (isLarge) return const SizedBox.shrink();
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Text(
+                            'Recent Conversations',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.grey[100] : Colors.grey[800],
+                            ),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          minimumSize: const Size(double.infinity, 50),
                         ),
-                        child: const Text('See More Conversations', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+                        const SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: _buildRecentChats(isDark, pColor, bgDark, neutralSoftUrlLight),
+                        ),
+                        const SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: OutlinedButton(
+                            onPressed: () => widget.onNavigate?.call(2), // Switch to Messages tab
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.grey[400],
+                              side: BorderSide(
+                                color: isDark ? const Color(0xFF1E293B) : neutralSoftUrlLight,
+                                width: 2,
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              minimumSize: const Size(double.infinity, 50),
+                            ),
+                            child: const Text('See More Conversations', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
           ),
-        ],
-      ),
-    ),
-  );
-}
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSidebarConversations(bool isDark, Color pColor, Color bgDark, Color bgLight, Color neutralSoftUrlLight) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Conversations',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.open_in_new, size: 20),
+                onPressed: () => widget.onNavigate?.call(2),
+                tooltip: 'Go to Messages',
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: _buildRecentChats(isDark, pColor, bgDark, neutralSoftUrlLight),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentChats(bool isDark, Color pColor, Color bgDark, Color neutralSoftUrlLight) {
+    return Consumer2<ChatService, AuthService>(
+      builder: (context, chatService, authService, _) {
+        if (_isLoadingChats) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final chats = chatService.chats;
+        if (chats.isEmpty) {
+          return const Center(child: Text('No recent conversations'));
+        }
+        final currentUserId = authService.currentUser?.id ?? "";
+        return Column(
+          children: chats.take(MediaQuery.of(context).size.width > 900 ? 10 : 3).map((chat) {
+            final otherUser = chat.otherParticipant(currentUserId);
+            if (otherUser == null) return const SizedBox.shrink();
+            return _buildChatItem(
+              context: context,
+              isDark: isDark,
+              imageUrl: resolveImageUrl(otherUser.profileImageUrl),
+              name: otherUser.fullName,
+              time: chat.lastMessage?.timeString ?? 'No messages',
+              message: chat.lastMessage?.content ?? '',
+              isOnline: otherUser.isOnline,
+              isUnread: false,
+              accentColor: pColor,
+              cardBgColor: isDark ? bgDark : Colors.white,
+              borderColor: isDark ? const Color(0xFF1E293B) : neutralSoftUrlLight,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatScreen(
+                      chatId: chat.id,
+                      otherUser: otherUser,
+                    ),
+                  ),
+                );
+              },
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleConnect(UserModel profile) async {
+    if (profile.connectionStatus == 'ACCEPTED') {
+      try {
+        final chatService = context.read<ChatService>();
+        final chat = await chatService.createChat(profile.id);
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                chatId: chat.id,
+                otherUser: profile,
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to open chat: $e")),
+          );
+        }
+      }
+    } else if (profile.connectionStatus == 'PENDING_RECEIVED') {
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProfileScreen(user: profile),
+          ),
+        );
+      }
+    } else {
+      try {
+        final connectionService = context.read<ConnectionService>();
+        await connectionService.sendConnectionRequest(profile.id);
+        if (mounted) {
+          setState(() {
+            final idx = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
+            if (idx != -1) {
+              _nearbyProfiles[idx] = _nearbyProfiles[idx].copyWith(connectionStatus: 'PENDING_SENT');
+            }
+          });
+        }
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Connection request sent!')),
+        );
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to send request: $e')),
+          );
+        }
+      }
+    }
+  }
 
   Widget _buildProfileCard({
     required BuildContext context,
@@ -624,7 +707,7 @@ class HomeScreenState extends State<HomeScreen> {
                       ),
                       if (verified) ...[
                         const SizedBox(width: 4),
-                        const Icon(Icons.verified, color: aColor, size: 14),
+                        Icon(Icons.verified, color: aColor, size: 14),
                       ],
                     ],
                   ),
