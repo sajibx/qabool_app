@@ -9,6 +9,7 @@ import 'api_service.dart';
 import '../widgets/notification_overlay.dart';
 import '../main.dart'; // To access navigatorKey
 import '../screens/chat_screen.dart'; // To navigate on tap
+import '../screens/profile_screen.dart';
 
 class PaginationMeta {
   final int total;
