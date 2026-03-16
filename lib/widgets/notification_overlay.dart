@@ -24,27 +24,37 @@ class NotificationOverlay {
     _currentEntry = null;
 
     _currentEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: MediaQuery.of(context).padding.top + 10,
-        left: 10,
-        right: 10,
-        child: _NotificationWidget(
-          title: title,
-          message: message,
-          imageUrl: imageUrl,
-          onTap: () {
-            _currentEntry?.remove();
-            _currentEntry = null;
-            _hideTimer?.cancel();
-            onTap?.call();
-          },
-          onDismiss: () {
-            _currentEntry?.remove();
-            _currentEntry = null;
-            _hideTimer?.cancel();
-          },
-        ),
-      ),
+      builder: (context) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        final isLargeScreen = screenWidth > 900;
+        
+        return Positioned(
+          top: MediaQuery.of(context).padding.top + 10,
+          right: isLargeScreen ? 20 : 10,
+          left: isLargeScreen ? null : 10,
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: isLargeScreen ? 380 : screenWidth - 20,
+            ),
+            child: _NotificationWidget(
+              title: title,
+              message: message,
+              imageUrl: imageUrl,
+              onTap: () {
+                _currentEntry?.remove();
+                _currentEntry = null;
+                _hideTimer?.cancel();
+                onTap?.call();
+              },
+              onDismiss: () {
+                _currentEntry?.remove();
+                _currentEntry = null;
+                _hideTimer?.cancel();
+              },
+            ),
+          ),
+        );
+      },
     );
 
     overlay.insert(_currentEntry!);

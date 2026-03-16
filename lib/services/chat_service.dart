@@ -319,15 +319,23 @@ class ChatService extends ChangeNotifier {
       final isFromMe = _apiService.currentUserId != null && 
           message.senderId.trim().toLowerCase() == _apiService.currentUserId!.trim().toLowerCase();
 
+      final isActiveChat = message.chatId == _activeChatId;
+      
+      // Auto-mark as read if this is the active chat
+      if (!isFromMe && isActiveChat) {
+        markAsRead(message.chatId);
+      }
+
       print('--- DEBUG UNREAD ---');
       print('Message Sender ID: "${message.senderId}"');
       print('Other Participant ID: "${otherParticipant.id}"');
       print('Current User ID (ApiService): "${_apiService.currentUserId}"');
       print('Is From Me: $isFromMe');
+      print('Is Active Chat: $isActiveChat');
       
       final updatedChat = chat.copyWith(
         lastMessage: message,
-        unreadCount: !isFromMe ? chat.unreadCount + 1 : chat.unreadCount,
+        unreadCount: (!isFromMe && !isActiveChat) ? chat.unreadCount + 1 : chat.unreadCount,
       );
       
       // Move to top (Stack approach)
@@ -335,7 +343,7 @@ class ChatService extends ChangeNotifier {
       _chats.insert(0, updatedChat);
 
       // Show notification if NOT from me and NOT active chat
-      if (!isFromMe && message.chatId != _activeChatId) {
+      if (!isFromMe && !isActiveChat) {
         _showNotification(message, otherParticipant);
       }
 

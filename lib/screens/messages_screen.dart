@@ -233,7 +233,7 @@ class MessagesScreenState extends State<MessagesScreen> {
                       name: otherUser.fullName,
                       time: chat.lastMessage?.timeString ?? '',
                       message: chat.lastMessage?.content ?? '',
-                      isTyping: false,
+                      isTyping: chatService.isTyping(chat.id, currentUserId),
                       isActive: isSelected,
                       isOnline: otherUser.isOnline,
                       isFavorited: otherUser.isFavorited,
