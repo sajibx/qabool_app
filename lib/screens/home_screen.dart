@@ -48,9 +48,9 @@ class HomeScreenState extends State<HomeScreen> {
     ]);
   }
 
-  Future<void> _fetchProfiles({String? query}) async {
+  Future<void> _fetchProfiles({String? query, bool silent = false}) async {
     try {
-      if (query != null) {
+      if (query != null || !silent) {
         setState(() => _isLoadingProfiles = true);
       }
       final authService = context.read<AuthService>();
@@ -657,8 +657,8 @@ class HomeScreenState extends State<HomeScreen> {
                               await profileService.favoriteUser(profile.id);
                             }
                             
-                            // Background refresh to ensure consistency
-                            refreshData();
+                            // Background refresh to ensure consistency silently
+                            _fetchProfiles(silent: true);
                           } catch (e) {
                             // Rollback on error
                             setState(() {

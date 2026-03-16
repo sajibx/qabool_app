@@ -48,8 +48,8 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
     super.dispose();
   }
 
-  Future<void> _fetchProfiles() async {
-    if (mounted) setState(() => _isLoading = true);
+  Future<void> _fetchProfiles({bool silent = false}) async {
+    if (mounted && !silent) setState(() => _isLoading = true);
     final profileService = context.read<ProfileService>();
     final authService = context.read<AuthService>();
     try {
@@ -412,7 +412,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
               physics: const AlwaysScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: MediaQuery.of(context).size.width > 1400 ? 5 : (MediaQuery.of(context).size.width > 900 ? 3 : (MediaQuery.of(context).size.width > 600 ? 2 : 2)),
-                childAspectRatio: 0.72,
+                childAspectRatio: 0.53, // Made taller to match Home page proportions
                 mainAxisSpacing: 24,
                 crossAxisSpacing: 24,
               ),
@@ -615,6 +615,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
+              // No fixed flex, let it take all available space
               child: ClipRRect(
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(16)),
@@ -691,8 +692,8 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                               await profileService.favoriteUser(profile.id);
                             }
                             
-                            // Background sync
-                            _fetchProfiles();
+                            // Background sync without full refresh
+                            _fetchProfiles(silent: true);
                           } catch (e) {
                             // Rollback
                             setState(() {
@@ -724,12 +725,13 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                 ),
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            Padding(
+              // Removed Expanded to let content define height and prevent overflow
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
                     if (profile.isOnline) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -783,7 +785,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                         ),
                       ],
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 8), // Reduced from Spacer/12
                     SizedBox(
                       height: 32,
                       width: double.infinity,
@@ -874,10 +876,9 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
+    }
 }
