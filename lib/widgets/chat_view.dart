@@ -301,15 +301,6 @@ class _ChatViewState extends State<ChatView> {
                                 letterSpacing: 0.5,
                               ),
                             ),
-                            if (context.watch<ChatService>().isTyping(_activeChatId ?? "", context.read<AuthService>().currentUser?.id))
-                              Text(
-                                'typing...',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontStyle: FontStyle.italic,
-                                  color: primaryColor.withOpacity(0.7),
-                                ),
-                              ),
                           ],
                         ),
                       ],

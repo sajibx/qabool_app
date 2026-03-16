@@ -130,8 +130,9 @@ class ChatService extends ChangeNotifier {
         
         final from = jsonData['from'];
         if (from != null) {
-          final userName = from['firstName'] ?? 'Someone';
-          final profileImageUrl = from['profileImageUrl'];
+          final sender = UserModel.fromJson(from);
+          final userName = sender.fullName;
+          final profileImageUrl = sender.profileImageUrl;
           
           if (navigatorKey.currentContext != null) {
             NotificationOverlay.show(
@@ -140,8 +141,11 @@ class ChatService extends ChangeNotifier {
               message: '$userName just added you to their favorites!',
               imageUrl: profileImageUrl,
               onTap: () {
-                // Navigate to discovery or who liked you if needed
-                // For now, it just shows who it is
+                navigatorKey.currentState?.push(
+                  MaterialPageRoute(
+                    builder: (context) => ProfileScreen(user: sender),
+                  ),
+                );
               },
             );
           }
@@ -234,11 +238,12 @@ class ChatService extends ChangeNotifier {
           }
         }
         
-        final requester = jsonData['requester'];
+        final requesterData = jsonData['requester'];
         final message = jsonData['message'] ?? 'Someone sent you a connection request';
         
-        if (requester != null && navigatorKey.currentContext != null) {
-          final profileImageUrl = requester['profileImageUrl'];
+        if (requesterData != null && navigatorKey.currentContext != null) {
+          final requester = UserModel.fromJson(requesterData);
+          final profileImageUrl = requester.profileImageUrl;
           
           NotificationOverlay.show(
             context: navigatorKey.currentContext!,
@@ -246,7 +251,11 @@ class ChatService extends ChangeNotifier {
             message: message,
             imageUrl: profileImageUrl,
             onTap: () {
-              // Navigation can be handled here if needed
+              navigatorKey.currentState?.push(
+                MaterialPageRoute(
+                  builder: (context) => ProfileScreen(user: requester),
+                ),
+              );
             },
           );
         }

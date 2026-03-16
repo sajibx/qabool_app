@@ -404,7 +404,7 @@ class MessagesScreenState extends State<MessagesScreen> {
                       ],
                       Expanded(
                         child: Text(
-                          message,
+                          isTyping ? 'typing...' : message,
                           style: TextStyle(
                             fontSize: 14,
                             fontStyle:
