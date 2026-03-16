@@ -163,7 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           // Mobile View
           return SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 120),
+            padding: const EdgeInsets.only(bottom: 40),
             child: Column(
               children: [
                 _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
@@ -347,72 +347,81 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 32),
         if (_isMe)
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const EditProfileScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.transparent,
-                    shadowColor: primaryColor.withOpacity(0.2),
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ).copyWith(
-                    backgroundColor:
-                        WidgetStateProperty.all(Colors.transparent),
-                  ),
-                  child: Ink(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF800000), Color(0xFF4A0000)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.transparent,
+                      shadowColor: primaryColor.withOpacity(0.2),
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      borderRadius: BorderRadius.circular(16),
+                    ).copyWith(
+                      backgroundColor:
+                          WidgetStateProperty.all(Colors.transparent),
                     ),
-                    child: Container(
-                      alignment: Alignment.center,
-                      constraints: const BoxConstraints(minHeight: 44),
-                      child: const Text(
-                        'EDIT PROFILE',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          letterSpacing: 1.2,
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF800000), Color(0xFF4A0000)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Container(
+                        alignment: Alignment.center,
+                        constraints: const BoxConstraints(minHeight: 44),
+                        child: const Text(
+                          'EDIT PROFILE',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            letterSpacing: 1.2,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 1,
-                child: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: BorderSide(
-                        color: primaryColor.withOpacity(0.2), width: 2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 1,
+                    child: OutlinedButton(
+                    onPressed: () async {
+                      await context.read<AuthService>().logout();
+                      if (context.mounted) {
+                        context.read<ChatService>().disconnectSocket();
+                        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                      }
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide(
+                          color: primaryColor.withOpacity(0.2), width: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      minimumSize: const Size.fromHeight(44),
                     ),
-                    minimumSize: const Size.fromHeight(44),
+                    child: Icon(Icons.logout, color: primaryColor, size: 20),
                   ),
-                  child: Icon(Icons.share, color: primaryColor, size: 20),
                 ),
-              ),
-            ],
+              ],
+            ),
           )
         else
           Column(
@@ -802,40 +811,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                   ),
-                  if (_isMe) ...[
-                    const SizedBox(height: 32),
-                    // Logout Button
-                    Center(
-                      child: TextButton.icon(
-                        onPressed: () async {
-                          await context.read<AuthService>().logout();
-                          if (context.mounted) {
-                            context.read<ChatService>().disconnectSocket();
-                            Navigator.pushNamedAndRemoveUntil(
-                                context, '/login', (route) => false);
-                          }
-                        },
-                        icon: const Icon(Icons.logout, size: 16, color: Colors.redAccent),
-                        label: const Text(
-                          'Sign Out',
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
-                        ),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: Colors.redAccent.withOpacity(0.2)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-            );
+      ],
+    );
   }
 
   Widget _buildCard({required bool isDark, required Widget child}) {
