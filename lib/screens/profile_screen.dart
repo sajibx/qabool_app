@@ -26,6 +26,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late UserModel? _displayUser;
   bool _isMe = false;
+  String _activeDesktopSection = 'hero'; // 'hero', 'connections', 'favorites'
 
   @override
   void initState() {
@@ -124,15 +125,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Right Side (Profile Hero & Activity) - Moved from left
                 Expanded(
                   flex: 2,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-                    child: Column(
-                      children: [
-                        _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
-                        const SizedBox(height: 48),
-                        _buildActivitySection(isDark, primaryColor, accentGold),
-                      ],
-                    ),
+                  child: Column(
+                    children: [
+                      if (_activeDesktopSection == 'hero')
+                        Expanded(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+                            child: Column(
+                              children: [
+                                _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
+                                const SizedBox(height: 48),
+                                _buildActivitySection(isDark, primaryColor, accentGold),
+                              ],
+                            ),
+                          ),
+                        )
+                      else if (_activeDesktopSection == 'connections')
+                        Expanded(
+                          child: ConnectionsScreen(
+                            isEmbedded: true,
+                            onBack: () => setState(() => _activeDesktopSection = 'hero'),
+                          ),
+                        )
+                      else if (_activeDesktopSection == 'favorites')
+                        Expanded(
+                          child: FavoritesScreen(
+                            isEmbedded: true,
+                            onBack: () => setState(() => _activeDesktopSection = 'hero'),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],
@@ -983,52 +1005,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildActivitySection(bool isDark, Color primaryColor, Color accentGold) {
     if (!_isMe) return const SizedBox.shrink();
-    return Column(
-      children: [
-        _buildSectionHeader(
-          icon: Icons.flash_on,
-          title: 'MY ACTIVITY',
-          accentGold: QaboolTheme.accentGold,
-          primaryColor: primaryColor,
-        ),
-        const SizedBox(height: 16),
-        Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isLargeScreen = MediaQuery.of(context).size.width > 900;
+        return Column(
           children: [
-            Expanded(
-              child: _buildActivityCard(
-                icon: Icons.people_outline,
-                label: 'Connections',
-                count: context
-                    .watch<ConnectionService>()
-                    .pendingRequests
-                    .length,
-                color: Colors.blueAccent,
-                isDark: isDark,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          const ConnectionsScreen()),
-                ),
-              ),
+            _buildSectionHeader(
+              icon: Icons.flash_on,
+              title: 'MY ACTIVITY',
+              accentGold: QaboolTheme.accentGold,
+              primaryColor: primaryColor,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildActivityCard(
-                icon: Icons.favorite_border,
-                label: 'Favorites',
-                color: const Color(0xFFFF7074),
-                isDark: isDark,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const FavoritesScreen()),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActivityCard(
+                    icon: Icons.people_outline,
+                    label: 'Connections',
+                    count: context
+                        .watch<ConnectionService>()
+                        .pendingRequests
+                        .length,
+                    color: Colors.blueAccent,
+                    isDark: isDark,
+                    onTap: () {
+                      if (isLargeScreen) {
+                        setState(() => _activeDesktopSection = 'connections');
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ConnectionsScreen()),
+                        );
+                      }
+                    },
+                  ),
                 ),
-              ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildActivityCard(
+                    icon: Icons.favorite_border,
+                    label: 'Favorites',
+                    color: const Color(0xFFFF7074),
+                    isDark: isDark,
+                    onTap: () {
+                      if (isLargeScreen) {
+                        setState(() => _activeDesktopSection = 'favorites');
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const FavoritesScreen()),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }

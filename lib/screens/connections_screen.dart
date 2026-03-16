@@ -12,7 +12,14 @@ import 'chat_screen.dart';
 import '../theme.dart';
 
 class ConnectionsScreen extends StatefulWidget {
-  const ConnectionsScreen({super.key});
+  final bool isEmbedded;
+  final VoidCallback? onBack;
+
+  const ConnectionsScreen({
+    super.key, 
+    this.isEmbedded = false,
+    this.onBack,
+  });
 
   @override
   State<ConnectionsScreen> createState() => _ConnectionsScreenState();
@@ -42,73 +49,96 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
     final connectionService = context.watch<ConnectionService>();
     final primaryColor = QaboolTheme.primary;
     
+    final content = Column(
+      children: [
+        Container(
+          padding: EdgeInsets.only(top: widget.isEmbedded ? 0 : MediaQuery.of(context).padding.top),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              AppBar(
+                elevation: 0,
+                toolbarHeight: 50,
+                backgroundColor: Colors.transparent,
+                centerTitle: true,
+                leading: widget.isEmbedded 
+                  ? IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                      onPressed: widget.onBack,
+                      color: QaboolTheme.primary,
+                    )
+                  : (Navigator.canPop(context) ? const BackButton() : null),
+                title: Text(
+                  widget.isEmbedded ? 'Connections' : 'My Network', 
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900, 
+                    fontSize: 18,
+                    letterSpacing: -0.5,
+                    color: QaboolTheme.primary,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: TabBar(
+                    controller: _tabController,
+                    indicator: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: primaryColor,
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: Colors.transparent,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: isDark ? Colors.grey[400] : Colors.grey[600],
+                    labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                    unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                    tabs: const [
+                      Tab(text: 'Connected'),
+                      Tab(text: 'Requests'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildList(connectionService.acceptedConnections, isPending: false),
+              _buildList(connectionService.pendingRequests, isPending: true),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (widget.isEmbedded) {
+      return Material(
+        color: Colors.transparent,
+        child: content,
+      );
+    }
+    
     return Scaffold(
       backgroundColor: isDark ? QaboolTheme.backgroundDark : QaboolTheme.backgroundLight,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverAppBar(
-            floating: true,
-            pinned: true,
-            elevation: 0,
-            toolbarHeight: 50,
-            backgroundColor: isDark ? QaboolTheme.backgroundDark : QaboolTheme.backgroundLight,
-            centerTitle: false,
-            title: Text(
-              'My Network', 
-              style: TextStyle(
-                fontWeight: FontWeight.w900, 
-                fontSize: 18,
-                letterSpacing: -0.5,
-                color: isDark ? Colors.white : QaboolTheme.primary,
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: isDark ? Colors.white : primaryColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: (isDark ? Colors.white : primaryColor).withOpacity(0.25),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                labelColor: isDark ? Colors.black : Colors.white,
-                unselectedLabelColor: isDark ? Colors.grey[400] : Colors.grey[600],
-                labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
-                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                tabs: const [
-                  Tab(text: 'Connected'),
-                  Tab(text: 'Requests'),
-                ],
-              ),
-            ),
-          ),
-          SliverFillRemaining(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildList(connectionService.acceptedConnections, isPending: false),
-                _buildList(connectionService.pendingRequests, isPending: true),
-              ],
-            ),
-          ),
-        ],
-      ),
+      body: content,
     );
   }
 
@@ -164,7 +194,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
         builder: (context, constraints) {
           final isLargeScreen = MediaQuery.of(context).size.width > 900;
           
-          if (isLargeScreen) {
+          if (isLargeScreen && !widget.isEmbedded) {
             return GridView.builder(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
               physics: const AlwaysScrollableScrollPhysics(),
@@ -285,17 +315,17 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
                           ),
                         ),
                         child: CircleAvatar(
-                          radius: 38,
+                          radius: widget.isEmbedded ? 32 : 38,
                           backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[100],
                           backgroundImage: otherUser?.profileImageUrl != null 
                               ? CachedNetworkImageProvider(resolveImageUrl(otherUser!.profileImageUrl!)) 
                               : null,
                           child: otherUser?.profileImageUrl == null 
-                              ? Icon(Icons.person_rounded, size: 44, color: Colors.grey[400]) 
+                              ? Icon(Icons.person_rounded, size: widget.isEmbedded ? 36 : 44, color: Colors.grey[400]) 
                               : null,
                         ),
                       ),
-                      const SizedBox(width: 20),
+                      SizedBox(width: widget.isEmbedded ? 16 : 20),
                       
                       // User Info
                       Expanded(
@@ -307,7 +337,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: widget.isEmbedded ? 18 : 20,
                                 fontWeight: FontWeight.w900,
                                 color: isDark ? Colors.white : const Color(0xFF0F172A),
                                 letterSpacing: -0.5,
@@ -324,7 +354,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontSize: 13,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w500,
                                       color: isDark ? Colors.grey[400] : Colors.grey[600],
                                     ),
