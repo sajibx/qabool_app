@@ -26,6 +26,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late UserModel? _displayUser;
   bool _isMe = false;
+  bool _isRefreshing = false;
   String _activeDesktopSection = 'hero'; // 'hero', 'connections', 'favorites'
 
   @override
@@ -36,6 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Always refresh profile from server to ensure full details
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _displayUser != null) {
+        setState(() => _isRefreshing = true);
         _refreshProfile();
       }
     });
@@ -52,6 +54,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       debugPrint('Error refreshing profile: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isRefreshing = false);
+      }
     }
   }
 
@@ -429,7 +435,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               children: [
-                if (_displayUser!.connectionStatus == 'PENDING_RECEIVED')
+                if (_isRefreshing && _displayUser!.connectionStatus == 'NONE')
+                  // Show loading state while we verify if there's actually a connection
+                  ElevatedButton(
+                    onPressed: null,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Container(
+                      alignment: Alignment.center,
+                      constraints: const BoxConstraints(minHeight: 44),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: isDark ? Colors.grey[600] : Colors.grey[400],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'LOADING...',
+                            style: TextStyle(
+                              color: isDark ? Colors.grey[600] : Colors.grey[400],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else if (_displayUser!.connectionStatus == 'PENDING_RECEIVED')
                   Row(
                     children: [
                       Expanded(
