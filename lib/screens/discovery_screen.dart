@@ -119,18 +119,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
             if (isLargeScreen) {
               return Row(
                 children: [
-                  // Sidebar Filters
-                  SizedBox(
-                    width: 280,
-                    child: _buildSidebarFilters(isDark, primaryColor, accentGold, bgDark, cardBgDark),
-                  ),
-                  // Divider
-                  VerticalDivider(
-                    width: 1,
-                    thickness: 1,
-                    color: primaryColor.withOpacity(0.1),
-                  ),
-                  // Main Content
+                  // Main Content (Suggested Profile Section) - Moved from right
                   Expanded(
                     child: Column(
                       children: [
@@ -140,6 +129,17 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                         ),
                       ],
                     ),
+                  ),
+                  // Divider
+                  VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color: primaryColor.withOpacity(0.1),
+                  ),
+                  // Sidebar Filters (Promoted to Right side)
+                  SizedBox(
+                    width: 300,
+                    child: _buildSidebarFilters(isDark, primaryColor, accentGold, bgDark, cardBgDark),
                   ),
                 ],
               );
@@ -411,12 +411,12 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
             child: GridView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 6 : (MediaQuery.of(context).size.width > 900 ? 4 : (MediaQuery.of(context).size.width > 600 ? 3 : 2)),
-                childAspectRatio: 0.63,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
+                crossAxisCount: MediaQuery.of(context).size.width > 1400 ? 5 : (MediaQuery.of(context).size.width > 900 ? 3 : (MediaQuery.of(context).size.width > 600 ? 2 : 2)),
+                childAspectRatio: 0.72,
+                mainAxisSpacing: 24,
+                crossAxisSpacing: 24,
               ),
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
               itemCount: _profiles.length,
               itemBuilder: (context, index) {
                 final profile = _profiles[index];
@@ -724,129 +724,154 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (profile.isOnline) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'ACTIVE NOW',
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (profile.isOnline) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  Text(
-                    '${profile.firstName}, ${profile.age ?? ""}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.grey[900],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    profile.profession ?? 'Member',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on,
-                          size: 12, color: Colors.grey[500]),
-                      const SizedBox(width: 4),
-                      Expanded(
                         child: Text(
-                          '${profile.city}, ${profile.country}',
+                          'ACTIVE NOW',
                           style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[500],
+                            color: primaryColor,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(height: 8),
                     ],
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12)
-                  .copyWith(bottom: 12),
-              child: ElevatedButton(
-                onPressed: (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING')
-                  ? null 
-                  : () async {
-                  if (profile.connectionStatus == 'ACCEPTED') {
-                    // existing logic...
-                  } else if (profile.connectionStatus == 'PENDING_RECEIVED') {
-                    // Navigate to profile to let user respond
-                    if (context.mounted) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProfileScreen(user: profile),
+                    Text(
+                      '${profile.firstName}, ${profile.age ?? ""}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.grey[900],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      profile.profession ?? 'Member',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, size: 10, color: Colors.grey[500]),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            '${profile.city}, ${profile.country}',
+                            style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      );
-                    }
-                  } else {
-                    try {
-                      final connectionService = context.read<ConnectionService>();
-                      await connectionService.sendConnectionRequest(profile.id);
-                      if (mounted) {
-                        setState(() {
-                          final index = _profiles.indexWhere((p) => p.id == profile.id);
-                          if (index != -1) {
-                            _profiles[index] = _profiles[index].copyWith(connectionStatus: 'PENDING_SENT');
+                      ],
+                    ),
+                    const Spacer(),
+                    SizedBox(
+                      height: 32,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING')
+                          ? null 
+                          : () async {
+                          if (profile.connectionStatus == 'ACCEPTED') {
+                            try {
+                              final chatService = context.read<ChatService>();
+                              final chat = await chatService.createChat(profile.id);
+                              if (context.mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatScreen(
+                                      chatId: chat.id,
+                                      otherUser: profile,
+                                    ),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text("Failed to open chat: $e")),
+                                );
+                              }
+                            }
+                          } else if (profile.connectionStatus == 'PENDING_RECEIVED') {
+                            // Navigate to profile to let user respond
+                            if (context.mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProfileScreen(user: profile),
+                                ),
+                              );
+                            }
+                          } else {
+                            try {
+                              final connectionService = context.read<ConnectionService>();
+                              await connectionService.sendConnectionRequest(profile.id);
+                              
+                              if (mounted) {
+                                setState(() {
+                                  final index = _profiles.indexWhere((p) => p.id == profile.id);
+                                  if (index != -1) {
+                                    _profiles[index] = _profiles[index].copyWith(connectionStatus: 'PENDING_SENT');
+                                  }
+                                });
+                              }
+                              
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Connection request sent!')),
+                              );
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Failed to send request: $e')),
+                                );
+                              }
+                            }
                           }
-                        });
-                      }
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Connection request sent!')),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to send request: $e')),
-                        );
-                      }
-                    }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: profile.connectionStatus == 'ACCEPTED' 
-                      ? const Color(0xFF2ECC71) // Nice green
-                      : ((profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING') ? Colors.grey : (profile.connectionStatus == 'PENDING_RECEIVED' ? accentGold : primaryColor)),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  minimumSize: const Size(double.infinity, 36),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                ),
-                child: Text(
-                   profile.connectionStatus == 'ACCEPTED' 
-                      ? 'MESSAGE' 
-                      : ((profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING') ? 'PENDING' : (profile.connectionStatus == 'PENDING_RECEIVED' ? 'RESPOND' : 'CONNECT')),
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: profile.connectionStatus == 'ACCEPTED' 
+                              ? const Color(0xFF2ECC71) 
+                              : (profile.connectionStatus == 'PENDING_RECEIVED' 
+                                  ? QaboolTheme.accentGold 
+                                  : (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING' ? Colors.grey : primaryColor)),
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.zero,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: Text(
+                          profile.connectionStatus == 'ACCEPTED' 
+                              ? 'MESSAGE' 
+                              : (profile.connectionStatus == 'PENDING_RECEIVED' 
+                                  ? 'RESPOND' 
+                                  : (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING' ? 'PENDING' : 'CONNECT')),
+                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -4,6 +4,7 @@ import '../models/user_model.dart';
 import '../services/profile_service.dart';
 import 'profile_screen.dart';
 import '../theme.dart';
+import '../utils/image_utils.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -83,31 +84,73 @@ class FavoritesList extends StatelessWidget {
           );
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: profiles.length,
-          itemBuilder: (context, index) {
-            final profile = profiles[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: profile.profileImageUrl != null 
-                      ? NetworkImage(profile.profileImageUrl!) 
-                      : null,
-                  child: profile.profileImageUrl == null ? const Icon(Icons.person) : null,
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isLargeScreen = MediaQuery.of(context).size.width > 900;
+
+            if (isLargeScreen) {
+              return GridView.builder(
+                padding: const EdgeInsets.all(24),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 3.5,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
                 ),
-                title: Text(profile.fullName),
-                subtitle: Text(profile.religion ?? 'No religion specified'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)),
+                itemCount: profiles.length,
+                itemBuilder: (context, index) {
+                  final profile = profiles[index];
+                  return Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: profile.profileImageUrl != null 
+                            ? NetworkImage(resolveImageUrl(profile.profileImageUrl!)) 
+                            : null,
+                        child: profile.profileImageUrl == null ? const Icon(Icons.person) : null,
+                      ),
+                      title: Text(profile.fullName),
+                      subtitle: Text(profile.religion ?? 'No religion specified'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)),
+                        );
+                      },
+                    ),
                   );
                 },
-              ),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: profiles.length,
+              itemBuilder: (context, index) {
+                final profile = profiles[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: profile.profileImageUrl != null 
+                          ? NetworkImage(resolveImageUrl(profile.profileImageUrl!)) 
+                          : null,
+                      child: profile.profileImageUrl == null ? const Icon(Icons.person) : null,
+                    ),
+                    title: Text(profile.fullName),
+                    subtitle: Text(profile.religion ?? 'No religion specified'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)),
+                      );
+                    },
+                  ),
+                );
+              },
             );
           },
         );

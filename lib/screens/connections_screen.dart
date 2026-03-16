@@ -160,26 +160,62 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
       backgroundColor: Colors.white,
       strokeWidth: 3,
       edgeOffset: 20,
-      child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: connections.length,
-        itemBuilder: (context, index) {
-          final connection = connections[index];
-          final currentUserId = context.read<AuthService>().currentUser?.id;
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isLargeScreen = MediaQuery.of(context).size.width > 900;
           
-          final otherUser = connection.requester?.id == currentUserId 
-              ? connection.recipient 
-              : connection.requester;
-          
-          final isIncoming = connection.recipient?.id == currentUserId;
-          
-          return _buildConnectionCard(
-            connection, 
-            otherUser, 
-            isPending, 
-            isIncoming,
-            Theme.of(context).brightness == Brightness.dark,
+          if (isLargeScreen) {
+            return GridView.builder(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
+              physics: const AlwaysScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 2.2,
+                mainAxisSpacing: 24,
+                crossAxisSpacing: 24,
+              ),
+              itemCount: connections.length,
+              itemBuilder: (context, index) {
+                final connection = connections[index];
+                final currentUserId = context.read<AuthService>().currentUser?.id;
+                final otherUser = connection.requester?.id == currentUserId 
+                    ? connection.recipient 
+                    : connection.requester;
+                final isIncoming = connection.recipient?.id == currentUserId;
+                
+                return _buildConnectionCard(
+                  connection, 
+                  otherUser, 
+                  isPending, 
+                  isIncoming,
+                  Theme.of(context).brightness == Brightness.dark,
+                );
+              },
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: connections.length,
+            itemBuilder: (context, index) {
+              final connection = connections[index];
+              final currentUserId = context.read<AuthService>().currentUser?.id;
+              
+              final otherUser = connection.requester?.id == currentUserId 
+                  ? connection.recipient 
+                  : connection.requester;
+              
+              final isIncoming = connection.recipient?.id == currentUserId;
+              
+              return _buildConnectionCard(
+                connection, 
+                otherUser, 
+                isPending, 
+                isIncoming,
+                Theme.of(context).brightness == Brightness.dark,
+              );
+            },
           );
         },
       ),
