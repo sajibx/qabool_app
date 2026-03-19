@@ -348,6 +348,9 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                           onConnect: () => _handleConnect(profile),
                                           onFavorite: () => _handleFavorite(profile),
                                           onSkip: () => _handleSkip(profile),
+                                          onTap: () {
+                                            Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)));
+                                          },
                                         );
                                       },
                                     ),

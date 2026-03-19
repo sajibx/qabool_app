@@ -8,6 +8,7 @@ class UserDiscoveryCard extends StatelessWidget {
   final VoidCallback onConnect;
   final VoidCallback onFavorite;
   final VoidCallback onSkip;
+  final VoidCallback? onTap;
   final bool isGridMode;
 
   const UserDiscoveryCard({
@@ -16,6 +17,7 @@ class UserDiscoveryCard extends StatelessWidget {
     required this.onConnect,
     required this.onFavorite,
     required this.onSkip,
+    this.onTap,
     this.isGridMode = false,
   });
 
@@ -37,9 +39,12 @@ class UserDiscoveryCard extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipRRect(
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(isGridMode ? 24 : 32),
-        child: Stack(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(isGridMode ? 24 : 32),
+          child: Stack(
           children: [
             // Background Image
             CachedNetworkImage(
@@ -199,8 +204,9 @@ class UserDiscoveryCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTag(String text, bool isDark, {bool isSmall = false}) {
     return Container(

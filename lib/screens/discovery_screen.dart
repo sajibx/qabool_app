@@ -27,6 +27,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  bool _showConnected = true;
   
   String? _selectedReligion;
   String? _selectedLocation;
@@ -54,11 +55,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
     final profileService = context.read<ProfileService>();
     final authService = context.read<AuthService>();
     try {
-      final profiles = await profileService.getDiscoveryList(
-        search: _searchQuery.isNotEmpty ? _searchQuery : null,
-        religion: _selectedReligion,
-        region: _selectedLocation,
-      );
+      final profiles = await profileService.getDiscoverUsers();
       if (mounted) {
         final currentUser = authService.currentUser;
         setState(() {
@@ -66,8 +63,8 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
             // Filter out self
             if (p.id == currentUser?.id) return false;
 
-            // Filter out already connected users
-            if (p.connectionStatus == 'ACCEPTED') return false;
+            // Show all users (connected and new) by default, but hide if toggle is off
+            if (!_showConnected && p.connectionStatus == 'ACCEPTED') return false;
 
             // Filter based on past issues preferences
             if (currentUser != null && !currentUser.acceptsPastIssues && p.hasPastIssues) {
@@ -371,6 +368,18 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
             _buildFilterButton('Education', _selectedEducation != null, () => _showEducationFilter(), primaryColor, accentGold, isDark),
             const SizedBox(width: 8),
             _buildFilterButton('Location', _selectedLocation != null, () => _showLocationFilter(), primaryColor, accentGold, isDark),
+            const SizedBox(width: 8),
+            _buildFilterButton(
+              _showConnected ? 'Connected: On' : 'Connected: Off',
+              _showConnected,
+              () {
+                setState(() => _showConnected = !_showConnected);
+                _fetchProfiles();
+              },
+              primaryColor,
+              accentGold,
+              isDark,
+            ),
           ],
         ),
       ),
@@ -441,10 +450,49 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                   },
                   child: const Text('Reset All Filters', style: TextStyle(color: QaboolTheme.primary)),
                 ),
+              const Divider(height: 32),
+              _buildSidebarToggleItem(
+                'Show Connected',
+                _showConnected,
+                (val) {
+                  setState(() => _showConnected = val);
+                  _fetchProfiles();
+                },
+                isDark,
+                primaryColor,
+              ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSidebarToggleItem(String title, bool value, Function(bool) onChanged, bool isDark, Color primaryColor) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+          SizedBox(
+            height: 24,
+            child: Switch(
+              value: value,
+              onChanged: onChanged,
+              activeColor: QaboolTheme.primary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -523,46 +571,114 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                   onConnect: () => _handleConnect(profile),
                   onFavorite: () => _handleFavorite(profile),
                   onSkip: () => _handleSkip(profile),
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)));
+                  },
                 );
               },
             ),
           );
   }
 
-  void _showAgeFilter() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Container(
+  void _showFilterDialog(String title, Widget content) {
+    final bool isDesktop = MediaQuery.of(context).size.width > 900;
+    
+    if (isDesktop) {
+      showGeneralDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierLabel: 'Dismiss',
+        transitionDuration: const Duration(milliseconds: 300),
+        pageBuilder: (context, anim1, anim2) {
+          return Align(
+            alignment: Alignment.centerRight,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                width: 400,
+                height: double.infinity,
+                margin: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(-5, 0)),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                        ],
+                      ),
+                    ),
+                    Expanded(child: SingleChildScrollView(padding: const EdgeInsets.symmetric(horizontal: 24), child: content)),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+        transitionBuilder: (context, anim1, anim2, child) {
+          return SlideTransition(
+            position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero).animate(anim1),
+            child: child,
+          );
+        },
+      );
+    } else {
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        builder: (context) => Container(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Select Age Range', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
-              RangeSlider(
-                values: _ageRange,
-                min: 18,
-                max: 80,
-                divisions: 62,
-                labels: RangeLabels(_ageRange.start.round().toString(), _ageRange.end.round().toString()),
-                activeColor: QaboolTheme.primary,
-                onChanged: (values) {
-                  setModalState(() => _ageRange = values);
-                  setState(() => _ageRange = values);
-                },
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _fetchProfiles();
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: QaboolTheme.primary, minimumSize: const Size(double.infinity, 45)),
-                child: const Text('Apply', style: TextStyle(color: Colors.white)),
-              )
+              content,
             ],
           ),
+        ),
+      );
+    }
+  }
+
+  void _showAgeFilter() {
+    _showFilterDialog(
+      'Select Age Range',
+      StatefulBuilder(
+        builder: (context, setModalState) => Column(
+          children: [
+            RangeSlider(
+              values: _ageRange,
+              min: 18,
+              max: 80,
+              divisions: 62,
+              labels: RangeLabels(_ageRange.start.round().toString(), _ageRange.end.round().toString()),
+              activeColor: QaboolTheme.primary,
+              onChanged: (values) {
+                setModalState(() => _ageRange = values);
+                setState(() => _ageRange = values);
+              },
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _fetchProfiles();
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: QaboolTheme.primary, minimumSize: const Size(double.infinity, 45)),
+              child: const Text('Apply', style: TextStyle(color: Colors.white)),
+            )
+          ],
         ),
       ),
     );
@@ -570,45 +686,50 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
 
   void _showReligionFilter() {
     final religions = ['Islam (Sunni)', 'Islam (Shia)', 'Islam (Other)', 'Christianity', 'Hinduism', 'Sikhism', 'Buddhism', 'Other'];
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => _buildSelectionList('Select Religion', religions, _selectedReligion, (val) {
+    _showFilterDialog(
+      'Select Religion',
+      _buildSelectionList(null, religions, _selectedReligion, (val) {
         setState(() => _selectedReligion = val);
+        Navigator.pop(context);
         _fetchProfiles();
       }),
     );
   }
 
   void _showEducationFilter() {
-    final edus = ['Bachelors', 'Masters', 'PhD', 'Diploma', 'High School'];
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => _buildSelectionList('Select Education', edus, _selectedEducation, (val) {
+    final education = ['High School', 'Bachelor\'s', 'Master\'s', 'PhD', 'Other'];
+    _showFilterDialog(
+      'Select Education',
+      _buildSelectionList(null, education, _selectedEducation, (val) {
         setState(() => _selectedEducation = val);
+        Navigator.pop(context);
         _fetchProfiles();
       }),
     );
   }
 
   void _showLocationFilter() {
-    final locs = ['Bangladesh', 'India', 'Germany', 'Pakistan', 'Canada', 'USA'];
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => _buildSelectionList('Select Location', locs, _selectedLocation, (val) {
+    final locations = ['London', 'New York', 'Daka', 'Dubai', 'Toronto', 'Sydney'];
+    _showFilterDialog(
+      'Select Location',
+      _buildSelectionList(null, locations, _selectedLocation, (val) {
         setState(() => _selectedLocation = val);
+        Navigator.pop(context);
         _fetchProfiles();
       }),
     );
   }
 
-  Widget _buildSelectionList(String title, List<String> options, String? current, Function(String?) onSelected) {
+  Widget _buildSelectionList(String? title, List<String> options, String? current, Function(String?) onSelected) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: title != null ? const EdgeInsets.all(24) : EdgeInsets.zero,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
+          if (title != null) ...[
+            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+          ],
           Flexible(
             child: ListView.builder(
               shrinkWrap: true,

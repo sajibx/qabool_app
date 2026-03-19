@@ -27,6 +27,18 @@ class ProfileService extends ChangeNotifier {
     }
   }
 
+  Future<List<UserModel>> getDiscoverUsers() async {
+    try {
+      final response = await _apiService.client.get('/profiles/discover');
+      if (response.statusCode == 200) {
+        return (response.data as List).map((u) => UserModel.fromJson(u)).toList();
+      }
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<UserModel> updateProfile(Map<String, dynamic> data, {XFile? image}) async {
     try {
       final formData = FormData.fromMap(data);
