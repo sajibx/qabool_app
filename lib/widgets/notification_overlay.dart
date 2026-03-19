@@ -26,7 +26,7 @@ class NotificationOverlay {
     _currentEntry = OverlayEntry(
       builder: (context) {
         final screenWidth = MediaQuery.of(context).size.width;
-        final isLargeScreen = screenWidth > 900;
+        final isLargeScreen = screenWidth > 800;
         
         return Positioned(
           top: MediaQuery.of(context).padding.top + 10,

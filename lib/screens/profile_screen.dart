@@ -108,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isLargeScreen = constraints.maxWidth > 900;
+          final isLargeScreen = constraints.maxWidth > 800;
 
           if (isLargeScreen) {
             return Row(
@@ -570,15 +570,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               final chat = await chatService
                                   .createChat(_displayUser!.id);
                               if (context.mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ChatScreen(
-                                      chatId: chat.id,
-                                      otherUser: _displayUser!,
+                                final isLargeScreen = MediaQuery.of(context).size.width > 800;
+                                if (isLargeScreen) {
+                                  chatService.toggleFloatingChat(chat.id, open: true, otherUser: _displayUser!);
+                                } else {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatScreen(
+                                        chatId: chat.id,
+                                        otherUser: _displayUser!,
+                                      ),
                                     ),
-                                  ),
-                                );
+                                  );
+                                }
                               }
                             } catch (e) {
                               if (context.mounted) {
@@ -1105,7 +1110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!_isMe) return const SizedBox.shrink();
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isLargeScreen = MediaQuery.of(context).size.width > 900;
+        final isLargeScreen = MediaQuery.of(context).size.width > 800;
         return Column(
           children: [
             _buildSectionHeader(

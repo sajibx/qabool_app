@@ -176,7 +176,7 @@ class _FavoritesListState extends State<FavoritesList> {
           );
         }
 
-        final isLargeScreen = MediaQuery.of(context).size.width > 900;
+        final isLargeScreen = MediaQuery.of(context).size.width > 800;
 
         if (isLargeScreen && !widget.isEmbedded) {
           return GridView.builder(

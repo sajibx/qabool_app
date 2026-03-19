@@ -192,7 +192,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
       edgeOffset: 20,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isLargeScreen = MediaQuery.of(context).size.width > 900;
+          final isLargeScreen = MediaQuery.of(context).size.width > 800;
           
           if (isLargeScreen && !widget.isEmbedded) {
             return GridView.builder(

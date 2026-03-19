@@ -109,7 +109,10 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
       try {
         final chatService = context.read<ChatService>();
         final chat = await chatService.createChat(profile.id);
-        if (context.mounted) {
+        final isLargeScreen = MediaQuery.of(context).size.width > 800;
+        if (isLargeScreen) {
+          chatService.toggleFloatingChat(chat.id, open: true, otherUser: profile);
+        } else if (context.mounted) {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -556,7 +559,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
             child: GridView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 3 : (MediaQuery.of(context).size.width > 800 ? 2 : 2),
+                crossAxisCount: MediaQuery.of(context).size.width > 800 ? 3 : 2,
                 childAspectRatio: 0.55, // Taller cards
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
@@ -581,7 +584,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
   }
 
   void _showFilterDialog(String title, Widget content) {
-    final bool isDesktop = MediaQuery.of(context).size.width > 900;
+    final bool isDesktop = MediaQuery.of(context).size.width > 800;
     
     if (isDesktop) {
       showGeneralDialog(

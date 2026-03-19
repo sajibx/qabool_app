@@ -67,7 +67,7 @@ class MessagesScreenState extends State<MessagesScreen> {
       backgroundColor: isDark ? bgDark : bgLight,
       body: LayoutBuilder(
           builder: (context, constraints) {
-            final isLargeScreen = constraints.maxWidth > 900;
+            final isLargeScreen = constraints.maxWidth > 800;
             
             if (isLargeScreen) {
               return Row(
@@ -239,7 +239,7 @@ class MessagesScreenState extends State<MessagesScreen> {
                       isFavorited: otherUser.isFavorited,
                       unreadCount: chat.unreadCount,
                       onTap: () {
-                        if (MediaQuery.of(context).size.width > 900) {
+                        if (MediaQuery.of(context).size.width > 800) {
                           setState(() {
                             _selectedChatId = chat.id;
                             _selectedUser = otherUser;

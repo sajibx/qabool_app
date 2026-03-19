@@ -6,6 +6,10 @@ import 'package:qabool_app/screens/home_screen.dart';
 import 'package:qabool_app/screens/discovery_screen.dart';
 import 'package:qabool_app/screens/messages_screen.dart';
 import 'package:qabool_app/screens/profile_screen.dart';
+import 'package:qabool_app/widgets/floating_chat_window.dart';
+import 'package:qabool_app/models/chat_model.dart';
+import 'package:qabool_app/models/user_model.dart';
+import 'package:qabool_app/services/api_service.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -32,6 +36,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const ProfileScreen(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialize activity state for the global overlay
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ChatService>().setMessagesPageActive(_currentIndex == 2);
+    });
+  }
+
   void _onItemTapped(int index) {
     if (_currentIndex == index) {
       if (index == 0) {
@@ -45,6 +58,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     setState(() {
       _currentIndex = index;
     });
+    // Update global messages page activity state
+    context.read<ChatService>().setMessagesPageActive(index == 2);
   }
 
   @override
@@ -57,7 +72,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isLargeScreen = constraints.maxWidth > 900;
+          final isLargeScreen = constraints.maxWidth > 800;
 
           return Row(
             children: [
@@ -166,7 +181,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: LayoutBuilder(
         builder: (context, constraints) {
-          if (MediaQuery.of(context).size.width > 900) return const SizedBox.shrink();
+          if (MediaQuery.of(context).size.width > 800) return const SizedBox.shrink();
           
           return Container(
             decoration: BoxDecoration(

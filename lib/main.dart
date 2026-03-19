@@ -9,6 +9,7 @@ import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/services/profile_service.dart';
 import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/services/connection_service.dart';
+import 'package:qabool_app/widgets/floating_chat_overlay.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -66,6 +67,9 @@ class QaboolApp extends StatelessWidget {
       theme: QaboolTheme.lightTheme,
       darkTheme: QaboolTheme.darkTheme,
       themeMode: ThemeMode.light,
+      builder: (context, child) {
+        return FloatingChatOverlay(child: child!);
+      },
       initialRoute: '/main', // Temporarily forced for verification
       routes: {
         '/login': (context) => const LoginScreen(),

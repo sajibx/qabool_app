@@ -18,6 +18,7 @@ class ChatView extends StatefulWidget {
   final UserModel? otherUser;
   final bool showBackButton;
   final VoidCallback? onBack;
+  final bool isFloating;
 
   const ChatView({
     super.key, 
@@ -25,6 +26,7 @@ class ChatView extends StatefulWidget {
     this.otherUser,
     this.showBackButton = true,
     this.onBack,
+    this.isFloating = false,
   });
 
   @override
@@ -118,7 +120,7 @@ class _ChatViewState extends State<ChatView> {
   void _updateActiveChat() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        context.read<ChatService>().setActiveChat(_activeChatId);
+        context.read<ChatService>().setActiveChat(_activeChatId, isFloating: widget.isFloating);
       }
     });
   }
@@ -138,7 +140,7 @@ class _ChatViewState extends State<ChatView> {
     _typingTimer?.cancel();
     _statusRefreshTimer?.cancel();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      navigatorKey.currentContext?.read<ChatService>().setActiveChat(null);
+      navigatorKey.currentContext?.read<ChatService>().setActiveChat(null, isFloating: widget.isFloating);
     });
     super.dispose();
   }
@@ -154,7 +156,7 @@ class _ChatViewState extends State<ChatView> {
       await chatService.fetchMessages(_activeChatId!);
       await chatService.markAsRead(_activeChatId!);
       
-      chatService.setActiveChat(_activeChatId);
+      chatService.setActiveChat(_activeChatId, isFloating: widget.isFloating);
 
       if (mounted) {
         setState(() => _isLoading = false);
@@ -389,20 +391,30 @@ class _ChatViewState extends State<ChatView> {
           Consumer2<ChatService, AuthService>(
             builder: (context, chatService, authService, _) {
               if (chatService.isTyping(_activeChatId ?? "", authService.currentUser?.id)) {
-                return Padding(
+                return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     children: [
-                      Text(
-                        '${widget.otherUser?.firstName ?? "Someone"} is typing',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[500], fontStyle: FontStyle.italic),
-                      ),
-                      const SizedBox(width: 4),
-                      SizedBox(
-                        width: 20,
-                        child: Text(
-                          '.',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: primaryColor),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${widget.otherUser?.firstName ?? "Someone"} is typing',
+                              style: TextStyle(
+                                fontSize: 12, 
+                                color: primaryColor, 
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _TypingIndicator(color: primaryColor),
+                          ],
                         ),
                       ),
                     ],
@@ -576,6 +588,59 @@ class _ChatViewState extends State<ChatView> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TypingIndicator extends StatefulWidget {
+  final Color color;
+  const _TypingIndicator({required this.color});
+
+  @override
+  State<_TypingIndicator> createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<_TypingIndicator> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        return AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final delay = index * 0.2;
+            final value = ((_controller.value + delay) % 1.0);
+            final opacity = (1.0 - (value - 0.5).abs() * 2).clamp(0.2, 1.0);
+            return Container(
+              width: 4,
+              height: 4,
+              margin: const EdgeInsets.symmetric(horizontal: 1),
+              decoration: BoxDecoration(
+                color: widget.color.withOpacity(opacity),
+                shape: BoxShape.circle,
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 }

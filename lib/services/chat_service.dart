@@ -45,23 +45,58 @@ class ChatService extends ChangeNotifier {
   Map<String, PaginationMeta> _paginationMeta = {}; // chatId -> meta
   Map<String, bool> _isLoadingMore = {}; // chatId -> isloading
   Map<String, String?> _typingStates = {}; // chatId -> senderId of user typing
+  Map<String, UserModel> _floatingOtherUsers = {}; // chatId -> otherUser
   String? _activeChatId;
+  List<String> _activeFloatingChatIds = [];
+  bool _isMessagesPageActive = false;
 
   ChatService(this._apiService);
 
   List<ChatModel> get chats => _chats;
+  List<String> get activeFloatingChatIds => _activeFloatingChatIds;
+  bool get isMessagesPageActive => _isMessagesPageActive;
   int get totalUnreadCount => _chats.fold(0, (sum, chat) => sum + chat.unreadCount);
   List<MessageModel> getMessages(String chatId) => _messages[chatId] ?? [];
   bool hasMoreMessages(String chatId) => _paginationMeta[chatId]?.hasMore ?? false;
   bool isLoadingMore(String chatId) => _isLoadingMore[chatId] ?? false;
+  UserModel? getFloatingOtherUser(String chatId) => _floatingOtherUsers[chatId];
   bool isTyping(String chatId, String? currentUserId) {
     final typingUserId = _typingStates[chatId];
     if (typingUserId == null || currentUserId == null) return false;
     return typingUserId.trim().toLowerCase() != currentUserId.trim().toLowerCase();
   }
 
-  void setActiveChat(String? chatId) {
+  void setActiveChat(String? chatId, {bool isFloating = false}) {
     _activeChatId = chatId;
+    // If we set an active chat (full screen), remove it from floating chats to avoid double UI
+    if (chatId != null && !isFloating) {
+      _activeFloatingChatIds.remove(chatId);
+    }
+    notifyListeners();
+  }
+
+  void toggleFloatingChat(String chatId, {bool open = true, UserModel? otherUser}) {
+    if (open) {
+      if (otherUser != null) {
+        _floatingOtherUsers[chatId] = otherUser;
+      }
+      if (!_activeFloatingChatIds.contains(chatId)) {
+        // Max 2 floating chats as per user request
+        if (_activeFloatingChatIds.length >= 2) {
+          final removedId = _activeFloatingChatIds.removeAt(0);
+          _floatingOtherUsers.remove(removedId);
+        }
+        _activeFloatingChatIds.add(chatId);
+      }
+    } else {
+      _activeFloatingChatIds.remove(chatId);
+      _floatingOtherUsers.remove(chatId);
+    }
+    notifyListeners();
+  }
+
+  void setMessagesPageActive(bool active) {
+    _isMessagesPageActive = active;
     notifyListeners();
   }
 
@@ -355,6 +390,12 @@ class ChatService extends ChangeNotifier {
       // Show notification if NOT from me and NOT active chat
       if (!isFromMe && !isActiveChat) {
         _showNotification(message, otherParticipant);
+        
+        // Auto-open floating chat if not already open and NOT on messages tab
+        // Note: The visibility logic (desktop only) will be handled in MainNavigationScreen
+        if (!_activeFloatingChatIds.contains(message.chatId)) {
+           toggleFloatingChat(message.chatId, open: true);
+        }
       }
 
       notifyListeners();

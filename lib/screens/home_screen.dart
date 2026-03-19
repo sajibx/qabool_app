@@ -168,7 +168,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isLargeScreen = MediaQuery.of(context).size.width > 900;
+            final isLargeScreen = MediaQuery.of(context).size.width > 800;
 
             if (isLargeScreen) {
               return Row(
@@ -334,7 +334,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                       shrinkWrap: true,
                                       physics: const NeverScrollableScrollPhysics(),
                                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 3 : (MediaQuery.of(context).size.width > 800 ? 2 : 2),
+                                        crossAxisCount: MediaQuery.of(context).size.width > 800 ? 3 : 2,
                                         childAspectRatio: 0.55, // Taller cards
                                         crossAxisSpacing: 16,
                                         mainAxisSpacing: 16,
@@ -452,8 +452,8 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                     ],
 
                   // Mobile-only Chat Section (Hidden based on user request)
-                  if (MediaQuery.of(context).size.width <= 900)
-                    const SizedBox.shrink(), // Section is hidden as per user request
+                  if (MediaQuery.of(context).size.width <= 800)
+                    const SizedBox.shrink(), 
                   const SizedBox(height: 24),
                 ],
               ),
@@ -511,7 +511,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
         }
         final currentUserId = authService.currentUser?.id ?? "";
         return Column(
-          children: chats.take(MediaQuery.of(context).size.width > 900 ? 10 : 3).map((chat) {
+          children: chats.take(MediaQuery.of(context).size.width > 800 ? 10 : 3).map((chat) {
             final otherUser = chat.otherParticipant(currentUserId);
             if (otherUser == null) return const SizedBox.shrink();
             return _buildChatItem(
@@ -527,15 +527,19 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
               cardBgColor: isDark ? bgDark : Colors.white,
               borderColor: isDark ? const Color(0xFF1E293B) : neutralSoftUrlLight,
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatScreen(
-                      chatId: chat.id,
-                      otherUser: otherUser,
+                if (MediaQuery.of(context).size.width > 800) {
+                  chatService.toggleFloatingChat(chat.id, open: true, otherUser: otherUser);
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatScreen(
+                        chatId: chat.id,
+                        otherUser: otherUser,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
               },
             );
           }).toList(),
@@ -549,7 +553,10 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
       try {
         final chatService = context.read<ChatService>();
         final chat = await chatService.createChat(profile.id);
-        if (context.mounted) {
+        final isLargeScreen = MediaQuery.of(context).size.width > 800;
+        if (isLargeScreen) {
+          chatService.toggleFloatingChat(chat.id, open: true, otherUser: profile);
+        } else if (context.mounted) {
           Navigator.push(
             context,
             MaterialPageRoute(
