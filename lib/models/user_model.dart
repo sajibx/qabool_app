@@ -25,6 +25,8 @@ class UserModel {
   final DateTime? lastSeen;
   final String connectionStatus; // NONE, PENDING_SENT, PENDING_RECEIVED, ACCEPTED, REJECTED
   final String? connectionId;
+  final bool hasPastIssues;
+  final bool acceptsPastIssues;
 
   UserModel({
     required this.id,
@@ -51,6 +53,8 @@ class UserModel {
     this.lastSeen,
     this.connectionStatus = 'NONE',
     this.connectionId,
+    this.hasPastIssues = false,
+    this.acceptsPastIssues = true,
   });
 
   String get fullName => '$firstName $lastName';
@@ -91,6 +95,8 @@ class UserModel {
       lastSeen: json['lastSeen'] != null ? DateTime.parse(json['lastSeen']) : null,
       connectionStatus: json['connectionStatus']?.toString() ?? 'NONE',
       connectionId: json['connectionId']?.toString(),
+      hasPastIssues: json['hasPastIssues'] ?? false,
+      acceptsPastIssues: json['acceptsPastIssues'] ?? true,
     );
   }
 
@@ -121,6 +127,8 @@ class UserModel {
       'lastSeen': lastSeen?.toIso8601String(),
       'connectionStatus': connectionStatus,
       'connectionId': connectionId,
+      'hasPastIssues': hasPastIssues,
+      'acceptsPastIssues': acceptsPastIssues,
     };
   }
 
@@ -149,6 +157,8 @@ class UserModel {
     DateTime? lastSeen,
     String? connectionStatus,
     String? connectionId,
+    bool? hasPastIssues,
+    bool? acceptsPastIssues,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -175,6 +185,8 @@ class UserModel {
       lastSeen: lastSeen ?? this.lastSeen,
       connectionStatus: connectionStatus ?? this.connectionStatus,
       connectionId: connectionId ?? this.connectionId,
+      hasPastIssues: hasPastIssues ?? this.hasPastIssues,
+      acceptsPastIssues: acceptsPastIssues ?? this.acceptsPastIssues,
     );
   }
 }

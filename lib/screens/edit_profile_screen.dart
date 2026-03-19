@@ -38,6 +38,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String _weightUnit = 'kg';
   XFile? _pickedImage;
   
+  bool _hasPastIssues = false;
+  bool _acceptsPastIssues = true;
   bool _isLoading = false;
 
   final Map<String, List<String>> _countryCities = {
@@ -78,6 +80,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _selectedGender = user?.gender;
     _selectedEthnicity = user?.ethnicity;
     _selectedReligion = user?.religion;
+    _hasPastIssues = user?.hasPastIssues ?? false;
+    _acceptsPastIssues = user?.acceptsPastIssues ?? true;
 
     // Handle Region Decomposition
     if (user?.region != null && user!.region!.contains(',')) {
@@ -199,6 +203,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'education': _educationController.text,
         'specialConsiderations': _specialController.text,
         'region': _selectedCountry != null && _selectedCity != null ? "${_selectedCity}, ${_selectedCountry}" : null,
+        'hasPastIssues': _hasPastIssues,
+        'acceptsPastIssues': _acceptsPastIssues,
       };
 
       await context.read<ProfileService>().updateProfile(updatedData, image: _pickedImage);
@@ -450,6 +456,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _buildTextField(controller: _educationController, label: 'Education', icon: Icons.school),
               const SizedBox(height: 16),
               _buildTextField(controller: _specialController, label: 'Special Considerations', icon: Icons.info, maxLines: 2),
+              const SizedBox(height: 32),
+
+              _buildSectionTitle('PREFERENCES & BACKGROUND'),
+              const SizedBox(height: 16),
+              SwitchListTile(
+                title: Text('Past issues/problems', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14)),
+                subtitle: Text('Do you have any past issues?', style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 12)),
+                secondary: Icon(Icons.history, color: primaryColor),
+                value: _hasPastIssues,
+                activeColor: primaryColor,
+                onChanged: (val) => setState(() => _hasPastIssues = val),
+                contentPadding: EdgeInsets.zero,
+              ),
+              SwitchListTile(
+                title: Text('Accept others with issues', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14)),
+                subtitle: Text('Would you accept matching with someone who has past issues?', style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 12)),
+                secondary: Icon(Icons.people_outline, color: primaryColor),
+                value: _acceptsPastIssues,
+                activeColor: primaryColor,
+                onChanged: (val) => setState(() => _acceptsPastIssues = val),
+                contentPadding: EdgeInsets.zero,
+              ),
               const SizedBox(height: 40),
             ],
           ),

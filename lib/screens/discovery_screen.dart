@@ -9,6 +9,7 @@ import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
 import 'package:qabool_app/screens/profile_screen.dart';
+import 'package:qabool_app/widgets/user_discovery_card.dart';
 import 'package:qabool_app/services/auth_service.dart';
 
 class DiscoveryScreen extends StatefulWidget {
@@ -64,6 +65,14 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
           _profiles = profiles.where((p) {
             // Filter out self
             if (p.id == currentUser?.id) return false;
+
+            // Filter out already connected users
+            if (p.connectionStatus == 'ACCEPTED') return false;
+
+            // Filter based on past issues preferences
+            if (currentUser != null && !currentUser.acceptsPastIssues && p.hasPastIssues) {
+              return false;
+            }
             
             // If current user has gender set, show only opposite gender (strict)
             if (currentUser?.gender != null) {
@@ -96,6 +105,94 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
         );
       }
     }
+  }
+
+  Future<void> _handleConnect(UserModel profile) async {
+    if (profile.connectionStatus == 'ACCEPTED') {
+      try {
+        final chatService = context.read<ChatService>();
+        final chat = await chatService.createChat(profile.id);
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                chatId: chat.id,
+                otherUser: profile,
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to open chat: $e")));
+        }
+      }
+    } else if (profile.connectionStatus == 'PENDING_RECEIVED') {
+      if (mounted) {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)));
+      }
+    } else {
+      try {
+        final connectionService = context.read<ConnectionService>();
+        await connectionService.sendConnectionRequest(profile.id);
+        if (mounted) {
+          setState(() {
+            final idx = _profiles.indexWhere((p) => p.id == profile.id);
+            if (idx != -1) {
+              _profiles[idx] = _profiles[idx].copyWith(connectionStatus: 'PENDING_SENT');
+            }
+          });
+        }
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Connection request sent!')));
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to send request: $e')));
+        }
+      }
+    }
+  }
+
+  Future<void> _handleFavorite(UserModel profile) async {
+    final profileService = context.read<ProfileService>();
+    final wasFavorited = profile.isFavorited;
+    try {
+      setState(() {
+        final index = _profiles.indexWhere((p) => p.id == profile.id);
+        if (index != -1) {
+          _profiles[index] = _profiles[index].copyWith(isFavorited: !wasFavorited);
+        }
+      });
+      if (wasFavorited) {
+        await profileService.unfavoriteUser(profile.id);
+      } else {
+        await profileService.favoriteUser(profile.id);
+      }
+      _fetchProfiles(silent: true);
+    } catch (e) {
+      setState(() {
+        final index = _profiles.indexWhere((p) => p.id == profile.id);
+        if (index != -1) {
+          _profiles[index] = _profiles[index].copyWith(isFavorited: wasFavorited);
+        }
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
+  void _handleSkip(UserModel profile) {
+    setState(() {
+      _profiles.removeWhere((p) => p.id == profile.id);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Skipped ${profile.firstName}'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
   }
 
   @override
@@ -411,21 +508,21 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
             child: GridView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).size.width > 1400 ? 5 : (MediaQuery.of(context).size.width > 900 ? 3 : (MediaQuery.of(context).size.width > 600 ? 2 : 2)),
-                childAspectRatio: 0.53, // Made taller to match Home page proportions
-                mainAxisSpacing: 24,
-                crossAxisSpacing: 24,
+                crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 3 : (MediaQuery.of(context).size.width > 800 ? 2 : 2),
+                childAspectRatio: 0.55, // Taller cards
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
               ),
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
               itemCount: _profiles.length,
               itemBuilder: (context, index) {
                 final profile = _profiles[index];
-                return _buildProfileCard(
-                  profile: profile,
-                  isDark: isDark,
-                  cardBg: isDark ? cardBgDark : cardBgLight,
-                  primaryColor: primaryColor,
-                  accentGold: accentGold,
+                return UserDiscoveryCard(
+                  user: profile,
+                  isGridMode: true,
+                  onConnect: () => _handleConnect(profile),
+                  onFavorite: () => _handleFavorite(profile),
+                  onSkip: () => _handleSkip(profile),
                 );
               },
             ),
@@ -583,302 +680,4 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
     );
   }
 
-  Widget _buildProfileCard({
-    required UserModel profile,
-    required bool isDark,
-    required Color cardBg,
-    required Color primaryColor,
-    required Color accentGold,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProfileScreen(user: profile),
-          ),
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              // No fixed flex, let it take all available space
-              child: ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: resolveImageUrl(profile.profileImageUrl),
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: isDark ? Colors.grey[800] : Colors.grey[200],
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: primaryColor,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: isDark ? Colors.grey[800] : Colors.grey[200],
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.person,
-                                size: 40,
-                                color: isDark ? Colors.grey[600] : Colors.grey[400]),
-                            const SizedBox(height: 4),
-                            Text(
-                              'No Image',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: isDark ? Colors.grey[600] : Colors.grey[400],
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (profile.isOnline)
-                      Positioned(
-                        top: 8,
-                        left: 8,
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                        ),
-                      ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          final profileService = context.read<ProfileService>();
-                          final wasFavorited = profile.isFavorited;
-                          try {
-                            // Optimistic update
-                            setState(() {
-                              final index = _profiles.indexWhere((p) => p.id == profile.id);
-                              if (index != -1) {
-                                _profiles[index] = _profiles[index].copyWith(isFavorited: !wasFavorited);
-                              }
-                            });
-
-                            if (wasFavorited) {
-                              await profileService.unfavoriteUser(profile.id);
-                            } else {
-                              await profileService.favoriteUser(profile.id);
-                            }
-                            
-                            // Background sync without full refresh
-                            _fetchProfiles(silent: true);
-                          } catch (e) {
-                            // Rollback
-                            setState(() {
-                              final index = _profiles.indexWhere((p) => p.id == profile.id);
-                              if (index != -1) {
-                                _profiles[index] = _profiles[index].copyWith(isFavorited: wasFavorited);
-                              }
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error: $e')),
-                            );
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.4),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            profile.isFavorited ? Icons.favorite : Icons.favorite_border,
-                            color: profile.isFavorited ? const Color(0xFFFF7074) : Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              // Removed Expanded to let content define height and prevent overflow
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                    if (profile.isOnline) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'ACTIVE NOW',
-                          style: TextStyle(
-                            color: primaryColor,
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    Text(
-                      '${profile.firstName}, ${profile.age ?? ""}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.grey[900],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      profile.profession ?? 'Member',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isDark ? Colors.grey[400] : Colors.grey[600],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(Icons.location_on, size: 10, color: Colors.grey[500]),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            '${profile.city}, ${profile.country}',
-                            style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8), // Reduced from Spacer/12
-                    SizedBox(
-                      height: 32,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING')
-                          ? null 
-                          : () async {
-                          if (profile.connectionStatus == 'ACCEPTED') {
-                            try {
-                              final chatService = context.read<ChatService>();
-                              final chat = await chatService.createChat(profile.id);
-                              if (context.mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ChatScreen(
-                                      chatId: chat.id,
-                                      otherUser: profile,
-                                    ),
-                                  ),
-                                );
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("Failed to open chat: $e")),
-                                );
-                              }
-                            }
-                          } else if (profile.connectionStatus == 'PENDING_RECEIVED') {
-                            // Navigate to profile to let user respond
-                            if (context.mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ProfileScreen(user: profile),
-                                ),
-                              );
-                            }
-                          } else {
-                            try {
-                              final connectionService = context.read<ConnectionService>();
-                              await connectionService.sendConnectionRequest(profile.id);
-                              
-                              if (mounted) {
-                                setState(() {
-                                  final index = _profiles.indexWhere((p) => p.id == profile.id);
-                                  if (index != -1) {
-                                    _profiles[index] = _profiles[index].copyWith(connectionStatus: 'PENDING_SENT');
-                                  }
-                                });
-                              }
-                              
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Connection request sent!')),
-                              );
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Failed to send request: $e')),
-                                );
-                              }
-                            }
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: profile.connectionStatus == 'ACCEPTED' 
-                              ? const Color(0xFF2ECC71) 
-                              : (profile.connectionStatus == 'PENDING_RECEIVED' 
-                                  ? QaboolTheme.accentGold 
-                                  : (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING' ? Colors.grey : primaryColor)),
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.zero,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: Text(
-                          profile.connectionStatus == 'ACCEPTED' 
-                              ? 'MESSAGE' 
-                              : (profile.connectionStatus == 'PENDING_RECEIVED' 
-                                  ? 'RESPOND' 
-                                  : (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING' ? 'PENDING' : 'CONNECT')),
-                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
 }

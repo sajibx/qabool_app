@@ -901,6 +901,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           primaryColor: primaryColor,
                           isDark: isDark,
                         ),
+                        const SizedBox(height: 24),
+                        _buildDetailRow(
+                          icon: Icons.history,
+                          label: 'PAST ISSUES/PROBLEMS',
+                          value: _displayUser!.hasPastIssues ? 'Yes' : 'No',
+                          primaryColor: primaryColor,
+                          isDark: isDark,
+                        ),
+                        if (_isMe) ...[
+                          const SizedBox(height: 24),
+                          _buildDetailRow(
+                            icon: Icons.people_outline,
+                            label: 'ACCEPTS OTHERS WITH ISSUES',
+                            value: _displayUser!.acceptsPastIssues ? 'Yes' : 'No',
+                            primaryColor: primaryColor,
+                            isDark: isDark,
+                          ),
+                        ],
                         if (_displayUser!.specialConsiderations != null && _displayUser!.specialConsiderations!.isNotEmpty) ...[
                           const SizedBox(height: 24),
                           _buildDetailRow(

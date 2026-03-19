@@ -40,6 +40,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _educationController = TextEditingController();
   final _bioController = TextEditingController();
   final _specialController = TextEditingController();
+  bool _hasPastIssues = false;
+  bool _acceptsPastIssues = true;
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -197,6 +199,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         bio: _bioController.text,
         specialConsiderations: _specialController.text,
         region: "${_selectedCity}, ${_selectedCountry}",
+        hasPastIssues: _hasPastIssues,
+        acceptsPastIssues: _acceptsPastIssues,
         profileImage: _pickedImage,
       );
       if (!mounted) return;
@@ -804,6 +808,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   ? const Color(0xFF334155)
                                   : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
+
+                          // Background & Preferences
+                          buildSectionHeader(Icons.info_outline, 'Background & Preferences'),
+                          
+                          SwitchListTile(
+                            title: const Text('Do you have any past issues/problems?', style: TextStyle(fontSize: 14)),
+                            subtitle: Text('This information helps in transparent matchmaking.', style: TextStyle(fontSize: 12, color: isDark ? Colors.grey[400] : Colors.grey[600])),
+                            value: _hasPastIssues,
+                            activeColor: pColor,
+                            onChanged: (val) => setState(() => _hasPastIssues = val),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          const SizedBox(height: 8),
+                          SwitchListTile(
+                            title: const Text('Will you accept someone with past issues?', style: TextStyle(fontSize: 14)),
+                            subtitle: Text('If yes, you will see both normal and issue-related profiles.', style: TextStyle(fontSize: 12, color: isDark ? Colors.grey[400] : Colors.grey[600])),
+                            value: _acceptsPastIssues,
+                            activeColor: pColor,
+                            onChanged: (val) => setState(() => _acceptsPastIssues = val),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          const SizedBox(height: 16),
 
                           // Bio
                           buildSectionHeader(Icons.description, 'Bio'),

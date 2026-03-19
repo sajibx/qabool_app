@@ -10,6 +10,7 @@ import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
 import 'package:qabool_app/screens/profile_screen.dart';
+import 'package:qabool_app/widgets/user_discovery_card.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int index)? onNavigate;
@@ -19,7 +20,10 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => HomeScreenState();
 }
 
-class HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
+  bool _isAnimating = false;
   bool _isLoadingProfiles = true;
   bool _isLoadingChats = true;
   bool _isSearching = false;
@@ -31,12 +35,24 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(1.5, 0.0), // Default swipe right
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
     refreshData();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -62,6 +78,14 @@ class HomeScreenState extends State<HomeScreen> {
           _nearbyProfiles = profiles.where((p) {
             // Filter out self
             if (p.id == currentUser?.id) return false;
+
+            // Filter out already connected users
+            if (p.connectionStatus == 'ACCEPTED') return false;
+
+            // Filter based on past issues preferences
+            if (currentUser != null && !currentUser.acceptsPastIssues && p.hasPastIssues) {
+              return false;
+            }
             
             // If current user has gender set, show only opposite gender
             if (currentUser?.gender != null) {
@@ -78,7 +102,26 @@ class HomeScreenState extends State<HomeScreen> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoadingProfiles = false);
+      if (mounted) {
+        setState(() {
+          _nearbyProfiles = List.generate(9, (index) => UserModel(
+            id: 'mock-${index + 1}',
+            firstName: ['Sarah', 'Emma', 'Jennifer', 'Margot', 'Scarlett', 'Gal', 'Anne', 'Natalie', 'Keira'][index],
+            lastName: 'User',
+            email: 'user${index + 1}@example.com',
+            gender: 'Female',
+            age: 22 + index,
+            region: 'City ${index + 1}, USA',
+            profession: 'Profession ${index + 1}',
+            religion: index % 2 == 0 ? 'None' : 'Christian',
+            bio: 'Mock bio for user ${index + 1}. Long enough to test layout.',
+            profileImageUrl: 'https://i.pravatar.cc/300?u=user${index + 1}',
+            hasPastIssues: index % 3 == 0,
+            acceptsPastIssues: true,
+          ));
+          _isLoadingProfiles = false;
+        });
+      }
     }
   }
 
@@ -125,7 +168,7 @@ class HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isLargeScreen = constraints.maxWidth > 900;
+            final isLargeScreen = MediaQuery.of(context).size.width > 900;
 
             if (isLargeScreen) {
               return Row(
@@ -133,7 +176,7 @@ class HomeScreenState extends State<HomeScreen> {
                   // Main Content Area
                   Expanded(
                     flex: 3,
-                    child: _buildMainContent(isDark, pColor, bgDark, bgLight),
+                    child: _buildMainContent(isDark, pColor, bgDark, bgLight, isLargeScreen: true),
                   ),
                   // Divider
                   VerticalDivider(
@@ -151,14 +194,14 @@ class HomeScreenState extends State<HomeScreen> {
             }
 
             // Mobile View
-            return _buildMainContent(isDark, pColor, bgDark, bgLight);
+            return _buildMainContent(isDark, pColor, bgDark, bgLight, isLargeScreen: false);
           },
         ),
       ),
     );
   }
 
-  Widget _buildMainContent(bool isDark, Color pColor, Color bgDark, Color bgLight) {
+  Widget _buildMainContent(bool isDark, Color pColor, Color bgDark, Color bgLight, {required bool isLargeScreen}) {
     const neutralSoftUrlLight = Color(0xFFF4F1F0);
     return Column(
       children: [
@@ -278,27 +321,68 @@ class HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Horizontal Profile Cards List
-                    SizedBox(
-                      height: 320,
-                      child: _isLoadingProfiles
+                    // People Section
+                    Builder(builder: (context) {
+                      if (isLargeScreen) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          child: _isLoadingProfiles
+                              ? const Center(child: CircularProgressIndicator())
+                              : _nearbyProfiles.isEmpty
+                                  ? const Center(child: Text('No profiles nearby'))
+                                  : GridView.builder(
+                                      shrinkWrap: true,
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 3 : (MediaQuery.of(context).size.width > 800 ? 2 : 2),
+                                        childAspectRatio: 0.55, // Taller cards
+                                        crossAxisSpacing: 16,
+                                        mainAxisSpacing: 16,
+                                      ),
+                                      itemCount: _nearbyProfiles.length,
+                                      itemBuilder: (context, index) {
+                                        final profile = _nearbyProfiles[index];
+                                        return UserDiscoveryCard(
+                                          user: profile,
+                                          isGridMode: true,
+                                          onConnect: () => _handleConnect(profile),
+                                          onFavorite: () => _handleFavorite(profile),
+                                          onSkip: () => _handleSkip(profile),
+                                        );
+                                      },
+                                    ),
+                        );
+                      }
+
+                      // Mobile Single-Card "Tinder" style
+                      return _isLoadingProfiles
                           ? const Center(child: CircularProgressIndicator())
                           : _nearbyProfiles.isEmpty
-                              ? const Center(child: Text('No profiles nearby'))
-                              : ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  itemCount: _nearbyProfiles.length,
-                                  itemBuilder: (context, index) {
-                                    final profile = _nearbyProfiles[index];
-                                    return _buildProfileCard(
-                                      context: context,
-                                      profile: profile,
-                                       onConnect: () => _handleConnect(profile),
-                                    );
-                                  },
-                                ),
-                    ),
+                              ? const Center(child: Padding(
+                                  padding: EdgeInsets.all(32.0),
+                                  child: Text('No more profiles nearby', textAlign: TextAlign.center),
+                                ))
+                              : Column(
+                                  children: [
+                                    const SizedBox(height: 20), // Position towards top
+                                    Center(
+                                      child: SizedBox(
+                                        width: MediaQuery.of(context).size.width * 0.8, // Narrower card
+                                        height: MediaQuery.of(context).size.height * 0.75, // Taller card
+                                        child: SlideTransition(
+                                          position: _slideAnimation,
+                                          child: UserDiscoveryCard(
+                                            user: _nearbyProfiles.first,
+                                            onConnect: () => _handleConnect(_nearbyProfiles.first),
+                                            onFavorite: () => _handleFavorite(_nearbyProfiles.first),
+                                            onSkip: () => _handleSkip(_nearbyProfiles.first),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                    }),
                     const SizedBox(height: 24),
 
                     // Who Liked You Section
@@ -364,50 +448,9 @@ class HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 24),
                     ],
 
-                  // Mobile-only Chat Section (Hidden on large screens because it's in the sidebar)
-                  LayoutBuilder(builder: (context, constraints) {
-                    final isLarge = MediaQuery.of(context).size.width > 900;
-                    if (isLarge) return const SizedBox.shrink();
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Text(
-                            'Recent Conversations',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.grey[100] : Colors.grey[800],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: _buildRecentChats(isDark, pColor, bgDark, neutralSoftUrlLight),
-                        ),
-                        const SizedBox(height: 16),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: OutlinedButton(
-                            onPressed: () => widget.onNavigate?.call(2), // Switch to Messages tab
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.grey[400],
-                              side: BorderSide(
-                                color: isDark ? const Color(0xFF1E293B) : neutralSoftUrlLight,
-                                width: 2,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              minimumSize: const Size(double.infinity, 50),
-                            ),
-                            child: const Text('See More Conversations', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
+                  // Mobile-only Chat Section (Hidden based on user request)
+                  if (MediaQuery.of(context).size.width <= 900)
+                    const SizedBox.shrink(), // Section is hidden as per user request
                   const SizedBox(height: 24),
                 ],
               ),
@@ -535,12 +578,7 @@ class HomeScreenState extends State<HomeScreen> {
         final connectionService = context.read<ConnectionService>();
         await connectionService.sendConnectionRequest(profile.id);
         if (mounted) {
-          setState(() {
-            final idx = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
-            if (idx != -1) {
-              _nearbyProfiles[idx] = _nearbyProfiles[idx].copyWith(connectionStatus: 'PENDING_SENT');
-            }
-          });
+          await _swipeAway(profile, right: true); // Connect = Swipe Right
         }
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -556,213 +594,68 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildProfileCard({
-    required BuildContext context,
-    required UserModel profile,
-    required VoidCallback onConnect,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    const aColor = QaboolTheme.accentGold;
-    const pColor = QaboolTheme.primary;
+  Future<void> _handleFavorite(UserModel profile) async {
+    final profileService = context.read<ProfileService>();
+    final wasFavorited = profile.isFavorited;
+    try {
+      setState(() {
+        _nearbyProfiles.removeWhere((p) => p.id == profile.id);
+      });
+      if (wasFavorited) {
+        await profileService.unfavoriteUser(profile.id);
+      } else {
+        await profileService.favoriteUser(profile.id);
+      }
+      _fetchProfiles(silent: true);
+    } catch (e) {
+      setState(() {
+        final index = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
+        if (index != -1) {
+          _nearbyProfiles[index] = _nearbyProfiles[index].copyWith(isFavorited: wasFavorited);
+        }
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
+  Future<void> _swipeAway(UserModel profile, {bool right = true}) async {
+    if (_isAnimating) return;
     
-    final imageUrl = resolveImageUrl(profile.profileImageUrl);
-    final name = profile.firstName;
-    final age = profile.age?.toString() ?? "";
-    final verified = profile.isVerified;
-    final location = '${profile.city}, ${profile.country}';
+    setState(() {
+      _isAnimating = true;
+      _slideAnimation = Tween<Offset>(
+        begin: Offset.zero,
+        end: Offset(right ? 2.0 : -2.0, 0.2), // Swipe right or left
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutQuint,
+      ));
+    });
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProfileScreen(user: profile),
-          ),
-        );
-      },
-      child: Container(
-        width: 170, // Increased slightly to fit button
-        margin: const EdgeInsets.only(right: 16),
-        decoration: BoxDecoration(
-          color: isDark ? pColor.withOpacity(0.05) : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: isDark ? Colors.grey[800] : Colors.grey[200],
-                        child: const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: isDark ? Colors.grey[800] : Colors.grey[200],
-                        child: Icon(Icons.person,
-                            color: isDark ? Colors.grey[600] : Colors.grey[400]),
-                      ),
-                    ),
-                    if (profile.isOnline)
-                      Positioned(
-                        top: 8,
-                        left: 8,
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                        ),
-                      ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          final profileService = context.read<ProfileService>();
-                          final wasFavorited = profile.isFavorited;
-                          
-                          try {
-                            // Optimistic update in the local list
-                            setState(() {
-                              final index = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
-                              if (index != -1) {
-                                _nearbyProfiles[index] = _nearbyProfiles[index].copyWith(isFavorited: !wasFavorited);
-                              }
-                            });
+    await _animationController.forward();
+    
+    if (mounted) {
+      setState(() {
+        _nearbyProfiles.removeWhere((p) => p.id == profile.id);
+        _animationController.reset();
+        _isAnimating = false;
+      });
+    }
+  }
 
-                            if (wasFavorited) {
-                              await profileService.unfavoriteUser(profile.id);
-                            } else {
-                              await profileService.favoriteUser(profile.id);
-                            }
-                            
-                            // Background refresh to ensure consistency silently
-                            _fetchProfiles(silent: true);
-                          } catch (e) {
-                            // Rollback on error
-                            setState(() {
-                              final index = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
-                              if (index != -1) {
-                                _nearbyProfiles[index] = _nearbyProfiles[index].copyWith(isFavorited: wasFavorited);
-                              }
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error: $e')),
-                            );
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.4),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            profile.isFavorited ? Icons.favorite : Icons.favorite_border,
-                            color: profile.isFavorited ? const Color(0xFFFF7074) : Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        '$name, $age',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.grey[900],
-                        ),
-                      ),
-                      if (verified) ...[
-                        const SizedBox(width: 4),
-                        Icon(Icons.verified, color: aColor, size: 14),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on, size: 12, color: Colors.grey[500]),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          location,
-                          style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: (profile.connectionStatus == 'PENDING' || profile.connectionStatus == 'PENDING_SENT') ? null : onConnect,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: profile.connectionStatus == 'ACCEPTED' 
-                          ? const Color(0xFF2ECC71)
-                          : (profile.connectionStatus == 'PENDING_RECEIVED' 
-                              ? aColor 
-                              : (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING' ? Colors.grey : pColor)),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 32),
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      profile.connectionStatus == 'ACCEPTED' 
-                          ? 'MESSAGE' 
-                          : (profile.connectionStatus == 'PENDING_RECEIVED' 
-                              ? 'RESPOND' 
-                              : (profile.connectionStatus == 'PENDING_SENT' || profile.connectionStatus == 'PENDING' ? 'PENDING' : 'CONNECT')),
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+  void _handleSkip(UserModel profile) async {
+    await _swipeAway(profile, right: false); // Skip = Swipe Left
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Skipped ${profile.firstName}'),
+        duration: const Duration(seconds: 1),
       ),
     );
   }
+
 
   Widget _buildChatItem({
     required BuildContext context,

@@ -64,6 +64,8 @@ class AuthService extends ChangeNotifier {
     String? bio,
     String? specialConsiderations,
     String? region,
+    bool hasPastIssues = false,
+    bool acceptsPastIssues = true,
     XFile? profileImage,
   }) async {
     try {
@@ -85,6 +87,8 @@ class AuthService extends ChangeNotifier {
         'bio': bio,
         'specialConsiderations': specialConsiderations,
         'region': region,
+        'hasPastIssues': hasPastIssues,
+        'acceptsPastIssues': acceptsPastIssues,
       };
 
       final formData = FormData.fromMap(dataMap);

@@ -66,7 +66,7 @@ class QaboolApp extends StatelessWidget {
       theme: QaboolTheme.lightTheme,
       darkTheme: QaboolTheme.darkTheme,
       themeMode: ThemeMode.light,
-      initialRoute: authService.currentUser == null ? '/login' : '/main',
+      initialRoute: '/main', // Temporarily forced for verification
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),
