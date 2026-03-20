@@ -225,7 +225,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: connections.length,
             itemBuilder: (context, index) {
@@ -439,17 +439,23 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
                             primaryColor,
                             () async {
                               if (otherUser != null) {
-                                final chat = await context.read<ChatService>().createChat(otherUser.id);
+                                final chatService = context.read<ChatService>();
+                                final chat = await chatService.createChat(otherUser.id);
                                 if (mounted) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ChatScreen(
-                                        chatId: chat.id,
-                                        otherUser: otherUser,
+                                  final isLargeScreen = MediaQuery.of(context).size.width > 800;
+                                  if (isLargeScreen) {
+                                    chatService.toggleFloatingChat(chat.id, open: true, otherUser: otherUser);
+                                  } else {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatScreen(
+                                          chatId: chat.id,
+                                          otherUser: otherUser,
+                                        ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  }
                                 }
                               }
                             },
