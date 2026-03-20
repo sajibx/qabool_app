@@ -19,12 +19,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+   final _passwordController = TextEditingController();
+  final _phoneController = TextEditingController();
   bool _obscurePassword = true;
   String? _selectedGender;
   DateTime? _selectedDob;
   String? _selectedEthnicity;
   String? _selectedCountry;
+  String? _selectedCountryCode;
   String? _selectedCity;
   String? _selectedReligion;
   XFile? _pickedImage;
@@ -59,6 +61,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
     'Canada': ['Toronto', 'Vancouver', 'Montreal', 'Ottawa', 'Calgary'],
     'USA': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Miami'],
   };
+  
+  final Map<String, String> _countryCodes = {
+    'Germany': '+49',
+    'Bangladesh': '+880',
+    'Pakistan': '+92',
+    'India': '+91',
+    'Canada': '+1',
+    'USA': '+1',
+  };
 
   final List<String> _ethnicities = [
     'Arab', 'Asian', 'Caucasian', 'African', 'Hispanic', 
@@ -79,6 +90,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _educationController.dispose();
     _bioController.dispose();
     _specialController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -119,6 +131,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _selectedDob == null ||
         _selectedEthnicity == null ||
         _selectedReligion == null ||
+        _selectedCountryCode == null ||
+        _phoneController.text.isEmpty ||
         _weightController.text.isEmpty ||
         _jobController.text.isEmpty ||
         _educationController.text.isEmpty) {
@@ -201,6 +215,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         region: "${_selectedCity}, ${_selectedCountry}",
         hasPastIssues: _hasPastIssues,
         acceptsPastIssues: _acceptsPastIssues,
+        phoneNumber: "${_selectedCountryCode}${_phoneController.text}",
         profileImage: _pickedImage,
       );
       if (!mounted) return;
@@ -558,6 +573,41 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 },
                               ),
                             ),
+                          ),
+                          const SizedBox(height: 16),
+                          buildLabel('Phone Number'),
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: DropdownButtonFormField<String>(
+                                  value: _selectedCountryCode,
+                                  decoration: inputDecoration('Code'),
+                                  isExpanded: true,
+                                  items: _countryCodes.entries
+                                      .map((e) => DropdownMenuItem(
+                                            value: e.value,
+                                            child: Text("${e.key} (${e.value})", 
+                                                style: const TextStyle(fontSize: 12)),
+                                          ))
+                                      .toList(),
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _selectedCountryCode = val;
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                flex: 3,
+                                child: TextField(
+                                  controller: _phoneController,
+                                  keyboardType: TextInputType.phone,
+                                  decoration: inputDecoration('Number'),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 24),
                           Divider(
