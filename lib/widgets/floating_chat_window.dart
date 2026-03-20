@@ -7,6 +7,7 @@ import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/widgets/chat_view.dart';
 import 'package:qabool_app/utils/image_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class FloatingChatWindow extends StatelessWidget {
   final String chatId;
@@ -66,15 +67,33 @@ class FloatingChatWindow extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 14,
-                    backgroundColor: Colors.white24,
-                    backgroundImage: otherUser.profileImageUrl != null && otherUser.profileImageUrl!.isNotEmpty
-                        ? CachedNetworkImageProvider(resolveImageUrl(otherUser.profileImageUrl!))
-                        : null,
-                    child: (otherUser.profileImageUrl == null || otherUser.profileImageUrl!.isEmpty)
-                        ? const Icon(Icons.person, size: 16, color: Colors.white)
-                        : null,
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Colors.white24,
+                        backgroundImage: otherUser.profileImageUrl != null && otherUser.profileImageUrl!.isNotEmpty
+                            ? CachedNetworkImageProvider(resolveImageUrl(otherUser.profileImageUrl!))
+                            : null,
+                        child: (otherUser.profileImageUrl == null || otherUser.profileImageUrl!.isEmpty)
+                            ? const Icon(Icons.person, size: 16, color: Colors.white)
+                            : null,
+                      ),
+                      if (otherUser.isOnline)
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: primaryColor, width: 1.5),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -92,14 +111,19 @@ class FloatingChatWindow extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (otherUser.isOnline)
-                          const Text(
-                            'Online',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 10,
-                            ),
+                        Text(
+                          otherUser.isOnline 
+                            ? 'ONLINE NOW' 
+                            : (otherUser.lastSeen != null 
+                                ? 'LAST SEEN ${timeago.format(otherUser.lastSeen!).toUpperCase()}' 
+                                : 'OFFLINE'),
+                          style: TextStyle(
+                            color: otherUser.isOnline ? Colors.white : Colors.white70,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.3,
                           ),
+                        ),
                       ],
                     ),
                   ),

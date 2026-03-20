@@ -218,8 +218,9 @@ class _ChatViewState extends State<ChatView> {
       color: isDark ? bgDark : bgLight,
       child: Column(
         children: [
-          // Header
-          Container(
+          // Header - Only show if not floating
+          if (!widget.isFloating)
+            Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF0F172A).withOpacity(0.8) : Colors.white.withOpacity(0.8),

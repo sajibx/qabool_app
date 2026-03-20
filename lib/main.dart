@@ -70,7 +70,7 @@ class QaboolApp extends StatelessWidget {
       builder: (context, child) {
         return FloatingChatOverlay(child: child!);
       },
-      initialRoute: '/main', // Temporarily forced for verification
+      initialRoute: authService.isAuthenticated ? '/main' : '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),

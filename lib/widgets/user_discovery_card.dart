@@ -180,10 +180,10 @@ class UserDiscoveryCard extends StatelessWidget {
                     iconSize: isGridMode ? 20 : 32,
                   ),
                   SizedBox(width: isGridMode ? 12 : 16),
-                  // Connect Button (Heart)
+                  // Connect/Message Button
                   _buildActionButton(
-                    icon: Icons.favorite,
-                    color: const Color(0xFFFF2D55), // Red
+                    icon: user.connectionStatus == 'ACCEPTED' ? Icons.chat_bubble : Icons.favorite,
+                    color: user.connectionStatus == 'ACCEPTED' ? const Color(0xFF2ECC71) : const Color(0xFFFF2D55),
                     onTap: onConnect,
                     size: isGridMode ? 52 : 84,
                     iconSize: isGridMode ? 24 : 38,
