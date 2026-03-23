@@ -85,10 +85,11 @@ class UserDiscoveryCard extends StatelessWidget {
             Positioned(
               left: isGridMode ? 12 : 20,
               right: isGridMode ? 12 : 20,
-              bottom: isGridMode ? 85 : 145, // Moved higher to prevent button overlap
+              bottom: isGridMode ? 85 : 120, // Adjusted after bio removal
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Name and Age
                   Row(
                     children: [
                       Expanded(
@@ -120,30 +121,16 @@ class UserDiscoveryCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
+                  // Info Chips
                   Wrap(
                     spacing: 4,
                     runSpacing: 4,
                     children: [
                       if (user.profession != null) _buildTag(user.profession!, isDark, isSmall: isGridMode),
                       if (user.religion != null) _buildTag(user.religion!, isDark, isSmall: isGridMode),
-                      if (!isGridMode && user.education != null) _buildTag(user.education!, isDark),
+                      if (user.education != null) _buildTag(user.education!, isDark, isSmall: isGridMode),
                     ],
                   ),
-                  if (!isGridMode) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      user.bio ?? "Looking for someone shared my values...",
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 14,
-                        shadows: [
-                          Shadow(color: Colors.black.withOpacity(0.5), blurRadius: 2, offset: const Offset(0, 1)),
-                        ],
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: 12),
                   Row(
                     children: [
