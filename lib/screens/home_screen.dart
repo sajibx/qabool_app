@@ -79,8 +79,8 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
             // Filter out self
             if (p.id == currentUser?.id) return false;
 
-            // Filter out already connected users
-            if (p.connectionStatus == 'ACCEPTED') return false;
+            // Filter out already connected or pending users
+            if (p.connectionStatus != 'NONE') return false;
 
             // Filter based on past issues preferences
             if (currentUser != null && !currentUser.acceptsPastIssues && p.hasPastIssues) {

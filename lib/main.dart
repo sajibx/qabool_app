@@ -30,8 +30,8 @@ void main() async {
     profileService.clearData(); // If implemented
   };
 
-  // Check initial auth status
-  await authService.checkAuthStatus();
+  // Check initial auth status (background)
+  authService.checkAuthStatus();
   
   // Initialize socket if token exists
   final token = await apiService.getToken();
