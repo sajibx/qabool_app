@@ -604,20 +604,38 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
     final profileService = context.read<ProfileService>();
     final wasFavorited = profile.isFavorited;
     try {
-      setState(() {
-        _nearbyProfiles.removeWhere((p) => p.id == profile.id);
-      });
-      if (wasFavorited) {
-        await profileService.unfavoriteUser(profile.id);
-      } else {
-        await profileService.favoriteUser(profile.id);
-      }
-      _fetchProfiles(silent: true);
-    } catch (e) {
+      // Optimistic UI update: Toggle favorited status instead of removing
       setState(() {
         final index = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
         if (index != -1) {
-          _nearbyProfiles[index] = _nearbyProfiles[index].copyWith(isFavorited: wasFavorited);
+          _nearbyProfiles[index] = profile.copyWith(isFavorited: !wasFavorited);
+        }
+      });
+      
+      if (wasFavorited) {
+        await profileService.unfavoriteUser(profile.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Removed ${profile.firstName} from favorites')),
+          );
+        }
+      } else {
+        await profileService.favoriteUser(profile.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Added ${profile.firstName} to favorites!')),
+          );
+        }
+      }
+      
+      // Removed _fetchProfiles(silent: true) to prevent grid flicker.
+      // The optimistic UI update is sufficient and avoids jumping cards.
+    } catch (e) {
+      // Revert if API fails
+      setState(() {
+        final index = _nearbyProfiles.indexWhere((p) => p.id == profile.id);
+        if (index != -1) {
+          _nearbyProfiles[index] = profile.copyWith(isFavorited: wasFavorited);
         }
       });
       if (mounted) {

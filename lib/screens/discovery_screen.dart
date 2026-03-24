@@ -162,10 +162,19 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
       });
       if (wasFavorited) {
         await profileService.unfavoriteUser(profile.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Removed ${profile.firstName} from favorites')),
+          );
+        }
       } else {
         await profileService.favoriteUser(profile.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Added ${profile.firstName} to favorites!')),
+          );
+        }
       }
-      _fetchProfiles(silent: true);
     } catch (e) {
       setState(() {
         final index = _profiles.indexWhere((p) => p.id == profile.id);
