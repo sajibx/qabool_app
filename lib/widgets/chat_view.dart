@@ -139,6 +139,18 @@ class _ChatViewState extends State<ChatView> {
     _scrollController.dispose();
     _typingTimer?.cancel();
     _statusRefreshTimer?.cancel();
+    
+    // Clear typing residue if disposed while typing
+    if (_isMeTyping && _activeChatId != null && widget.otherUser != null) {
+      try {
+        navigatorKey.currentContext?.read<ChatService>().setTypingStatus(
+          chatId: _activeChatId!,
+          recipientId: widget.otherUser!.id,
+          isTyping: false,
+        );
+      } catch (_) {}
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       navigatorKey.currentContext?.read<ChatService>().setActiveChat(null, isFloating: widget.isFloating);
     });

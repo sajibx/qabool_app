@@ -28,6 +28,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _showConnected = true;
+  bool _showSkipped = false;
   
   String? _selectedReligion;
   String? _selectedLocation;
@@ -55,7 +56,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
     final profileService = context.read<ProfileService>();
     final authService = context.read<AuthService>();
     try {
-      final profiles = await profileService.getDiscoverUsers();
+      final profiles = await profileService.getExploreProfiles(_showConnected, _showSkipped);
       if (mounted) {
         final currentUser = authService.currentUser;
         setState(() {
@@ -63,23 +64,18 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
             // Filter out self
             if (p.id == currentUser?.id) return false;
 
-            // Show all users (connected and new) by default, but hide if toggle is off
-            if (!_showConnected && p.connectionStatus == 'ACCEPTED') return false;
+            // Optional local search filtering over API data
+            if (_searchQuery.isNotEmpty) {
+               final nameMatch = p.firstName.toLowerCase().contains(_searchQuery.toLowerCase()) || 
+                                 p.lastName.toLowerCase().contains(_searchQuery.toLowerCase());
+               if (!nameMatch) return false;
+            }
 
-            // Filter based on past issues preferences
+            // Filter based on past issues preferences (if not done in backend)
             if (currentUser != null && !currentUser.acceptsPastIssues && p.hasPastIssues) {
               return false;
             }
             
-            // If current user has gender set, show only opposite gender (strict)
-            if (currentUser?.gender != null) {
-              if (currentUser!.gender == 'Male') {
-                if (p.gender != 'Female') return false;
-              } else if (currentUser.gender == 'Female') {
-                if (p.gender != 'Male') return false;
-              }
-            }
-
             // Local filters for fields not supported by backend yet
             if (p.age != null && (p.age! < _ageRange.start || p.age! > _ageRange.end)) {
               return false;
@@ -183,16 +179,28 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
     }
   }
 
-  void _handleSkip(UserModel profile) {
-    setState(() {
-      _profiles.removeWhere((p) => p.id == profile.id);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Skipped ${profile.firstName}'),
-        duration: const Duration(seconds: 1),
-      ),
-    );
+  void _handleSkip(UserModel profile) async {
+    final profileService = context.read<ProfileService>();
+    try {
+      await profileService.skipUser(profile);
+      setState(() {
+        _profiles.removeWhere((p) => p.id == profile.id);
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Skipped ${profile.firstName}'),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to skip: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -383,6 +391,18 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
               accentGold,
               isDark,
             ),
+            const SizedBox(width: 8),
+            _buildFilterButton(
+              _showSkipped ? 'Skipped: On' : 'Skipped: Off',
+              _showSkipped,
+              () {
+                setState(() => _showSkipped = !_showSkipped);
+                _fetchProfiles();
+              },
+              primaryColor,
+              accentGold,
+              isDark,
+            ),
           ],
         ),
       ),
@@ -459,6 +479,16 @@ class DiscoveryScreenState extends State<DiscoveryScreen> {
                 _showConnected,
                 (val) {
                   setState(() => _showConnected = val);
+                  _fetchProfiles();
+                },
+                isDark,
+                primaryColor,
+              ),
+              _buildSidebarToggleItem(
+                'Show Skipped',
+                _showSkipped,
+                (val) {
+                  setState(() => _showSkipped = val);
                   _fetchProfiles();
                 },
                 isDark,

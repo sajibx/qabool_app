@@ -114,6 +114,7 @@ class ChatService extends ChangeNotifier {
     _socket = IO.io('http://127.0.0.1:3000', 
       IO.OptionBuilder()
         .setTransports(['websocket'])
+        .enableForceNew() // CRITICAL: Stop socket reuse across logouts
         .setAuth({'token': token})
         .build()
     );
@@ -335,6 +336,9 @@ class ChatService extends ChangeNotifier {
     _isLoadingMore = {};
     _typingStates = {};
     _activeChatId = null;
+    _activeFloatingChatIds = [];
+    _floatingOtherUsers = {};
+    _isMessagesPageActive = false;
     notifyListeners();
   }
 

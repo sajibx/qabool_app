@@ -142,9 +142,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                             ),
                             SizedBox(height: _isSidebarCollapsed ? 16 : 48),
                             // Nav Items
-                            _buildSidebarItem(Icons.home_outlined, Icons.home, 'Home', 0, accentGold, primaryColor, isDark),
-                            _buildSidebarItem(Icons.explore_outlined, Icons.explore, 'Discover', 1, accentGold, primaryColor, isDark),
-                            _buildSidebarItem(Icons.chat_bubble_outline, Icons.chat_bubble, 'Messages', 2, accentGold, primaryColor, isDark, badgeCount: totalUnread > 0 ? totalUnread : null),
+                            _buildSidebarItem(Icons.home_outlined, Icons.home, 'Qabool', 0, accentGold, primaryColor, isDark),
+                            _buildSidebarItem(Icons.explore_outlined, Icons.explore, 'Explore', 1, accentGold, primaryColor, isDark),
+                            _buildSidebarItem(Icons.chat_bubble_outline, Icons.chat_bubble, 'Chat', 2, accentGold, primaryColor, isDark, badgeCount: totalUnread > 0 ? totalUnread : null),
                             _buildSidebarItem(Icons.person_outline, Icons.person, 'Profile', 3, accentGold, primaryColor, isDark),
                             const Spacer(),
                             // version info
@@ -207,12 +207,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildNavItem(
-                          Icons.home, 'Home', 0, accentGold, primaryColor, isDark),
-                      _buildNavItem(Icons.explore, 'Discover', 1, accentGold,
+                          Icons.favorite, 'Qabool', 0, const Color(0xFFFF2D55), primaryColor, isDark),
+                      _buildNavItem(Icons.explore, 'Explore', 1, const Color(0xFFFF2D55),
                           primaryColor, isDark),
-                      _buildNavItem(Icons.chat_bubble, 'Messages', 2, accentGold,
+                      _buildNavItem(Icons.chat_bubble, 'Chat', 2, const Color(0xFFFF2D55),
                           primaryColor, isDark, badgeCount: totalUnread > 0 ? totalUnread : null),
-                      _buildNavItem(Icons.account_circle, 'Profile', 3, accentGold,
+                      _buildNavItem(Icons.person, 'Profile', 3, const Color(0xFFFF2D55),
                           primaryColor, isDark),
                     ],
                   );
@@ -340,8 +340,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 style: TextStyle(
                   color: color,
                   fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
                 ),
               ),
             ],

@@ -10,6 +10,65 @@ class ProfileService extends ChangeNotifier {
 
   ProfileService(this._apiService);
 
+  Future<void> skipUser(UserModel user) async {
+    try {
+      await _apiService.client.post('/profiles/${user.id}/skip');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error skipping user: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> unskipUser(String userId) async {
+    try {
+      await _apiService.client.delete('/profiles/$userId/skip');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error unskipping user: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<UserModel>> getSkippedUsers() async {
+    try {
+      final response = await _apiService.client.get('/profiles/skipped');
+      if (response.statusCode == 200) {
+        return (response.data as List).map((u) => UserModel.fromJson(u)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching skipped users: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<UserModel>> getHomeProfiles() async {
+    try {
+      final response = await _apiService.client.get('/profiles/home');
+      if (response.statusCode == 200) {
+        return (response.data as List).map((u) => UserModel.fromJson(u)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching home profiles: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<UserModel>> getExploreProfiles(bool includeConnected, bool includeSkipped) async {
+    try {
+      final response = await _apiService.client.get('/profiles/explore/$includeConnected/$includeSkipped');
+      if (response.statusCode == 200) {
+        return (response.data as List).map((u) => UserModel.fromJson(u)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching explore profiles: $e');
+      rethrow;
+    }
+  }
+
   Future<List<UserModel>> getDiscoveryList({String? religion, String? region, String? search}) async {
     try {
       final queryParams = <String, dynamic>{};

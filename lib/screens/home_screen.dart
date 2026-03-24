@@ -69,9 +69,9 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
       if (query != null || !silent) {
         setState(() => _isLoadingProfiles = true);
       }
-      final authService = context.read<AuthService>();
       final profileService = context.read<ProfileService>();
-      final profiles = await profileService.getDiscoveryList(search: query);
+      final authService = context.read<AuthService>();
+      final profiles = await profileService.getHomeProfiles(); // Using new Home API
       if (mounted) {
         final currentUser = authService.currentUser;
         setState(() {
@@ -79,21 +79,16 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
             // Filter out self
             if (p.id == currentUser?.id) return false;
 
-            // Filter out already connected or pending users
-            if (p.connectionStatus != 'NONE') return false;
+            // Optional local search query matching if applicable
+            if (query != null && query.isNotEmpty) {
+               final nameMatch = p.firstName.toLowerCase().contains(query.toLowerCase()) || 
+                                 p.lastName.toLowerCase().contains(query.toLowerCase());
+               if (!nameMatch) return false;
+            }
 
-            // Filter based on past issues preferences
+            // Filter based on past issues preferences (if not done in backend)
             if (currentUser != null && !currentUser.acceptsPastIssues && p.hasPastIssues) {
               return false;
-            }
-            
-            // If current user has gender set, show only opposite gender
-            if (currentUser?.gender != null) {
-              if (currentUser!.gender == 'Male') {
-                return p.gender == 'Female';
-              } else if (currentUser.gender == 'Female') {
-                return p.gender == 'Male';
-              }
             }
             
             return true;
@@ -104,23 +99,10 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
     } catch (e) {
       if (mounted) {
         setState(() {
-          _nearbyProfiles = List.generate(9, (index) => UserModel(
-            id: 'mock-${index + 1}',
-            firstName: ['Sarah', 'Emma', 'Jennifer', 'Margot', 'Scarlett', 'Gal', 'Anne', 'Natalie', 'Keira'][index],
-            lastName: 'User',
-            email: 'user${index + 1}@example.com',
-            gender: 'Female',
-            age: 22 + index,
-            region: 'City ${index + 1}, USA',
-            profession: 'Profession ${index + 1}',
-            religion: index % 2 == 0 ? 'None' : 'Christian',
-            bio: 'Mock bio for user ${index + 1}. Long enough to test layout.',
-            profileImageUrl: 'https://i.pravatar.cc/300?u=user${index + 1}',
-            hasPastIssues: index % 3 == 0,
-            acceptsPastIssues: true,
-          ));
+          _nearbyProfiles = [];
           _isLoadingProfiles = false;
         });
+        // Remove mock data generation code on error for production
       }
     }
   }
@@ -205,8 +187,9 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
     const neutralSoftUrlLight = Color(0xFFF4F1F0);
     return Column(
       children: [
-        // Top Navigation Bar (Cleaned up to avoid empty space)
-        if (_isSearching)
+        // Tool Bar removed completely as requested
+
+        if (isLargeScreen && _isSearching)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             decoration: BoxDecoration(
@@ -262,63 +245,64 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                     const SizedBox(height: 8),
 
 
-                    // People Nearby Header
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              if (!_isSearching)
-                                IconButton(
-                                  icon: Icon(Icons.search, color: pColor, size: 20),
-                                  onPressed: () => setState(() => _isSearching = true),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
-                              if (!_isSearching) const SizedBox(width: 8),
-                              Text(
-                                _isSearching ? 'Search Results' : 'People Nearby',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.grey[100] : Colors.grey[800],
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: pColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  'NEW',
+                    // People Nearby Header (Only on Desktop)
+                    if (isLargeScreen)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                if (!_isSearching)
+                                  IconButton(
+                                    icon: Icon(Icons.search, color: pColor, size: 20),
+                                    onPressed: () => setState(() => _isSearching = true),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+                                if (!_isSearching) const SizedBox(width: 8),
+                                Text(
+                                  _isSearching ? 'Search Results' : 'People Nearby',
                                   style: TextStyle(
-                                    fontSize: 10,
-                                    color: pColor,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    letterSpacing: 1,
+                                    color: isDark ? Colors.grey[100] : Colors.grey[800],
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          GestureDetector(
-                            onTap: () => widget.onNavigate?.call(1), // Switch to Discovery tab
-                            child: Text(
-                              'View all',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: pColor,
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: pColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    'NEW',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: pColor,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            GestureDetector(
+                              onTap: () => widget.onNavigate?.call(1), // Switch to Discovery tab
+                              child: Text(
+                                'View all',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: pColor,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 16),
 
                     // People Section
@@ -367,11 +351,11 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                 ))
                               : Column(
                                   children: [
-                                    const SizedBox(height: 20), // Position towards top
+                                    const SizedBox(height: 10),
                                     Center(
                                       child: SizedBox(
-                                        width: MediaQuery.of(context).size.width * 0.8, // Narrower card
-                                        height: MediaQuery.of(context).size.height * 0.75, // Taller card
+                                        width: MediaQuery.of(context).size.width * 0.9,
+                                        height: MediaQuery.of(context).size.height * 0.65,
                                         child: SlideTransition(
                                           position: _slideAnimation,
                                           child: UserDiscoveryCard(
@@ -383,13 +367,25 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                         ),
                                       ),
                                     ),
+                                    const SizedBox(height: 15),
+                                    // Large Action Buttons
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        _buildCircularButton(Icons.close, Colors.grey[400]!, 50, () => _handleSkip(_nearbyProfiles.first)),
+                                        const SizedBox(width: 12),
+                                        _buildCircularButton(Icons.favorite, const Color(0xFFFF2D55), 65, () => _handleConnect(_nearbyProfiles.first), isHeart: true),
+                                        const SizedBox(width: 12),
+                                        _buildCircularButton(Icons.star, const Color(0xFFFFB800), 50, () => _handleFavorite(_nearbyProfiles.first)),
+                                      ],
+                                    ),
                                   ],
                                 );
                     }),
                     const SizedBox(height: 24),
 
-                    // Who Liked You Section
-                    if (_likedMeProfiles.isNotEmpty) ...[
+                    // Who Liked You Section (Only on Desktop)
+                    if (isLargeScreen && _likedMeProfiles.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Text(
@@ -658,6 +654,10 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
   void _handleSkip(UserModel profile) async {
     await _swipeAway(profile, right: false); // Skip = Swipe Left
     if (!mounted) return;
+    
+    // Add to skipped list in ProfileService
+    context.read<ProfileService>().skipUser(profile);
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Skipped ${profile.firstName}'),
@@ -784,6 +784,51 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopIconButton(IconData icon, bool isDark, Color color) {
+    return Container(
+      width: 45,
+      height: 45,
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white10 : Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Icon(icon, color: color, size: 22),
+    );
+  }
+
+  Widget _buildCircularButton(IconData icon, Color color, double size, VoidCallback onTap, {bool isHeart = false}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: isHeart ? color : Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: (isHeart ? color : Colors.black).withOpacity(0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Icon(
+          icon,
+          color: isHeart ? Colors.white : color,
+          size: size * 0.45,
         ),
       ),
     );

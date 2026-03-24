@@ -11,6 +11,7 @@ import 'package:qabool_app/services/profile_service.dart';
 import 'package:qabool_app/services/connection_service.dart';
 import 'package:qabool_app/screens/connections_screen.dart';
 import 'package:qabool_app/screens/favorites_screen.dart';
+import 'package:qabool_app/screens/skipped_screen.dart';
 import 'package:qabool_app/utils/image_utils.dart';
 import 'package:qabool_app/models/connection_model.dart' as v_conn;
 
@@ -27,7 +28,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late UserModel? _displayUser;
   bool _isMe = false;
   bool _isRefreshing = false;
-  String _activeDesktopSection = 'hero'; // 'hero', 'connections', 'favorites'
+  int _skippedCount = 0;
+  String _activeDesktopSection = 'hero'; // 'hero', 'connections', 'favorites', 'skipped'
 
   @override
   void initState() {
@@ -41,6 +43,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _refreshProfile();
       }
     });
+
+    _fetchSkippedCount();
+  }
+
+  Future<void> _fetchSkippedCount() async {
+    try {
+      final users = await context.read<ProfileService>().getSkippedUsers();
+      if (mounted) setState(() => _skippedCount = users.length);
+    } catch (e) {
+      debugPrint('Error fetching skipped count: $e');
+    }
   }
 
   Future<void> _refreshProfile() async {
@@ -159,6 +172,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             isEmbedded: true,
                             onBack: () => setState(() => _activeDesktopSection = 'hero'),
                           ),
+                        )
+                      else if (_activeDesktopSection == 'skipped')
+                        Expanded(
+                          child: SkippedScreen(
+                            isEmbedded: true,
+                            onBack: () => setState(() => _activeDesktopSection = 'hero'),
+                          ),
                         ),
                     ],
                   ),
@@ -173,6 +193,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               children: [
                 _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
+                if (_isMe) ...[
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: _buildActivitySection(isDark, primaryColor, accentGold),
+                  ),
+                ],
                 Padding(
                   padding: const EdgeInsets.all(24),
                   child: _buildContentSections(isDark, primaryColor, accentGold),
@@ -1161,6 +1188,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           MaterialPageRoute(
                               builder: (context) => const FavoritesScreen()),
                         );
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildActivityCard(
+                    icon: Icons.block_flipped,
+                    label: 'Skipped',
+                    count: _skippedCount,
+                    color: Colors.grey,
+                    isDark: isDark,
+                    onTap: () {
+                      if (isLargeScreen) {
+                        setState(() => _activeDesktopSection = 'skipped');
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SkippedScreen()),
+                        ).then((_) => _fetchSkippedCount());
                       }
                     },
                   ),
