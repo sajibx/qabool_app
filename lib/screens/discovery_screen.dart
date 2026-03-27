@@ -144,6 +144,48 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
     }
   }
 
+  Future<void> _handleRemoveConnection(UserModel profile) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove Connection?'),
+        content: Text('Are you sure you want to remove your connection with ${profile.firstName}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('REMOVE', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        final connections = context.read<ConnectionService>().connections;
+        final auth = context.read<AuthService>();
+        final currentUserId = auth.currentUser?.id;
+        
+        // Find the active ACCEPTED connection for this user
+        final conn = connections.firstWhere((c) => 
+          c.status == ConnectionStatus.ACCEPTED && 
+          (c.requester?.id == profile.id || c.recipient?.id == profile.id)
+        );
+
+        await context.read<ConnectionService>().respondToRequest(conn.id, ConnectionStatus.REJECTED);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Connection with ${profile.firstName} removed.')));
+          refreshData();
+        }
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error removing connection: $e')));
+      }
+    }
+  }
+
   // Build Helpers
   Widget _buildList(List<UserModel> users, {
     String emptyMessage = "No users found",
@@ -300,7 +342,11 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
 
                 return TabBarView(
                   children: [
-                    _buildList(mutualUsers, emptyMessage: "No mutual connections yet"),
+                    _buildList(
+                      mutualUsers, 
+                      emptyMessage: "No mutual connections yet",
+                      customOnSkip: (u) => _handleRemoveConnection(u),
+                    ),
                     _buildList(
                       receivedUsers, 
                       emptyMessage: "No received requests",
