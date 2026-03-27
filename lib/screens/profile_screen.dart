@@ -220,7 +220,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   flex: 3,
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-                    child: _buildContentSections(isDark, primaryColor, accentGold),
+                    child: _buildContentSections(isDark, primaryColor, accentGold, showRequirements: false),
                   ),
                 ),
                 // Divider
@@ -239,9 +239,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: SingleChildScrollView(
                             padding: const EdgeInsets.only(top: 0, bottom: 40),
                             child: Column(
-                              children: [
-                                 _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
-                              ],
+                                children: [
+                                  _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
+                                  const SizedBox(height: 24),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                                    child: _buildRequirementsSection(isDark, primaryColor, accentGold),
+                                  ),
+                                ],
                             ),
                           ),
                         )
@@ -288,7 +293,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // ],
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: _buildContentSections(isDark, primaryColor, accentGold),
+                  child: _buildContentSections(isDark, primaryColor, accentGold, showRequirements: true),
                 ),
               ],
             ),
@@ -794,15 +799,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: _buildRequirementsSection(isDark, primaryColor, accentGold),
-        ),
       ],
     );
   }
 
-  Widget _buildContentSections(bool isDark, Color primaryColor, Color accentGold) {
+  Widget _buildContentSections(bool isDark, Color primaryColor, Color accentGold, {bool showRequirements = true}) {
     final cardBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFFDF2F4);
     final sectionTitleStyle = TextStyle(
       fontSize: 18,
@@ -856,7 +857,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }),
         const SizedBox(height: 24),
 
-        const SizedBox(height: 24),
+        if (showRequirements) ...[
+          _buildRequirementsSection(isDark, primaryColor, accentGold),
+          const SizedBox(height: 24),
+        ],
 
         // Footer placeholders
         _buildActionPlaceholder('Define your problem', 'Tell us what\'s on your mind so we can help you better.', Icons.warning_amber_rounded, isDark),
