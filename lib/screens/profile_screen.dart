@@ -19,8 +19,8 @@ import 'package:qabool_app/models/connection_model.dart' as v_conn;
 
 class ProfileScreen extends StatefulWidget {
   final UserModel? user;
-
-  const ProfileScreen({super.key, this.user});
+  final bool showBackButton;
+  const ProfileScreen({super.key, this.user, this.showBackButton = true});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -118,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         automaticallyImplyLeading: false, // Custom leading
-        leading: !_isMe ? Padding(
+        leading: (!_isMe && widget.showBackButton) ? Padding(
           padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
           child: CircleAvatar(
             backgroundColor: Colors.black.withValues(alpha: 0.2),

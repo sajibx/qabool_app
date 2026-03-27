@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/utils/image_utils.dart';
+import '../theme.dart';
 
 class UserListTile extends StatelessWidget {
   final UserModel user;
   final VoidCallback onConnect;
   final VoidCallback onFavorite;
   final VoidCallback onSkip;
+  final bool isSelected;
   final VoidCallback? onTap;
 
   const UserListTile({
@@ -16,6 +18,7 @@ class UserListTile extends StatelessWidget {
     required this.onConnect,
     required this.onFavorite,
     required this.onSkip,
+    this.isSelected = false,
     this.onTap,
   });
 
@@ -27,8 +30,12 @@ class UserListTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: BorderRadius.circular(50), // Thinner cylinder shape
+        color: isSelected && !isDark ? QaboolTheme.primary.withOpacity(0.05) : (isDark ? const Color(0xFF1E293B) : Colors.white),
+        borderRadius: BorderRadius.circular(50),
+        border: Border.all(
+          color: isSelected ? QaboolTheme.primary : Colors.transparent,
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
