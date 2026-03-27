@@ -1,4 +1,5 @@
 import 'package:qabool_app/services/api_service.dart';
+import 'package:flutter/foundation.dart';
 
 /// Resolves a potentially relative image path to a full URL.
 ///
