@@ -66,6 +66,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _displayUser = updatedUser;
         });
+        
+        // If this is my profile, update the global AuthService as well
+        if (_isMe && updatedUser != null) {
+          await context.read<AuthService>().updateCurrentUser(updatedUser);
+        }
       }
     } catch (e) {
       debugPrint('Error refreshing profile: $e');
