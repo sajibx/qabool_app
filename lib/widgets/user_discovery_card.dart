@@ -102,7 +102,7 @@ class UserDiscoveryCard extends StatelessWidget {
                         letterSpacing: -0.3,
                       ),
                     ),
-                    if (user.isVerified || true) ...[ // Always show for Sarah mock
+                    if (user.verifiedStatus == 'active') ...[
                       const SizedBox(width: 6),
                       const Icon(Icons.verified, color: Color(0xFF3498DB), size: 18),
                     ],

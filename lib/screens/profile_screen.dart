@@ -416,7 +416,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (_displayUser!.isVerified)
+                  if (_displayUser!.verifiedStatus == 'active')
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
