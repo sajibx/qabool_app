@@ -240,9 +240,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             padding: const EdgeInsets.only(top: 0, bottom: 40),
                             child: Column(
                               children: [
-                                _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
-                                // const SizedBox(height: 48),
-                                // _buildActivitySection(isDark, primaryColor, accentGold),
+                                 _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
+                                 const SizedBox(height: 24),
+                                 Padding(
+                                   padding: const EdgeInsets.symmetric(horizontal: 24),
+                                   child: _buildRequirementsSection(isDark, primaryColor, accentGold),
+                                 ),
                               ],
                             ),
                           ),
@@ -290,7 +293,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // ],
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: _buildContentSections(isDark, primaryColor, accentGold),
+                  child: Column(
+                    children: [
+                      _buildContentSections(isDark, primaryColor, accentGold),
+                      const SizedBox(height: 24),
+                      _buildRequirementsSection(isDark, primaryColor, accentGold),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -854,31 +863,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }),
         const SizedBox(height: 24),
 
-        // Your Requirements
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFDF2F4),
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Your requirements', style: sectionTitleStyle),
-                  Icon(Icons.edit_note, color: const Color(0xFFF43F5E), size: 24),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildRequirementItem('LOOKING FOR', _displayUser!.lookingForType ?? 'Practising Muslim', true),
-              _buildRequirementItem('AGE', _displayUser!.lookingForAge ?? '20 - 30 years old', true),
-              _buildRequirementItem('EDUCATION', _displayUser!.lookingForProfession ?? 'Bachelors Degree or above', true),
-            ],
-          ),
-        ),
         const SizedBox(height: 24),
 
         // Footer placeholders
@@ -955,6 +939,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequirementsSection(bool isDark, Color primaryColor, Color accentGold) {
+    final sectionTitleStyle = TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w900,
+      color: isDark ? Colors.white : const Color(0xFF1E293B),
+    );
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFDF2F4),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Your requirements', style: sectionTitleStyle),
+              Icon(Icons.edit_note, color: const Color(0xFFF43F5E), size: 24),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildRequirementItem('LOOKING FOR', _displayUser!.lookingForType ?? 'Practising Muslim', true),
+          _buildRequirementItem('AGE', _displayUser!.lookingForAge ?? '20 - 30 years old', true),
+          _buildRequirementItem('EDUCATION', _displayUser!.lookingForProfession ?? 'Bachelors Degree or above', true),
         ],
       ),
     );
