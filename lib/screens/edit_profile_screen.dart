@@ -241,12 +241,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       };
 
       final updatedUser = await context.read<ProfileService>().updateProfile(updatedData, image: _pickedImage);
-      // Update currentUser in AuthService to reflect changes locally immediately
-      if (mounted) {
-        await context.read<AuthService>().updateCurrentUser(updatedUser);
-      }
       
       if (mounted) {
+        await context.read<AuthService>().updateCurrentUser(updatedUser);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully')),
         );
@@ -254,8 +251,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage = e.toString();
+        if (errorMessage.startsWith('Exception: ')) {
+          errorMessage = errorMessage.replaceFirst('Exception: ', '');
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.redAccent,
+          ),
         );
       }
     } finally {
@@ -326,7 +330,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     )
                                   : (context.read<AuthService>().currentUser?.profileImageUrl != null
                                       ? DecorationImage(
-                                          image: NetworkImage('${ApiService.baseUrl.replaceAll('/api/v1', '')}${context.read<AuthService>().currentUser!.profileImageUrl}'),
+                                          image: NetworkImage(resolveImageUrl(context.read<AuthService>().currentUser!.profileImageUrl)),
                                           fit: BoxFit.cover,
                                         )
                                       : null),

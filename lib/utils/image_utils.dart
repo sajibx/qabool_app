@@ -5,5 +5,8 @@
 String resolveImageUrl(String? path) {
   if (path == null || path.isEmpty) return '';
   if (path.startsWith('http')) return path;
-  return 'http://127.0.0.1:3000$path';
+  
+  // Remove leading slash if it exists to avoid double slash
+  final cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  return 'http://localhost:3000/$cleanPath';
 }

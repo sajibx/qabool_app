@@ -127,6 +127,11 @@ class ProfileService extends ChangeNotifier {
         return UserModel.fromJson(response.data);
       }
       throw Exception('Failed to update profile');
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null && e.response!.data['message'] != null) {
+        throw Exception(e.response!.data['message']);
+      }
+      rethrow;
     } catch (e) {
       rethrow;
     }
