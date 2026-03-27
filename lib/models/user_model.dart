@@ -27,6 +27,19 @@ class UserModel {
   final String? connectionId;
   final bool hasPastIssues;
   final bool acceptsPastIssues;
+  
+  // New Fields
+  final String? maritalStatus;
+  final String? currentCity;
+  final double? monthlyIncome;
+  final int? siblings;
+  final int? familyMembers;
+  final String? lookingForAge;
+  final String? lookingForType;
+  final String? lookingForProfession;
+  final String verifiedStatus; // active, inactive
+  final String? sect;
+  final String? caste;
 
   UserModel({
     required this.id,
@@ -55,11 +68,23 @@ class UserModel {
     this.connectionId,
     this.hasPastIssues = false,
     this.acceptsPastIssues = true,
+    this.maritalStatus,
+    this.currentCity,
+    this.monthlyIncome,
+    this.siblings,
+    this.familyMembers,
+    this.lookingForAge,
+    this.lookingForType,
+    this.lookingForProfession,
+    this.verifiedStatus = 'inactive',
+    this.sect,
+    this.caste,
   });
 
   String get fullName => '$firstName $lastName';
 
   String get city {
+    if (currentCity != null && currentCity!.isNotEmpty) return currentCity!;
     if (region == null) return "";
     return region!.split(',').first.trim();
   }
@@ -97,6 +122,17 @@ class UserModel {
       connectionId: json['connectionId']?.toString(),
       hasPastIssues: json['hasPastIssues'] ?? false,
       acceptsPastIssues: json['acceptsPastIssues'] ?? true,
+      maritalStatus: json['maritalStatus'],
+      currentCity: json['currentCity'],
+      monthlyIncome: json['monthlyIncome']?.toDouble(),
+      siblings: json['siblings'],
+      familyMembers: json['familyMembers'],
+      lookingForAge: json['lookingForAge'],
+      lookingForType: json['lookingForType'],
+      lookingForProfession: json['lookingForProfession'],
+      verifiedStatus: json['verifiedStatus']?.toString() ?? 'inactive',
+      sect: json['sect'],
+      caste: json['caste'],
     );
   }
 
@@ -129,6 +165,17 @@ class UserModel {
       'connectionId': connectionId,
       'hasPastIssues': hasPastIssues,
       'acceptsPastIssues': acceptsPastIssues,
+      'maritalStatus': maritalStatus,
+      'currentCity': currentCity,
+      'monthlyIncome': monthlyIncome,
+      'siblings': siblings,
+      'familyMembers': familyMembers,
+      'lookingForAge': lookingForAge,
+      'lookingForType': lookingForType,
+      'lookingForProfession': lookingForProfession,
+      'verifiedStatus': verifiedStatus,
+      'sect': sect,
+      'caste': caste,
     };
   }
 
@@ -159,6 +206,17 @@ class UserModel {
     String? connectionId,
     bool? hasPastIssues,
     bool? acceptsPastIssues,
+    String? maritalStatus,
+    String? currentCity,
+    double? monthlyIncome,
+    int? siblings,
+    int? familyMembers,
+    String? lookingForAge,
+    String? lookingForType,
+    String? lookingForProfession,
+    String? verifiedStatus,
+    String? sect,
+    String? caste,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -187,6 +245,17 @@ class UserModel {
       connectionId: connectionId ?? this.connectionId,
       hasPastIssues: hasPastIssues ?? this.hasPastIssues,
       acceptsPastIssues: acceptsPastIssues ?? this.acceptsPastIssues,
+      maritalStatus: maritalStatus ?? this.maritalStatus,
+      currentCity: currentCity ?? this.currentCity,
+      monthlyIncome: monthlyIncome ?? this.monthlyIncome,
+      siblings: siblings ?? this.siblings,
+      familyMembers: familyMembers ?? this.familyMembers,
+      lookingForAge: lookingForAge ?? this.lookingForAge,
+      lookingForType: lookingForType ?? this.lookingForType,
+      lookingForProfession: lookingForProfession ?? this.lookingForProfession,
+      verifiedStatus: verifiedStatus ?? this.verifiedStatus,
+      sect: sect ?? this.sect,
+      caste: caste ?? this.caste,
     );
   }
 }

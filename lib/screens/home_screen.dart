@@ -11,6 +11,7 @@ import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
 import 'package:qabool_app/screens/profile_screen.dart';
 import 'package:qabool_app/widgets/user_discovery_card.dart';
+import 'package:qabool_app/widgets/filter_bottom_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int index)? onNavigate;
@@ -31,6 +32,14 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
   List<UserModel> _nearbyProfiles = [];
   List<UserModel> _likedMeProfiles = [];
   bool _isLoadingLikedMe = true;
+
+  // Filter State
+  String? _selectedReligion;
+  String? _selectedLocation;
+  RangeValues _ageRange = const RangeValues(18, 80);
+  String? _selectedEducation;
+  bool _showConnected = false;
+  bool _showSkipped = false;
 
   @override
   void initState() {
@@ -71,7 +80,11 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
       }
       final profileService = context.read<ProfileService>();
       final authService = context.read<AuthService>();
-      final profiles = await profileService.getHomeProfiles(); // Using new Home API
+      
+      // If the user wants connected or skipped users, we must use the Explore API 
+      // since the Home API rigidly filters them out.
+      final profiles = await profileService.getExploreProfiles(_showConnected, _showSkipped);
+      
       if (mounted) {
         final currentUser = authService.currentUser;
         setState(() {
@@ -88,6 +101,20 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
 
             // Filter based on past issues preferences (if not done in backend)
             if (currentUser != null && !currentUser.acceptsPastIssues && p.hasPastIssues) {
+              return false;
+            }
+
+            // Local filters for Explore
+            if (p.age != null && (p.age! < _ageRange.start || p.age! > _ageRange.end)) {
+              return false;
+            }
+            if (_selectedEducation != null && p.education != _selectedEducation) {
+              return false;
+            }
+            if (_selectedReligion != null && p.religion != _selectedReligion) {
+              return false;
+            }
+            if (_selectedLocation != null && p.region != null && !p.region!.contains(_selectedLocation!)) {
               return false;
             }
             
@@ -134,6 +161,33 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
     } catch (e) {
       if (mounted) setState(() => _isLoadingChats = false);
     }
+  }
+
+  void _showFilters() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FilterBottomSheet(
+        initialAgeRange: _ageRange,
+        initialReligion: _selectedReligion,
+        initialEducation: _selectedEducation,
+        initialLocation: _selectedLocation,
+        initialShowConnected: _showConnected,
+        initialShowSkipped: _showSkipped,
+        onApply: (ageRange, religion, education, location, showConnected, showSkipped) {
+          setState(() {
+            _ageRange = ageRange;
+            _selectedReligion = religion;
+            _selectedEducation = education;
+            _selectedLocation = location;
+            _showConnected = showConnected;
+            _showSkipped = showSkipped;
+          });
+          _fetchProfiles();
+        },
+      ),
+    );
   }
 
   @override
@@ -187,7 +241,29 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
     const neutralSoftUrlLight = Color(0xFFF4F1F0);
     return Column(
       children: [
-        // Tool Bar removed completely as requested
+        // Top Left Filter Settings Icon
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Row(
+            children: [
+              InkWell(
+                onTap: _showFilters,
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4),
+                    ],
+                  ),
+                  child: Icon(Icons.tune, color: pColor, size: 24),
+                ),
+              ),
+            ],
+          ),
+        ),
 
         if (isLargeScreen && _isSearching)
           Container(
@@ -363,6 +439,14 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                             onConnect: () => _handleConnect(_nearbyProfiles.first),
                                             onFavorite: () => _handleFavorite(_nearbyProfiles.first),
                                             onSkip: () => _handleSkip(_nearbyProfiles.first),
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => ProfileScreen(user: _nearbyProfiles.first),
+                                                ),
+                                              );
+                                            },
                                           ),
                                         ),
                                       ),

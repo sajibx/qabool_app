@@ -42,8 +42,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _educationController = TextEditingController();
   final _bioController = TextEditingController();
   final _specialController = TextEditingController();
+  final _currentCityController = TextEditingController();
+  
   bool _hasPastIssues = false;
   bool _acceptsPastIssues = true;
+  String? _selectedMaritalStatus;
+  String? _selectedMonthlyIncome;
+  String? _selectedSiblings;
+  String? _selectedFamilyMembers;
+  String? _selectedLookingForType;
+  String? _selectedLookingForAge;
+  String? _selectedLookingForProfession;
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -91,6 +100,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _bioController.dispose();
     _specialController.dispose();
     _phoneController.dispose();
+    _currentCityController.dispose();
     super.dispose();
   }
 
@@ -135,7 +145,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _phoneController.text.isEmpty ||
         _weightController.text.isEmpty ||
         _jobController.text.isEmpty ||
-        _educationController.text.isEmpty) {
+        _educationController.text.isEmpty ||
+        _selectedMaritalStatus == null ||
+        _currentCityController.text.isEmpty ||
+        _selectedMonthlyIncome == null ||
+        _selectedSiblings == null ||
+        _selectedFamilyMembers == null ||
+        _selectedLookingForType == null ||
+        _selectedLookingForAge == null ||
+        _selectedLookingForProfession == null) {
       debugPrint('SignUp: Mandatory fields validation failed');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all mandatory fields')),
@@ -216,6 +234,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
         hasPastIssues: _hasPastIssues,
         acceptsPastIssues: _acceptsPastIssues,
         phoneNumber: "${_selectedCountryCode}${_phoneController.text}",
+        maritalStatus: _selectedMaritalStatus,
+        currentCity: _currentCityController.text,
+        monthlyIncome: double.tryParse(_selectedMonthlyIncome ?? ""),
+        siblings: int.tryParse(_selectedSiblings ?? ""),
+        familyMembers: int.tryParse(_selectedFamilyMembers ?? ""),
+        lookingForAge: _selectedLookingForAge,
+        lookingForType: _selectedLookingForType,
+        lookingForProfession: _selectedLookingForProfession,
         profileImage: _pickedImage,
       );
       if (!mounted) return;
@@ -852,6 +878,125 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               controller: _educationController,
                               decoration:
                                   inputDecoration('Highest degree earned')),
+                          const SizedBox(height: 16),
+
+                          // Household & Additional Info
+                          buildSectionHeader(Icons.home, 'Household & Additional Info'),
+                          buildLabel('Marital Status'),
+                          DropdownButtonFormField<String>(
+                            value: _selectedMaritalStatus,
+                            decoration: inputDecoration('Select Status'),
+                            items: ['Single', 'Divorced', 'Widowed', 'Separated']
+                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (val) => setState(() => _selectedMaritalStatus = val),
+                          ),
+                          const SizedBox(height: 16),
+                          buildLabel('Current City'),
+                          TextField(
+                            controller: _currentCityController,
+                            decoration: inputDecoration('e.g. London, UK'),
+                          ),
+                          const SizedBox(height: 16),
+                          buildLabel('Monthly Income'),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: DropdownButtonFormField<String>(
+                                  value: _selectedMonthlyIncome,
+                                  decoration: inputDecoration('Select Income'),
+                                  items: ['0', '500', '1000', '2000', '3000', '4000', '5000', '7500', '10000']
+                                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => _selectedMonthlyIncome = val),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Euro',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    buildLabel('Siblings'),
+                                    DropdownButtonFormField<String>(
+                                      value: _selectedSiblings,
+                                      decoration: inputDecoration('Select'),
+                                      items: ['0', '1', '2', '3', '4', '5', '6+']
+                                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                          .toList(),
+                                      onChanged: (val) => setState(() => _selectedSiblings = val),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    buildLabel('Family Members'),
+                                    DropdownButtonFormField<String>(
+                                      value: _selectedFamilyMembers,
+                                      decoration: inputDecoration('Select'),
+                                      items: ['1', '2', '3', '4', '5', '6', '7', '8+']
+                                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                          .toList(),
+                                      onChanged: (val) => setState(() => _selectedFamilyMembers = val),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          Divider(
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFE2E8F0)),
+                          const SizedBox(height: 24),
+
+                          // Partner Requirements
+                          buildSectionHeader(Icons.favorite, 'Partner Requirements'),
+                          buildLabel('Looking For (Type)'),
+                          DropdownButtonFormField<String>(
+                            value: _selectedLookingForType,
+                            decoration: inputDecoration('Select Type'),
+                            items: ['Practising Muslim', 'Moderate Muslim', 'Liberal Muslim', 'Other']
+                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (val) => setState(() => _selectedLookingForType = val),
+                          ),
+                          const SizedBox(height: 16),
+                          buildLabel('Preferred Age Range'),
+                          DropdownButtonFormField<String>(
+                            value: _selectedLookingForAge,
+                            decoration: inputDecoration('Select Age Range'),
+                            items: ['18 - 25 years old', '25 - 35 years old', '35 - 45 years old', '45+ years old']
+                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (val) => setState(() => _selectedLookingForAge = val),
+                          ),
+                          const SizedBox(height: 16),
+                          buildLabel('Preferred Education/Profession'),
+                          DropdownButtonFormField<String>(
+                            value: _selectedLookingForProfession,
+                            decoration: inputDecoration('Select Education'),
+                            items: ['High School or above', 'Bachelors Degree or above', 'Masters Degree or above', 'PhD or above']
+                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (val) => setState(() => _selectedLookingForProfession = val),
+                          ),
                           const SizedBox(height: 24),
                           Divider(
                               color: isDark

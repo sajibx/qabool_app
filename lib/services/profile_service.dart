@@ -184,6 +184,37 @@ class ProfileService extends ChangeNotifier {
     }
   }
 
+  // Blocking
+  Future<void> blockUser(String id) async {
+    try {
+      await _apiService.client.post('/blocks/$id');
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> unblockUser(String id) async {
+    try {
+      await _apiService.client.delete('/blocks/$id');
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<UserModel>> getBlockedUsers() async {
+    try {
+      final response = await _apiService.client.get('/blocks');
+      if (response.statusCode == 200) {
+        return (response.data as List).map((u) => UserModel.fromJson(u)).toList();
+      }
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   void clearData() {
     notifyListeners();
   }

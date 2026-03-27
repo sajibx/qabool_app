@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'blocked_users_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qabool_app/theme.dart';
 import 'package:provider/provider.dart';
@@ -98,25 +100,111 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? bgDark : const Color(0xFFFDFCFB),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: _isMe
-            ? const Text(
-                'My Profile',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: QaboolTheme.primary,
-                ),
-              )
-            : null,
-        centerTitle: true,
-        automaticallyImplyLeading: !_isMe,
-        backgroundColor:
-            isDark ? bgDark.withOpacity(0.8) : Colors.white.withOpacity(0.8),
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        scrolledUnderElevation: 1,
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false, // Custom leading
+        leading: !_isMe ? Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+          child: CircleAvatar(
+            backgroundColor: Colors.black.withValues(alpha: 0.2),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+        ) : null,
         actions: [
           if (!_isMe)
-            _buildFavoriteButton(isDark, primaryColor),
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
+              child: CircleAvatar(
+                backgroundColor: Colors.black.withValues(alpha: 0.2),
+                child: PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: Colors.white, size: 20),
+                  onSelected: (value) async {
+                    if (value == 'block') {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Block User?'),
+                          content: Text('Are you sure you want to block ${_displayUser!.firstName}? They will no longer be able to see your profile or message you.'),
+                          actions: [
+                            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCEL')),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('BLOCK', style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirmed == true && mounted) {
+                        try {
+                          await context.read<ProfileService>().blockUser(_displayUser!.id);
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('${_displayUser!.firstName} blocked.')),
+                            );
+                            Navigator.pop(context); // Go back after blocking
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error blocking user: $e')),
+                            );
+                          }
+                        }
+                      }
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuItem<String>(
+                      value: 'block',
+                      child: Text('Block User'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.black.withValues(alpha: 0.3),
+                    child: IconButton(
+                      icon: const Icon(Icons.block, color: Colors.white, size: 20),
+                      tooltip: 'Blocked Users',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const BlockedUsersScreen()),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  CircleAvatar(
+                    backgroundColor: Colors.black.withValues(alpha: 0.3),
+                    child: IconButton(
+                        icon: const Icon(Icons.logout, color: Colors.white, size: 20),
+                        tooltip: 'Logout',
+                        onPressed: () async {
+                          await context.read<AuthService>().logout();
+                          if (context.mounted) {
+                            context.read<ChatService>().disconnectSocket();
+                            Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                          }
+                        },
+                      ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
       body: LayoutBuilder(
@@ -149,12 +237,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (_activeDesktopSection == 'hero')
                         Expanded(
                           child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+                            padding: const EdgeInsets.only(top: 0, bottom: 40),
                             child: Column(
                               children: [
                                 _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
-                                const SizedBox(height: 48),
-                                _buildActivitySection(isDark, primaryColor, accentGold),
+                                // const SizedBox(height: 48),
+                                // _buildActivitySection(isDark, primaryColor, accentGold),
                               ],
                             ),
                           ),
@@ -189,19 +277,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           // Mobile View
           return SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 40),
+            padding: const EdgeInsets.only(top: 0, bottom: 40),
             child: Column(
               children: [
                 _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
-                if (_isMe) ...[
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: _buildActivitySection(isDark, primaryColor, accentGold),
-                  ),
-                ],
+                // if (_isMe) ...[
+                //   const SizedBox(height: 16),
+                //   Padding(
+                //     padding: const EdgeInsets.symmetric(horizontal: 24),
+                //     child: _buildActivitySection(isDark, primaryColor, accentGold),
+                //   ),
+                // ],
                 Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: _buildContentSections(isDark, primaryColor, accentGold),
                 ),
               ],
@@ -271,76 +359,137 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildHeroSection(bool isDark, Color bgDark, Color primaryColor, Color accentGold) {
     return Column(
       children: [
-        Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            Container(
-              width: 180,
-              height: 180,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [
-                    QaboolTheme.primary,
-                    QaboolTheme.accentGold,
-                    QaboolTheme.primary
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+        SizedBox(
+      height: MediaQuery.of(context).size.height * 0.48,
+      width: double.infinity,
+      child: Stack(
+        children: [
+          // Full Cover Image
+          SizedBox(
+            width: double.infinity,
+            height: double.infinity,
+            child: CachedNetworkImage(
+              imageUrl: resolveImageUrl(_displayUser!.profileImageUrl),
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                color: isDark ? Colors.grey[800] : Colors.grey[200],
+                child: const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
               ),
-              child: ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: resolveImageUrl(_displayUser!.profileImageUrl),
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                    child: const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                    child: Icon(Icons.person,
-                        size: 64,
-                        color: isDark ? Colors.grey[600] : Colors.grey[400]),
-                  ),
-                ),
+              errorWidget: (context, url, error) => Container(
+                color: isDark ? Colors.grey[800] : Colors.grey[200],
+                child: Icon(Icons.person,
+                    size: 100,
+                    color: isDark ? Colors.grey[600] : Colors.grey[400]),
               ),
             ),
-            if (_isMe)
-              Container(
-                width: 40,
-                height: 40,
+          ),
+          
+          // Gradient Overlay
+          Positioned.fill(
+             child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.2),
+                      Colors.transparent,
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.8),
+                    ],
+                    stops: const [0.0, 0.1, 0.7, 1.0],
+                  )
+                )
+             )
+          ),
+
+          // User Info Title (Bottom left)
+          Positioned(
+             bottom: 24,
+             left: 24,
+             right: 24,
+             child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (_displayUser!.isVerified)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.verified, color: Color(0xFF3498DB), size: 18),
+                        const SizedBox(width: 4),
+                        const Text('Verified',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          '${_displayUser!.firstName}, ${_displayUser!.age ?? ""}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 14, height: 14,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: const Color(0xFF2ECC71), width: 3),
+                        ),
+                      )
+                    ]
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on_outlined, color: Colors.white, size: 18),
+                      const SizedBox(width: 6),
+                      Text(
+                        _displayUser!.region ?? 'No location added',
+                        style: const TextStyle(
+                           color: Colors.white,
+                           fontSize: 16,
+                           fontWeight: FontWeight.w600,
+                        ),
+                      )
+                    ]
+                  )
+                ]
+             )
+          ),
+          
+          // Edit Profile button overlay if it's me
+          if (_isMe) ...[
+            Positioned(
+              bottom: 24,
+              right: 24,
+              child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF800000), Color(0xFF4A0000)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  border: Border.all(
-                      color: isDark ? bgDark : Colors.white, width: 2),
+                  color: primaryColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: IconButton(
-                  padding: EdgeInsets.zero,
-                  icon: const Icon(Icons.edit,
-                      color: Colors.white, size: 20),
+                  icon: const Icon(Icons.edit, color: Colors.white),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -349,486 +498,301 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },
                 ),
               ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        Text(
-          '${_displayUser!.fullName}${_displayUser!.age != null ? ", ${_displayUser!.age}" : ""}',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: isDark ? Colors.grey[100] : Colors.grey[900],
-          ),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.location_on,
-                size: 18,
-                color: isDark ? Colors.grey[500] : Colors.grey[400]),
-            const SizedBox(width: 4),
-            Text(
-              _displayUser!.region ?? 'No location added',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: isDark ? Colors.grey[500] : Colors.grey[500],
-              ),
             ),
           ],
-        ),
-        const SizedBox(height: 32),
-        if (_isMe)
-          // ... (existing _isMe block remains same)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const EditProfileScreen()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.transparent,
-                      shadowColor: primaryColor.withOpacity(0.2),
-                      elevation: 8,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ).copyWith(
-                      backgroundColor:
-                          WidgetStateProperty.all(Colors.transparent),
-                    ),
-                    child: Ink(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF800000), Color(0xFF4A0000)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Container(
-                        alignment: Alignment.center,
-                        constraints: const BoxConstraints(minHeight: 44),
-                        child: const Text(
-                          'EDIT PROFILE',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 1,
-                    child: OutlinedButton(
-                    onPressed: () async {
-                      await context.read<AuthService>().logout();
-                      if (context.mounted) {
-                        context.read<ChatService>().disconnectSocket();
-                        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-                      }
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide(
-                          color: primaryColor.withOpacity(0.2), width: 2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      minimumSize: const Size.fromHeight(44),
-                    ),
-                    child: Icon(Icons.logout, color: primaryColor, size: 20),
-                  ),
-                ),
+        ],
+      ),
+    ),
+
+        if (!_isMe)
+          Container(
+            margin: const EdgeInsets.only(top: 12, left: 20, right: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFFF1F2),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark ? Colors.white10 : const Color(0xFFFFE4E6),
+                width: 1,
+              ),
+              boxShadow: isDark ? [] : [
+                BoxShadow(
+                  color: const Color(0xFFF43F5E).withOpacity(0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                )
               ],
             ),
-          )
-        else
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (_isRefreshing && _displayUser!.connectionStatus == 'NONE')
-                  // Show loading state while we verify if there's actually a connection
-                  ElevatedButton(
-                    onPressed: null,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Container(
-                      alignment: Alignment.center,
-                      constraints: const BoxConstraints(minHeight: 44),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: isDark ? Colors.grey[600] : Colors.grey[400],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'LOADING...',
-                            style: TextStyle(
-                              color: isDark ? Colors.grey[600] : Colors.grey[400],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                else if (_displayUser!.connectionStatus == 'PENDING_RECEIVED')
-                  Row(
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            try {
-                              final connectionService = context.read<ConnectionService>();
-                              await connectionService.respondToRequest(
-                                  _displayUser!.connectionId!,
-                                  v_conn.ConnectionStatus.ACCEPTED);
-                              if (mounted) {
-                                setState(() {
-                                  _displayUser = _displayUser!.copyWith(
-                                      connectionStatus: 'ACCEPTED');
-                                });
-                              }
-                            } catch (e) {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content:
-                                          Text('Failed to accept: $e')),
-                                );
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 16),
-                            backgroundColor: const Color(0xFF2ECC71),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+                      Text(
+                        _displayUser!.connectionStatus == 'ACCEPTED' ? 'Match Found!' :
+                        _displayUser!.connectionStatus == 'PENDING_RECEIVED' ? 'Pending Request' :
+                        'Ready to Qabool?',
+                        style: TextStyle(
+                            fontSize: 18, 
+                            fontWeight: FontWeight.w800, 
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        _displayUser!.connectionStatus == 'ACCEPTED' ? 'You are connected.' :
+                        _displayUser!.connectionStatus == 'PENDING_RECEIVED' ? 'They want to connect.' :
+                        'Is ${_displayUser?.gender?.toLowerCase() == 'male' ? 'he' : 'she'} your perfect match?',
+                        style: TextStyle(
+                            fontSize: 14, 
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_isRefreshing && _displayUser!.connectionStatus == 'NONE')
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: isDark ? Colors.grey[600] : Colors.grey[400],
+                        ),
+                      )
+                    else if (_displayUser!.connectionStatus == 'PENDING_RECEIVED') ...[
+                      // Reject
+                      GestureDetector(
+                        onTap: () async {
+                          try {
+                            final connectionService = context.read<ConnectionService>();
+                            await connectionService.respondToRequest(
+                                _displayUser!.connectionId!,
+                                v_conn.ConnectionStatus.REJECTED);
+                            if (mounted) setState(() => _displayUser = _displayUser!.copyWith(connectionStatus: 'NONE'));
+                          } catch (e) {
+                            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF43F5E), 
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFF43F5E).withOpacity(0.35),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              )
+                            ]
                           ),
-                          child: const Text('ACCEPT',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold)),
+                          child: const Icon(Icons.close, color: Colors.white, size: 24),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () async {
+                      // Accept
+                      GestureDetector(
+                        onTap: () async {
+                          try {
+                            final connectionService = context.read<ConnectionService>();
+                            await connectionService.respondToRequest(
+                                _displayUser!.connectionId!,
+                                v_conn.ConnectionStatus.ACCEPTED);
+                            if (mounted) setState(() => _displayUser = _displayUser!.copyWith(connectionStatus: 'ACCEPTED'));
+                          } catch (e) {
+                            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2ECC71), 
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF2ECC71).withOpacity(0.35),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              )
+                            ]
+                          ),
+                          child: const Icon(Icons.check, color: Colors.white, size: 24),
+                        ),
+                      ),
+                    ]
+                    else if (_displayUser!.connectionStatus == 'ACCEPTED') ...[
+                      // Remove Connection
+                      GestureDetector(
+                        onTap: () async {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Remove Connection'),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCEL')),
+                                TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('REMOVE', style: TextStyle(color: Colors.red))),
+                              ],
+                            ),
+                          );
+                          if (confirmed == true) {
                             try {
                               final connectionService = context.read<ConnectionService>();
                               await connectionService.respondToRequest(
                                   _displayUser!.connectionId!,
                                   v_conn.ConnectionStatus.REJECTED);
-                              if (mounted) {
-                                setState(() {
-                                  _displayUser = _displayUser!.copyWith(
-                                      connectionStatus: 'NONE');
-                                });
-                              }
+                              if (mounted) setState(() => _displayUser = _displayUser!.copyWith(connectionStatus: 'NONE'));
                             } catch (e) {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content:
-                                          Text('Failed to reject: $e')),
-                                );
-                              }
+                              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
                             }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 16),
-                            backgroundColor: Colors.grey[800],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[800], 
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              )
+                            ]
                           ),
-                          child: const Text('REJECT',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold)),
+                          child: const Icon(Icons.person_remove, color: Colors.white, size: 20),
                         ),
                       ),
-                    ],
-                  )
-                else if (_displayUser!.connectionStatus == 'ACCEPTED')
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: ElevatedButton(
-                          onPressed: () async {
+                      const SizedBox(width: 12),
+                      // Message
+                      GestureDetector(
+                        onTap: () async {
                             try {
                               final chatService = context.read<ChatService>();
-                              final chat = await chatService
-                                  .createChat(_displayUser!.id);
+                              final chat = await chatService.createChat(_displayUser!.id);
                               if (context.mounted) {
                                 final isLargeScreen = MediaQuery.of(context).size.width > 800;
                                 if (isLargeScreen) {
                                   chatService.toggleFloatingChat(chat.id, open: true, otherUser: _displayUser!);
                                 } else {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ChatScreen(
-                                        chatId: chat.id,
-                                        otherUser: _displayUser!,
-                                      ),
-                                    ),
-                                  );
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(chatId: chat.id, otherUser: _displayUser!)));
                                 }
                               }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          'Failed to open chat: $e')),
-                                );
-                              }
+                            } catch (e) {}
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2ECC71), 
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF2ECC71).withOpacity(0.35),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              )
+                            ]
+                          ),
+                          child: const Icon(Icons.chat_bubble, color: Colors.white, size: 20),
+                        ),
+                      ),
+                    ]
+                    else ...[
+                      // Default Actions (NONE or PENDING_SENT)
+                      GestureDetector(
+                        onTap: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING') ? () async {
+                          try {
+                            final connectionService = context.read<ConnectionService>();
+                            await connectionService.respondToRequest(
+                                _displayUser!.connectionId!,
+                                v_conn.ConnectionStatus.REJECTED);
+                            if (mounted) setState(() => _displayUser = _displayUser!.copyWith(connectionStatus: 'NONE'));
+                          } catch (e) {}
+                        } : () async {
+                          try {
+                            final profileService = context.read<ProfileService>();
+                            await profileService.skipUser(_displayUser!);
+                            if (mounted) {
+                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User passed.')));
                             }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            backgroundColor: Colors.transparent,
-                            shadowColor: const Color(0xFF2ECC71).withOpacity(0.2),
-                            elevation: 8,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ).copyWith(
-                            backgroundColor:
-                                WidgetStateProperty.all(Colors.transparent),
+                          } catch (e) {}
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF43F5E), 
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFF43F5E).withOpacity(0.35),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              )
+                            ]
                           ),
-                          child: Ink(
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Container(
-                              alignment: Alignment.center,
-                              constraints: const BoxConstraints(minHeight: 44),
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.chat_bubble, color: Colors.white, size: 20),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'MESSAGE',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      letterSpacing: 1.2,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                          child: const Icon(Icons.close, color: Colors.white, size: 24),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Expanded(
-                        flex: 1,
-                        child: OutlinedButton(
-                          onPressed: () async {
-                            final confirmed = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Remove Connection'),
-                                content: const Text('Are you sure you want to remove this connection?'),
-                                actions: [
-                                  TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCEL')),
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context, true), 
-                                    child: const Text('REMOVE', style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                              ),
-                            );
-
-                            if (confirmed == true) {
-                              try {
-                                final connectionService = context.read<ConnectionService>();
-                                await connectionService.respondToRequest(
-                                    _displayUser!.connectionId!,
-                                    v_conn.ConnectionStatus.REJECTED);
-                                if (mounted) {
-                                  setState(() {
-                                    _displayUser = _displayUser!.copyWith(
-                                        connectionStatus: 'NONE');
-                                  });
-                                }
-                              } catch (e) {
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Failed to remove connection: $e')),
-                                  );
-                                }
-                              }
-                            }
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            side: BorderSide(
-                                color: Colors.redAccent.withOpacity(0.2), width: 2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            minimumSize: const Size.fromHeight(44),
-                          ),
-                          child: const Icon(Icons.person_remove_outlined, color: Colors.redAccent, size: 20),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  ElevatedButton(
-                    onPressed: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING')
-                        ? () async {
-                            // CANCEL REQUEST
-                            try {
-                              final connectionService = context.read<ConnectionService>();
-                              await connectionService.respondToRequest(
-                                  _displayUser!.connectionId!,
-                                  v_conn.ConnectionStatus.REJECTED);
-                              if (mounted) {
-                                setState(() {
-                                  _displayUser = _displayUser!.copyWith(
-                                      connectionStatus: 'NONE');
-                                });
-                              }
-                            } catch (e) {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Failed to cancel request: $e')),
-                                );
-                              }
-                            }
+                      GestureDetector(
+                        onTap: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING') ? null : () async {
+                          final currentUser = context.read<AuthService>().currentUser;
+                          if (currentUser?.verifiedStatus != 'active') {
+                             showDialog(
+                               context: context,
+                               builder: (context) => AlertDialog(
+                                 title: const Text('Profile Verification Required'),
+                                 content: const Text('Your profile must be verified by an admin before you can send connection requests. Please wait for verification.'),
+                                 actions: [
+                                   TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
+                                 ],
+                               ),
+                             );
+                             return;
                           }
-                        : () async {
-                            try {
-                              final connectionService =
-                                  context.read<ConnectionService>();
-                              await connectionService
-                                  .sendConnectionRequest(_displayUser!.id);
-                              if (mounted) {
-                                setState(() {
-                                  _displayUser = _displayUser!.copyWith(
-                                      connectionStatus: 'PENDING_SENT');
-                                });
-                              }
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Connection request sent!')),
-                                );
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          'Failed to send request: $e')),
-                                );
-                              }
-                            }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.transparent,
-                      shadowColor: primaryColor.withOpacity(0.2),
-                      elevation: 8,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ).copyWith(
-                      backgroundColor:
-                          WidgetStateProperty.all(Colors.transparent),
-                    ),
-                    child: Ink(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING')
-                                  ? [Colors.grey, Colors.grey]
-                                  : [const Color(0xFF800000), const Color(0xFF4A0000)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Container(
-                        alignment: Alignment.center,
-                        constraints: const BoxConstraints(minHeight: 44),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              (_displayUser!.connectionStatus == 'PENDING_RECEIVED' 
-                                      ? Icons.check_circle_outline 
-                                      : Icons.chat_bubble_outline),
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              (_displayUser!.connectionStatus == 'PENDING_RECEIVED'
-                                      ? 'RESPOND'
-                                      : (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING'
-                                          ? 'CANCEL REQUEST'
-                                          : 'CONNECT')),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          ],
+                          try {
+                            final connectionService = context.read<ConnectionService>();
+                            await connectionService.sendConnectionRequest(_displayUser!.id);
+                            if (mounted) setState(() => _displayUser = _displayUser!.copyWith(connectionStatus: 'PENDING_SENT'));
+                          } catch (e) {}
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING') 
+                                   ? Colors.grey[400] 
+                                   : const Color(0xFFF43F5E),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING')
+                                    ? Colors.transparent
+                                    : const Color(0xFFF43F5E).withOpacity(0.35),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              )
+                            ]
+                          ),
+                          child: Icon(
+                            (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING') 
+                                ? Icons.access_time 
+                                : Icons.favorite_border,
+                            color: Colors.white, 
+                            size: 24
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    ]
+                  ],
+                ),
               ],
             ),
           ),
@@ -837,134 +801,193 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildContentSections(bool isDark, Color primaryColor, Color accentGold) {
-    return Column(
-      children: [
-                  // Bio Section
-                  _buildCard(
-                    isDark: isDark,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionHeader(
-                          icon: Icons.account_circle,
-                          title: 'ABOUT ME',
-                          accentGold: QaboolTheme.accentGold,
-                          primaryColor: primaryColor,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _displayUser!.bio ??
-                              (_isMe
-                                  ? 'No bio added yet. Tell others bit about yourself!'
-                                  : 'No bio provided.'),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            height: 1.5,
-                            color: isDark ? Colors.grey[400] : Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+    final cardBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFFDF2F4);
+    final sectionTitleStyle = TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w900,
+      color: isDark ? Colors.white : const Color(0xFF1E293B),
+    );
 
-                  // Personal Details
-                  _buildCard(
-                    isDark: isDark,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Transform.scale(
-                              scale: 0.9,
-                              child: Icon(Icons.list_alt, color: primaryColor),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'PERSONAL DETAILS',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w900,
-                                color: accentGold,
-                                letterSpacing: 2,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        _buildDetailRow(
-                          icon: Icons.school,
-                          label: 'EDUCATION',
-                          value: _displayUser!.education ?? 'Not specified',
-                          primaryColor: primaryColor,
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: 24),
-                        _buildDetailRow(
-                          icon: Icons.work,
-                          label: 'PROFESSION',
-                          value: _displayUser!.profession ?? 'Not specified',
-                          primaryColor: primaryColor,
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: 24),
-                        _buildDetailRow(
-                          icon: Icons.height,
-                          label: 'HEIGHT',
-                          value: _displayUser!.height != null ? "${_displayUser!.height} cm" : 'Not specified',
-                          primaryColor: primaryColor,
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: 24),
-                        _buildDetailRow(
-                          icon: Icons.monitor_weight,
-                          label: 'WEIGHT',
-                          value: _displayUser!.weight != null ? "${_displayUser!.weight!.toStringAsFixed(1)} kg" : 'Not specified',
-                          primaryColor: primaryColor,
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: 24),
-                        _buildDetailRow(
-                          icon: Icons.church,
-                          label: 'RELIGION & CASTE',
-                          value: '${_displayUser!.religion ?? "Not specified"}${_displayUser!.ethnicity != null ? ", ${_displayUser!.ethnicity}" : ""}',
-                          primaryColor: primaryColor,
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: 24),
-                        _buildDetailRow(
-                          icon: Icons.history,
-                          label: 'PAST ISSUES/PROBLEMS',
-                          value: _displayUser!.hasPastIssues ? 'Yes' : 'No',
-                          primaryColor: primaryColor,
-                          isDark: isDark,
-                        ),
-                        if (_isMe) ...[
-                          const SizedBox(height: 24),
-                          _buildDetailRow(
-                            icon: Icons.people_outline,
-                            label: 'ACCEPTS OTHERS WITH ISSUES',
-                            value: _displayUser!.acceptsPastIssues ? 'Yes' : 'No',
-                            primaryColor: primaryColor,
-                            isDark: isDark,
-                          ),
-                        ],
-                        if (_displayUser!.specialConsiderations != null && _displayUser!.specialConsiderations!.isNotEmpty) ...[
-                          const SizedBox(height: 24),
-                          _buildDetailRow(
-                            icon: Icons.info_outline,
-                            label: 'SPECIAL CONSIDERATIONS',
-                            value: _displayUser!.specialConsiderations!,
-                            primaryColor: primaryColor,
-                            isDark: isDark,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // About Me
+        Text('About Me', style: sectionTitleStyle),
+        const SizedBox(height: 8),
+        Text(
+          _displayUser!.bio ?? (_isMe ? 'No bio added yet.' : 'No bio provided.'),
+          style: TextStyle(
+            fontSize: 14,
+            height: 1.5,
+            color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Info Grid
+        LayoutBuilder(builder: (context, constraints) {
+          final crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
+          return GridView.count(
+            crossAxisCount: crossAxisCount,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childAspectRatio: 2.3,
+            children: [
+              _buildInfoCard(Icons.wc, 'GENDER', _displayUser!.gender ?? 'Not set', isDark),
+              _buildInfoCard(Icons.cake, 'AGE', _displayUser!.age?.toString() ?? 'Not set', isDark),
+              _buildInfoCard(Icons.favorite_border, 'MARITAL STATUS', _displayUser!.maritalStatus ?? 'Not set', isDark),
+              _buildInfoCard(Icons.monitor_weight_outlined, 'WEIGHT', _displayUser!.weight != null ? '${_displayUser!.weight}kg' : 'Not set', isDark),
+              _buildInfoCard(Icons.height, 'HEIGHT', _displayUser!.height != null ? '${_displayUser!.height}cm' : 'Not set', isDark),
+              _buildInfoCard(Icons.location_city, 'CURRENT CITY', _displayUser!.currentCity ?? 'Not set', isDark),
+              _buildInfoCard(Icons.school_outlined, 'EDUCATION', _displayUser!.education ?? 'Not set', isDark),
+              _buildInfoCard(Icons.mosque_outlined, 'RELIGION', _displayUser!.religion ?? 'Not set', isDark),
+              _buildInfoCard(Icons.account_balance, 'SECT', _displayUser!.sect ?? 'Not set', isDark),
+              _buildInfoCard(Icons.groups_outlined, 'CASTE', _displayUser!.caste ?? 'Not set', isDark),
+              _buildInfoCard(Icons.payments_outlined, 'MONTHLY INCOME', _displayUser!.monthlyIncome != null ? '\$${_displayUser!.monthlyIncome}' : 'Not set', isDark),
+              _buildInfoCard(Icons.work_outline, 'PROFESSION', _displayUser!.profession ?? 'Not set', isDark),
+              _buildInfoCard(Icons.people_outline, 'SIBLINGS', _displayUser!.siblings?.toString() ?? 'Not set', isDark),
+              _buildInfoCard(Icons.family_restroom_outlined, 'FAMILY MEMBERS', _displayUser!.familyMembers?.toString() ?? 'Not set', isDark),
+            ],
+          );
+        }),
+        const SizedBox(height: 24),
+
+        // Your Requirements
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFDF2F4),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Your requirements', style: sectionTitleStyle),
+                  Icon(Icons.edit_note, color: const Color(0xFFF43F5E), size: 24),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildRequirementItem('LOOKING FOR', _displayUser!.lookingForType ?? 'Practising Muslim', true),
+              _buildRequirementItem('AGE', _displayUser!.lookingForAge ?? '20 - 30 years old', true),
+              _buildRequirementItem('EDUCATION', _displayUser!.lookingForProfession ?? 'Bachelors Degree or above', true),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Footer placeholders
+        _buildActionPlaceholder('Define your problem', 'Tell us what\'s on your mind so we can help you better.', Icons.warning_amber_rounded, isDark),
+        const SizedBox(height: 16),
+        _buildActionPlaceholder('Who can you qabool?', 'Specify the qualities of your ideal life partner.', Icons.person_search_outlined, isDark),
       ],
+    );
+  }
+
+  Widget _buildInfoCard(IconData icon, String label, String value, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFFF1F2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? Colors.white10 : const Color(0xFFFFE4E6),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFFF43F5E), size: 18),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(label, 
+                  style: TextStyle(
+                    fontSize: 7.5, 
+                    fontWeight: FontWeight.bold, 
+                    color: isDark ? Colors.grey[400] : const Color(0xFF94A3B8), 
+                    letterSpacing: 0.3
+                  )
+                ),
+                Text(value, 
+                  style: TextStyle(
+                    fontSize: 12, 
+                    fontWeight: FontWeight.w900, 
+                    color: isDark ? Colors.white : const Color(0xFF1E293B),
+                    height: 1.1
+                  ), 
+                  overflow: TextOverflow.ellipsis
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequirementItem(String label, String value, bool checked) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF43F5E).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.check, color: const Color(0xFFF43F5E), size: 14),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
+              Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionPlaceholder(String title, String subtitle, IconData icon, bool isDark) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFDF2F4),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF1E293B))),
+              Icon(icon, color: const Color(0xFFF43F5E), size: 24),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 14,
+              color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

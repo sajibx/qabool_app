@@ -67,6 +67,14 @@ class AuthService extends ChangeNotifier {
     bool hasPastIssues = false,
     bool acceptsPastIssues = true,
     String? phoneNumber,
+    String? maritalStatus,
+    String? currentCity,
+    double? monthlyIncome,
+    int? siblings,
+    int? familyMembers,
+    String? lookingForAge,
+    String? lookingForType,
+    String? lookingForProfession,
     XFile? profileImage,
   }) async {
     try {
@@ -91,6 +99,14 @@ class AuthService extends ChangeNotifier {
         'hasPastIssues': hasPastIssues,
         'acceptsPastIssues': acceptsPastIssues,
         'phoneNumber': phoneNumber,
+        'maritalStatus': maritalStatus,
+        'currentCity': currentCity,
+        'monthlyIncome': monthlyIncome,
+        'siblings': siblings,
+        'familyMembers': familyMembers,
+        'lookingForAge': lookingForAge,
+        'lookingForType': lookingForType,
+        'lookingForProfession': lookingForProfession,
       };
 
       final formData = FormData.fromMap(dataMap);
