@@ -103,6 +103,7 @@ class ProfileService extends ChangeNotifier {
       // Create a copy and filter out nulls/empty strings to avoid 400 errors on the backend
       final filteredData = Map<String, dynamic>.from(data);
       filteredData.removeWhere((key, value) => value == null || (value is String && value.isEmpty));
+      debugPrint('ProfileService: sending updatedData: $filteredData');
 
       final formData = FormData.fromMap(filteredData);
       if (image != null) {

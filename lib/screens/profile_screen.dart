@@ -387,18 +387,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               key: ValueKey('${resolveImageUrl(_displayUser!.profileImageUrl)}?v=${_displayUser!.updatedAt?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}'),
               imageUrl: '${resolveImageUrl(_displayUser!.profileImageUrl)}?v=${_displayUser!.updatedAt?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}',
               fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                color: isDark ? Colors.grey[800] : Colors.grey[200],
-                child: const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-              errorWidget: (context, url, error) => Container(
-                color: isDark ? Colors.grey[800] : Colors.grey[200],
-                child: Icon(Icons.person,
-                    size: 100,
-                    color: isDark ? Colors.grey[600] : Colors.grey[400]),
-              ),
+              errorWidget: (context, url, error) {
+                debugPrint('CachedNetworkImage ERROR: $error for URL: $url');
+                return Container(
+                  color: isDark ? Colors.grey[800] : Colors.grey[200],
+                  child: Icon(Icons.person,
+                      size: 100,
+                      color: isDark ? Colors.grey[600] : Colors.grey[400]),
+                );
+              },
             ),
           ),
           
