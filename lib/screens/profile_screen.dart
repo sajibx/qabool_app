@@ -957,14 +957,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Your requirements', style: sectionTitleStyle),
-              Icon(Icons.edit_note, color: const Color(0xFFF43F5E), size: 24),
+              Text(_isMe ? 'Your requirements' : 'Requirements', style: sectionTitleStyle),
+              if (_isMe) Icon(Icons.edit_note, color: const Color(0xFFF43F5E), size: 24),
             ],
           ),
           const SizedBox(height: 16),
-          _buildRequirementItem('LOOKING FOR', _displayUser!.lookingForType ?? 'Practising Muslim', true),
-          _buildRequirementItem('AGE', _displayUser!.lookingForAge ?? '20 - 30 years old', true),
-          _buildRequirementItem('EDUCATION', _displayUser!.lookingForProfession ?? 'Bachelors Degree or above', true),
+          _buildRequirementItem('LOOKING FOR', _displayUser!.lookingForType ?? 'Not set', true),
+          _buildRequirementItem('AGE', _displayUser!.lookingForAge ?? 'Not set', true),
+          _buildRequirementItem('EDUCATION', _displayUser!.lookingForProfession ?? 'Not set', true),
         ],
       ),
     );
