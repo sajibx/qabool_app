@@ -64,6 +64,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final List<String> _ethnicities = [
     'South Asian',
     'East Asian',
+    'Asian',
     'Middle Eastern',
     'White / Caucasian',
     'Black / African',
@@ -667,6 +668,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final user = context.read<AuthService>().currentUser;
     _selectedGender ??= user?.gender;
 
+    final dropdownItems = ['Male', 'Female'];
+    if (_selectedGender != null && !dropdownItems.contains(_selectedGender)) {
+      dropdownItems.add(_selectedGender!);
+    }
+
     return DropdownButtonFormField<String>(
       value: _selectedGender,
       style: TextStyle(color: isDark ? Colors.white : Colors.black87),
@@ -685,7 +691,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         filled: true,
         fillColor: isDark ? const Color(0xFF2D2626) : Colors.white,
       ),
-      items: ['Male', 'Female']
+      items: dropdownItems
           .map((e) => DropdownMenuItem(value: e, child: Text(e)))
           .toList(),
       onChanged: (val) {
@@ -704,6 +710,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required Function(String?) onChanged,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dropdownItems = List<String>.from(items);
+    if (value != null && !dropdownItems.contains(value)) {
+      dropdownItems.add(value);
+    }
+
     return DropdownButtonFormField<String>(
       value: value,
       style: TextStyle(color: isDark ? Colors.white : Colors.black87),
@@ -722,7 +733,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         filled: true,
         fillColor: isDark ? const Color(0xFF2D2626) : Colors.white,
       ),
-      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+      items: dropdownItems.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
       onChanged: onChanged,
     );
   }
