@@ -833,9 +833,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             crossAxisCount: crossAxisCount,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 2.3,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 3.2,
             children: [
               _buildInfoCard(Icons.wc, 'GENDER', _displayUser!.gender ?? 'Not set', isDark),
               _buildInfoCard(Icons.cake, 'AGE', _displayUser!.age?.toString() ?? 'Not set', isDark),
@@ -888,10 +888,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(label, 
                   style: TextStyle(
-                    fontSize: 7.5, 
-                    fontWeight: FontWeight.bold, 
+                    fontSize: 8, 
+                    fontWeight: FontWeight.w900, 
                     color: isDark ? Colors.grey[400] : const Color(0xFF94A3B8), 
-                    letterSpacing: 0.3
+                    letterSpacing: 0.5
                   )
                 ),
                 Text(value, 
