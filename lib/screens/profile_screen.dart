@@ -348,7 +348,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(previousState ? 'Removed from favorites' : 'Added to favorites!'),
-                backgroundColor: previousState ? Colors.grey[800] : const Color(0xFFFF7074),
+                backgroundColor: previousState ? Colors.grey[800] : const Color(0xFFFFB800),
               ),
             );
           }
@@ -364,8 +364,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       },
       child: Icon(
-        _displayUser!.isFavorited ? Icons.favorite : Icons.favorite_border,
-        color: _displayUser!.isFavorited ? const Color(0xFFFF7074) : iconColor,
+        _displayUser!.isFavorited ? Icons.star : Icons.star_border,
+        color: _displayUser!.isFavorited ? const Color(0xFFFFB800) : iconColor,
         size: 20,
       ),
     );
