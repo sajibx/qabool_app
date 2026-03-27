@@ -384,8 +384,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: double.infinity,
             height: double.infinity,
             child: CachedNetworkImage(
-              key: ValueKey(resolveImageUrl(_displayUser!.profileImageUrl)),
-              imageUrl: resolveImageUrl(_displayUser!.profileImageUrl),
+              key: ValueKey('${resolveImageUrl(_displayUser!.profileImageUrl)}?v=${_displayUser!.updatedAt?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}'),
+              imageUrl: '${resolveImageUrl(_displayUser!.profileImageUrl)}?v=${_displayUser!.updatedAt?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}',
               fit: BoxFit.cover,
               placeholder: (context, url) => Container(
                 color: isDark ? Colors.grey[800] : Colors.grey[200],

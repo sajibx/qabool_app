@@ -42,6 +42,7 @@ class UserModel {
   final String verifiedStatus; // active, inactive
   final String? sect;
   final String? caste;
+  final DateTime? updatedAt;
 
   UserModel({
     required this.id,
@@ -82,6 +83,7 @@ class UserModel {
     this.verifiedStatus = 'inactive',
     this.sect,
     this.caste,
+    this.updatedAt,
   });
 
   String get fullName => '$firstName $lastName';
@@ -148,6 +150,7 @@ class UserModel {
       verifiedStatus: json['verifiedStatus']?.toString() ?? 'inactive',
       sect: json['sect'],
       caste: json['caste'],
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
     );
   }
 
@@ -192,6 +195,7 @@ class UserModel {
       'verifiedStatus': verifiedStatus,
       'sect': sect,
       'caste': caste,
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
@@ -234,6 +238,7 @@ class UserModel {
     String? verifiedStatus,
     String? sect,
     String? caste,
+    DateTime? updatedAt,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -274,6 +279,7 @@ class UserModel {
       verifiedStatus: verifiedStatus ?? this.verifiedStatus,
       sect: sect ?? this.sect,
       caste: caste ?? this.caste,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }
