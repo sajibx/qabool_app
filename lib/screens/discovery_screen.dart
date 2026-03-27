@@ -23,7 +23,6 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
   bool _isLoading = true;
   List<UserModel> _favorites = [];
   List<UserModel> _passed = [];
-  UserModel? _selectedUser;
 
   @override
   void initState() {
@@ -196,39 +195,22 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
     if (_isLoading) return const Center(child: CircularProgressIndicator());
     if (users.isEmpty) return Center(child: Text(emptyMessage, style: const TextStyle(fontSize: 16, color: Colors.grey)));
 
-    final isLargeScreen = MediaQuery.of(context).size.width > 900;
-    
-    // Set default selection if none and on desktop
-    if (isLargeScreen && _selectedUser == null && users.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _selectedUser == null) {
-          setState(() => _selectedUser = users.first);
-        }
-      });
-    }
-
     return RefreshIndicator(
       onRefresh: refreshData,
       color: QaboolTheme.primary,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(vertical: 8), 
+        padding: const EdgeInsets.symmetric(vertical: 8), // tile margin handles horizontal space
         itemCount: users.length,
         itemBuilder: (context, index) {
           final profile = users[index];
-          final isSelected = _selectedUser?.id == profile.id;
           return UserListTile(
             user: profile,
-            isSelected: isSelected,
             onConnect: () => customOnConnect != null ? customOnConnect(profile) : _handleConnect(profile),
             onFavorite: () => _handleFavorite(profile),
             onSkip: () => customOnSkip != null ? customOnSkip(profile) : _handleSkip(profile),
             onTap: () {
-              if (isLargeScreen) {
-                setState(() => _selectedUser = profile);
-              } else {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)));
-              }
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)));
             },
           );
         },
@@ -242,9 +224,8 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
     const pColor = QaboolTheme.primary;
     const bgDark = QaboolTheme.backgroundDark;
     const bgLight = QaboolTheme.backgroundLight;
-    final isLargeScreen = MediaQuery.of(context).size.width > 900;
 
-    Widget mainContent = Scaffold(
+    return Scaffold(
       backgroundColor: isDark ? bgDark : bgLight,
       appBar: AppBar(
         toolbarHeight: 0,
@@ -271,44 +252,6 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
         ],
       ),
     );
-
-    if (isLargeScreen) {
-      return Row(
-        children: [
-          SizedBox(
-            width: 400,
-            child: mainContent,
-          ),
-          VerticalDivider(
-            width: 1,
-            thickness: 1,
-            color: isDark ? Colors.white12 : Colors.black12,
-          ),
-          Expanded(
-            child: Container(
-              color: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-                child: _selectedUser == null
-                    ? const Center(child: Text("Select a profile to view details"))
-                    : KeyedSubtree(
-                        key: ValueKey(_selectedUser!.id),
-                        child: ProfileScreen(
-                          user: _selectedUser,
-                          showBackButton: false,
-                        ),
-                      ),
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-
-    return mainContent;
   }
 
   Widget _buildMyHistoryTab(bool isDark, Color pColor) {
