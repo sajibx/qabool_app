@@ -82,11 +82,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final auth = context.watch<AuthService>();
     final currentUser = auth.currentUser;
     
-    if (_displayUser == null && currentUser != null) {
+    // Determine if it's my profile
+    _isMe = widget.user == null || (currentUser != null && widget.user?.id == currentUser.id);
+
+    // If it's my profile, always use the latest user data from AuthService (which we are watching)
+    if (_isMe && currentUser != null) {
       _displayUser = currentUser;
+    } else {
+      _displayUser ??= widget.user;
     }
-    
-    _isMe = _displayUser?.id == currentUser?.id;
     
     const primaryColor = QaboolTheme.primary; // Maroon
     const accentGold = QaboolTheme.accentGold; // Gold
@@ -839,7 +843,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             childAspectRatio: 3.2,
             children: [
               _buildInfoCard(Icons.wc, 'GENDER', _displayUser!.gender ?? 'Not set', isDark),
-              _buildInfoCard(Icons.cake, 'AGE', _displayUser!.age?.toString() ?? 'Not set', isDark),
+              _buildInfoCard(Icons.cake, 'AGE', _displayUser!.displayAge > 0 ? _displayUser!.displayAge.toString() : 'Not set', isDark),
               _buildInfoCard(Icons.favorite_border, 'MARITAL STATUS', _displayUser!.maritalStatus ?? 'Not set', isDark),
               _buildInfoCard(Icons.monitor_weight_outlined, 'WEIGHT', _displayUser!.weight != null ? '${_displayUser!.weight}kg' : 'Not set', isDark),
               _buildInfoCard(Icons.height, 'HEIGHT', _displayUser!.height != null ? '${_displayUser!.height}cm' : 'Not set', isDark),
@@ -848,7 +852,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildInfoCard(Icons.mosque_outlined, 'RELIGION', _displayUser!.religion ?? 'Not set', isDark),
               _buildInfoCard(Icons.account_balance, 'SECT', _displayUser!.sect ?? 'Not set', isDark),
               _buildInfoCard(Icons.groups_outlined, 'CASTE', _displayUser!.caste ?? 'Not set', isDark),
-              _buildInfoCard(Icons.payments_outlined, 'MONTHLY INCOME', _displayUser!.monthlyIncome != null ? '\$${_displayUser!.monthlyIncome}' : 'Not set', isDark),
+              _buildInfoCard(Icons.payments_outlined, 'MONTHLY INCOME', _displayUser!.monthlyIncome != null ? '€${_displayUser!.monthlyIncome}' : 'Not set', isDark),
               _buildInfoCard(Icons.work_outline, 'PROFESSION', _displayUser!.profession ?? 'Not set', isDark),
               _buildInfoCard(Icons.people_outline, 'SIBLINGS', _displayUser!.siblings?.toString() ?? 'Not set', isDark),
               _buildInfoCard(Icons.family_restroom_outlined, 'FAMILY MEMBERS', _displayUser!.familyMembers?.toString() ?? 'Not set', isDark),

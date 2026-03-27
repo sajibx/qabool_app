@@ -129,9 +129,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ? Colors.grey[400]
                                     : Colors.grey[500],
                                 fontSize: 16,
+                                letterSpacing: 0.2,
                               ),
                             ),
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 48),
 
                             // Form Fields
                             Text(
@@ -144,38 +145,52 @@ class _LoginScreenState extends State<LoginScreen> {
                                     : Colors.grey[700],
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            TextField(
-                              controller: _emailController,
-                              decoration: InputDecoration(
-                                hintText: 'Enter your email',
-                                filled: true,
-                                fillColor: isDark
-                                    ? const Color(0xFF1E293B)
-                                    : Colors.white,
-                                contentPadding: const EdgeInsets.all(16),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(
-                                    color: isDark
-                                        ? const Color(0xFF334155)
-                                        : const Color(0xFFE2E8F0),
+                            const SizedBox(height: 12),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.04),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
                                   ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(
-                                    color: isDark
-                                        ? const Color(0xFF334155)
-                                        : const Color(0xFFE2E8F0),
+                                ],
+                              ),
+                              child: TextField(
+                                controller: _emailController,
+                                decoration: InputDecoration(
+                                  hintText: 'Enter your email',
+                                  filled: true,
+                                  fillColor: isDark
+                                      ? const Color(0xFF1E293B)
+                                      : Colors.white,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 18),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
                                   ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: const BorderSide(
-                                    color: QaboolTheme.primary,
-                                    width: 2,
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: isDark
+                                          ? const Color(0xFF334155)
+                                          : const Color(0xFFF1F5F9),
+                                    ),
                                   ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: QaboolTheme.primary,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  prefixIcon: Icon(Icons.email_outlined,
+                                      size: 20,
+                                      color: isDark
+                                          ? Colors.grey[500]
+                                          : Colors.grey[400]),
                                 ),
                               ),
                             ),
@@ -207,56 +222,71 @@ class _LoginScreenState extends State<LoginScreen> {
                                 )
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            TextField(
-                              controller: _passwordController,
-                              obscureText: _obscurePassword,
-                              decoration: InputDecoration(
-                                hintText: '••••••••',
-                                filled: true,
-                                fillColor: isDark
-                                    ? const Color(0xFF1E293B)
-                                    : Colors.white,
-                                contentPadding: const EdgeInsets.all(16),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(
-                                    color: isDark
-                                        ? const Color(0xFF334155)
-                                        : const Color(0xFFE2E8F0),
+                            const SizedBox(height: 12),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.04),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
                                   ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(
-                                    color: isDark
-                                        ? const Color(0xFF334155)
-                                        : const Color(0xFFE2E8F0),
+                                ],
+                              ),
+                              child: TextField(
+                                controller: _passwordController,
+                                obscureText: _obscurePassword,
+                                decoration: InputDecoration(
+                                  hintText: '••••••••',
+                                  filled: true,
+                                  fillColor: isDark
+                                      ? const Color(0xFF1E293B)
+                                      : Colors.white,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 18),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
                                   ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: const BorderSide(
-                                    color: QaboolTheme.primary,
-                                    width: 2,
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: isDark
+                                          ? const Color(0xFF334155)
+                                          : const Color(0xFFF1F5F9),
+                                    ),
                                   ),
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscurePassword
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                    color: Colors.grey[400],
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: QaboolTheme.primary,
+                                      width: 2,
+                                    ),
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscurePassword = !_obscurePassword;
-                                    });
-                                  },
+                                  prefixIcon: Icon(Icons.lock_outline,
+                                      size: 20,
+                                      color: isDark
+                                          ? Colors.grey[500]
+                                          : Colors.grey[400]),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscurePassword
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                      color: Colors.grey[400],
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscurePassword = !_obscurePassword;
+                                      });
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 32),
 
                                                          Consumer<AuthService>(
                                 builder: (context, auth, _) {
@@ -265,11 +295,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: QaboolTheme.primary,
                                       foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 18),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      elevation: 4,
+                                      elevation: 0,
                                     ),
                                     child: auth.isLoading
                                         ? const SizedBox(
@@ -284,7 +315,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             'Log In',
                                             style: TextStyle(
                                                 fontSize: 16,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.w700),
                                           ),
                                   );
                                 },
@@ -344,34 +375,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             const SizedBox(height: 24),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Already have an account? ',
-                                  style: TextStyle(
-                                    color: isDark
-                                        ? Colors.grey[400]
-                                        : Colors.grey[600],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushNamed(context,
-                                        '/signup'); // Or pop depending on desired flow
-                                  },
-                                  child: const Text(
-                                    'Sign In',
-                                    style: TextStyle(
-                                      color: QaboolTheme.primary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
                           ],
                         ),
                       ),

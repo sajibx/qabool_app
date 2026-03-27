@@ -27,6 +27,8 @@ class UserModel {
   final String? connectionId;
   final bool hasPastIssues;
   final bool acceptsPastIssues;
+  final String? phoneNumber;
+
   
   // New Fields
   final String? maritalStatus;
@@ -68,6 +70,7 @@ class UserModel {
     this.connectionId,
     this.hasPastIssues = false,
     this.acceptsPastIssues = true,
+    this.phoneNumber,
     this.maritalStatus,
     this.currentCity,
     this.monthlyIncome,
@@ -82,6 +85,17 @@ class UserModel {
   });
 
   String get fullName => '$firstName $lastName';
+
+  int get displayAge {
+    if (age != null && age != 0) return age!;
+    if (dob == null) return 0;
+    final now = DateTime.now();
+    int ageCalc = now.year - dob!.year;
+    if (now.month < dob!.month || (now.month == dob!.month && now.day < dob!.day)) {
+      ageCalc--;
+    }
+    return ageCalc;
+  }
 
   String get city {
     if (currentCity != null && currentCity!.isNotEmpty) return currentCity!;
@@ -122,6 +136,7 @@ class UserModel {
       connectionId: json['connectionId']?.toString(),
       hasPastIssues: json['hasPastIssues'] ?? false,
       acceptsPastIssues: json['acceptsPastIssues'] ?? true,
+      phoneNumber: json['phoneNumber']?.toString(),
       maritalStatus: json['maritalStatus'],
       currentCity: json['currentCity'],
       monthlyIncome: json['monthlyIncome']?.toDouble(),
@@ -165,6 +180,7 @@ class UserModel {
       'connectionId': connectionId,
       'hasPastIssues': hasPastIssues,
       'acceptsPastIssues': acceptsPastIssues,
+      'phoneNumber': phoneNumber,
       'maritalStatus': maritalStatus,
       'currentCity': currentCity,
       'monthlyIncome': monthlyIncome,
@@ -206,6 +222,7 @@ class UserModel {
     String? connectionId,
     bool? hasPastIssues,
     bool? acceptsPastIssues,
+    String? phoneNumber,
     String? maritalStatus,
     String? currentCity,
     double? monthlyIncome,
@@ -245,6 +262,7 @@ class UserModel {
       connectionId: connectionId ?? this.connectionId,
       hasPastIssues: hasPastIssues ?? this.hasPastIssues,
       acceptsPastIssues: acceptsPastIssues ?? this.acceptsPastIssues,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
       maritalStatus: maritalStatus ?? this.maritalStatus,
       currentCity: currentCity ?? this.currentCity,
       monthlyIncome: monthlyIncome ?? this.monthlyIncome,

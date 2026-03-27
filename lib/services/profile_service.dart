@@ -100,7 +100,11 @@ class ProfileService extends ChangeNotifier {
 
   Future<UserModel> updateProfile(Map<String, dynamic> data, {XFile? image}) async {
     try {
-      final formData = FormData.fromMap(data);
+      // Create a copy and filter out nulls/empty strings to avoid 400 errors on the backend
+      final filteredData = Map<String, dynamic>.from(data);
+      filteredData.removeWhere((key, value) => value == null || (value is String && value.isEmpty));
+
+      final formData = FormData.fromMap(filteredData);
       if (image != null) {
         if (kIsWeb) {
           formData.files.add(MapEntry(

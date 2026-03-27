@@ -243,7 +243,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
       children: [
         // Top Left Filter Settings Icon
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
           child: Row(
             children: [
               InkWell(
@@ -318,7 +318,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
 
 
                     // People Nearby Header (Only on Desktop)
@@ -379,7 +379,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                           ],
                         ),
                       ),
-                    const SizedBox(height: 16),
+                    if (isLargeScreen) const SizedBox(height: 16),
 
                     // People Section
                     Builder(builder: (context) {
@@ -427,7 +427,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                 ))
                               : Column(
                                   children: [
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 4),
                                     Center(
                                       child: SizedBox(
                                         width: MediaQuery.of(context).size.width * 0.9,

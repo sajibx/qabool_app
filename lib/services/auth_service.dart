@@ -181,6 +181,13 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  Future<void> updateCurrentUser(UserModel user) async {
+    _currentUser = user;
+    _apiService.currentUserId = user.id;
+    await _apiService.saveUserData(jsonEncode(user.toJson()));
+    notifyListeners();
+  }
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();

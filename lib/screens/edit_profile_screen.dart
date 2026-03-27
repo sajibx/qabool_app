@@ -21,12 +21,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _lastNameController;
   late TextEditingController _bioController;
   late TextEditingController _professionController;
-  late TextEditingController _educationController;
   late TextEditingController _specialController;
   late TextEditingController _weightController;
   late TextEditingController _heightCmController;
   late TextEditingController _heightFtController;
   late TextEditingController _heightInController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneNumberController;
+  late TextEditingController _currentCityController;
   
   DateTime? _selectedDob;
   String? _selectedGender;
@@ -34,6 +36,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _selectedCountry;
   String? _selectedCity;
   String? _selectedReligion;
+  String? _selectedMaritalStatus;
+  String? _selectedMonthlyIncome;
+  String? _selectedSiblings;
+  String? _selectedFamilyMembers;
+  String? _selectedLookingForAge;
+  String? _selectedLookingForType;
+  String? _selectedLookingForProfession;
+  String? _selectedEducation;
   String _heightUnit = 'cm';
   String _weightUnit = 'kg';
   XFile? _pickedImage;
@@ -69,17 +79,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastNameController = TextEditingController(text: user?.lastName);
     _bioController = TextEditingController(text: user?.bio);
     _professionController = TextEditingController(text: user?.profession);
-    _educationController = TextEditingController(text: user?.education);
     _specialController = TextEditingController(text: user?.specialConsiderations);
     _weightController = TextEditingController(text: user?.weight?.toStringAsFixed(1));
     _heightCmController = TextEditingController(text: user?.height?.toStringAsFixed(0));
     _heightFtController = TextEditingController();
     _heightInController = TextEditingController();
+    _emailController = TextEditingController(text: user?.email);
+    _phoneNumberController = TextEditingController(text: user?.phoneNumber);
+    _currentCityController = TextEditingController(text: user?.currentCity);
 
     _selectedDob = user?.dob;
     _selectedGender = user?.gender;
     _selectedEthnicity = user?.ethnicity;
     _selectedReligion = user?.religion;
+    _selectedMaritalStatus = user?.maritalStatus;
+    _selectedMonthlyIncome = user?.monthlyIncome?.toStringAsFixed(0);
+    _selectedSiblings = user?.siblings?.toString();
+    _selectedFamilyMembers = user?.familyMembers?.toString();
+    _selectedLookingForAge = user?.lookingForAge;
+    _selectedLookingForType = user?.lookingForType;
+    _selectedLookingForProfession = user?.lookingForProfession;
+    _selectedEducation = user?.education;
     _hasPastIssues = user?.hasPastIssues ?? false;
     _acceptsPastIssues = user?.acceptsPastIssues ?? true;
 
@@ -113,12 +133,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastNameController.dispose();
     _bioController.dispose();
     _professionController.dispose();
-    _educationController.dispose();
     _specialController.dispose();
     _weightController.dispose();
     _heightCmController.dispose();
     _heightFtController.dispose();
     _heightInController.dispose();
+    _emailController.dispose();
+    _phoneNumberController.dispose();
+    _currentCityController.dispose();
     super.dispose();
   }
 
@@ -192,6 +214,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final updatedData = {
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
+        // Removed email from update to avoid potential 400 error (often restricted)
+        'phoneNumber': _phoneNumberController.text,
         'bio': _bioController.text,
         'gender': _selectedGender,
         'dob': _selectedDob?.toIso8601String(),
@@ -199,17 +223,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'religion': _selectedReligion,
         'height': heightCm,
         'weight': weightKg,
+        'maritalStatus': _selectedMaritalStatus,
+        'currentCity': _currentCityController.text,
+        'monthlyIncome': double.tryParse(_selectedMonthlyIncome ?? ""),
+        'siblings': int.tryParse(_selectedSiblings ?? ""),
+        'familyMembers': int.tryParse(_selectedFamilyMembers ?? ""),
+        'lookingForAge': _selectedLookingForAge,
+        'lookingForType': _selectedLookingForType,
+        'lookingForProfession': _selectedLookingForProfession,
         'profession': _professionController.text,
-        'education': _educationController.text,
+        'education': _selectedEducation,
         'specialConsiderations': _specialController.text,
         'region': _selectedCountry != null && _selectedCity != null ? "${_selectedCity}, ${_selectedCountry}" : null,
         'hasPastIssues': _hasPastIssues,
         'acceptsPastIssues': _acceptsPastIssues,
       };
 
-      await context.read<ProfileService>().updateProfile(updatedData, image: _pickedImage);
-      // Also update currentUser in AuthService to reflect changes locally immediately
-      await context.read<AuthService>().checkAuthStatus();
+      final updatedUser = await context.read<ProfileService>().updateProfile(updatedData, image: _pickedImage);
+      // Update currentUser in AuthService to reflect changes locally immediately
+      if (mounted) {
+        await context.read<AuthService>().updateCurrentUser(updatedUser);
+      }
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -357,6 +391,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               _buildTextField(controller: _bioController, label: 'Bio', icon: Icons.edit, maxLines: 3),
               const SizedBox(height: 32),
+
+              _buildSectionTitle('CONTACT INFORMATION'),
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _emailController,
+                label: 'Email Address',
+                icon: Icons.email,
+                enabled: false, // Email is typically read-only in profile
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(controller: _phoneNumberController, label: 'Phone Number', icon: Icons.phone),
+              const SizedBox(height: 32),
               
               _buildSectionTitle('LOCATION & BACKGROUND'),
               const SizedBox(height: 16),
@@ -403,6 +449,54 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 value: _selectedReligion,
                 items: ['Islam (Sunni)', 'Islam (Shia)', 'Islam (Other)', 'Other'],
                 onChanged: (val) => setState(() => _selectedReligion = val),
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(controller: _currentCityController, label: 'Current City', icon: Icons.home_work),
+              const SizedBox(height: 32),
+
+              _buildSectionTitle('FAMILY & SOCIAL'),
+              const SizedBox(height: 16),
+              _buildDropdownField(
+                label: 'Marital Status',
+                icon: Icons.favorite_border,
+                value: _selectedMaritalStatus,
+                items: ['Single', 'Divorced', 'Widowed', 'Separated'],
+                onChanged: (val) => setState(() => _selectedMaritalStatus = val),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDropdownField(
+                      label: 'Siblings',
+                      icon: Icons.people_outline,
+                      value: _selectedSiblings,
+                      items: ['0', '1', '2', '3', '4', '5', '6+'],
+                      onChanged: (val) => setState(() => _selectedSiblings = val),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildDropdownField(
+                      label: 'Family Members',
+                      icon: Icons.group,
+                      value: _selectedFamilyMembers,
+                      items: ['1', '2', '3', '4', '5', '6', '7', '8+'],
+                      onChanged: (val) => setState(() => _selectedFamilyMembers = val),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+
+              _buildSectionTitle('FINANCIAL'),
+              const SizedBox(height: 16),
+              _buildDropdownField(
+                label: 'Monthly Income (Euro)',
+                icon: Icons.payments,
+                value: _selectedMonthlyIncome,
+                items: ['0', '500', '1000', '2000', '3000', '4000', '5000', '7500', '10000'],
+                onChanged: (val) => setState(() => _selectedMonthlyIncome = val),
               ),
               const SizedBox(height: 32),
 
@@ -453,7 +547,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 16),
               _buildTextField(controller: _professionController, label: 'Profession', icon: Icons.work),
               const SizedBox(height: 16),
-              _buildTextField(controller: _educationController, label: 'Education', icon: Icons.school),
+              _buildDropdownField(
+                label: 'Education',
+                icon: Icons.school,
+                value: _selectedEducation,
+                items: ['High School', 'Bachelors Degree', 'Masters Degree', 'PhD', 'Other'],
+                onChanged: (val) => setState(() => _selectedEducation = val),
+              ),
               const SizedBox(height: 16),
               _buildTextField(controller: _specialController, label: 'Special Considerations', icon: Icons.info, maxLines: 2),
               const SizedBox(height: 32),
@@ -477,6 +577,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 activeColor: primaryColor,
                 onChanged: (val) => setState(() => _acceptsPastIssues = val),
                 contentPadding: EdgeInsets.zero,
+              ),
+              const SizedBox(height: 32),
+
+              _buildSectionTitle('PARTNER PREFERENCES'),
+              const SizedBox(height: 16),
+              _buildDropdownField(
+                label: 'Looking For Age Range',
+                icon: Icons.calendar_month,
+                value: _selectedLookingForAge,
+                items: ['18 - 25 years old', '25 - 35 years old', '35 - 45 years old', '45+ years old'],
+                onChanged: (val) => setState(() => _selectedLookingForAge = val),
+              ),
+              const SizedBox(height: 16),
+              _buildDropdownField(
+                label: 'Looking For Type',
+                icon: Icons.psychology,
+                value: _selectedLookingForType,
+                items: ['Practising Muslim', 'Moderate Muslim', 'Liberal Muslim', 'Other'],
+                onChanged: (val) => setState(() => _selectedLookingForType = val),
+              ),
+              const SizedBox(height: 16),
+              _buildDropdownField(
+                label: 'Looking For Profession/Education',
+                icon: Icons.work_history,
+                value: _selectedLookingForProfession,
+                items: ['High School or above', 'Bachelors Degree or above', 'Masters Degree or above', 'PhD or above'],
+                onChanged: (val) => setState(() => _selectedLookingForProfession = val),
               ),
               const SizedBox(height: 40),
             ],
@@ -503,12 +630,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required String label,
     required IconData icon,
     int maxLines = 1,
+    bool enabled = true,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
-      style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+      enabled: enabled,
+      style: TextStyle(color: enabled ? (isDark ? Colors.white : Colors.black87) : Colors.grey),
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: QaboolTheme.primary),
