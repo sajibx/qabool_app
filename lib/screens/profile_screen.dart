@@ -288,12 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // ],
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: Column(
-                    children: [
-                      _buildContentSections(isDark, primaryColor, accentGold),
-                      _buildContentSections(isDark, primaryColor, accentGold),
-                    ],
-                  ),
+                  child: _buildContentSections(isDark, primaryColor, accentGold),
                 ),
               ],
             ),
@@ -799,6 +794,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: _buildRequirementsSection(isDark, primaryColor, accentGold),
+        ),
       ],
     );
   }
