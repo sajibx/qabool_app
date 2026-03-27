@@ -132,50 +132,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (!_isMe)
             Padding(
               padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
-              child: CircleAvatar(
-                backgroundColor: Colors.black.withValues(alpha: 0.2),
-                child: PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: Colors.white, size: 20),
-                  onSelected: (value) async {
-                    if (value == 'block') {
-                      final confirmed = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Block User?'),
-                          content: Text('Are you sure you want to block ${_displayUser!.firstName}? They will no longer be able to see your profile or message you.'),
-                          actions: [
-                            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCEL')),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('BLOCK', style: TextStyle(color: Colors.red)),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildFavoriteButton(isDark, Colors.white),
+                    const SizedBox(width: 8),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: Colors.white, size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 40),
+                      onSelected: (value) async {
+                        if (value == 'block') {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Block User?'),
+                              content: Text('Are you sure you want to block ${_displayUser!.firstName}? They will no longer be able to see your profile or message you.'),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCEL')),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('BLOCK', style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      );
+                          );
 
-                      if (confirmed == true && mounted) {
-                        try {
-                          await context.read<ProfileService>().blockUser(_displayUser!.id);
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${_displayUser!.firstName} blocked.')),
-                            );
-                            Navigator.pop(context); // Go back after blocking
-                          }
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error blocking user: $e')),
-                            );
+                          if (confirmed == true && mounted) {
+                            try {
+                              await context.read<ProfileService>().blockUser(_displayUser!.id);
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('${_displayUser!.firstName} blocked.')),
+                                );
+                                Navigator.pop(context); // Go back after blocking
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error blocking user: $e')),
+                                );
+                              }
+                            }
                           }
                         }
-                      }
-                    }
-                  },
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                    const PopupMenuItem<String>(
-                      value: 'block',
-                      child: Text('Block User'),
+                      },
+                      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                        const PopupMenuItem<String>(
+                          value: 'block',
+                          child: Text('Block User'),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -315,58 +328,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildFavoriteButton(bool isDark, Color primaryColor) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 12.0),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () async {
-          final previousState = _displayUser!.isFavorited;
-          final pService = context.read<ProfileService>();
-          try {
-            setState(() {
-              _displayUser = _displayUser!.copyWith(isFavorited: !previousState);
-            });
-            if (previousState) {
-              await pService.unfavoriteUser(_displayUser!.id);
-            } else {
-              await pService.favoriteUser(_displayUser!.id);
-            }
-            final updatedUser = await pService.getProfile(_displayUser!.id);
-            if (mounted) {
-              setState(() {
-                _displayUser = updatedUser;
-              });
-            }
-          } catch (e) {
-            if (mounted) {
-              setState(() {
-                _displayUser = _displayUser!.copyWith(isFavorited: previousState);
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error: $e')),
-              );
-            }
+  Widget _buildFavoriteButton(bool isDark, Color iconColor) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () async {
+        final previousState = _displayUser!.isFavorited;
+        final pService = context.read<ProfileService>();
+        try {
+          if (previousState) {
+            await pService.unfavoriteUser(_displayUser!.id);
+          } else {
+            await pService.favoriteUser(_displayUser!.id);
           }
-        },
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isDark ? Colors.black.withOpacity(0.3) : Colors.grey[100],
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: _displayUser!.isFavorited 
-                ? const Color(0xFFFF7074).withOpacity(0.2) 
-                : (isDark ? Colors.white10 : Colors.black12),
-              width: 1,
-            ),
-          ),
-          child: Icon(
-            _displayUser!.isFavorited ? Icons.favorite : Icons.favorite_border,
-            color: _displayUser!.isFavorited ? const Color(0xFFFF7074) : primaryColor,
-            size: 20,
-          ),
-        ),
+          final updatedUser = await pService.getProfile(_displayUser!.id);
+          if (mounted) {
+            setState(() {
+              _displayUser = updatedUser;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(previousState ? 'Removed from favorites' : 'Added to favorites!'),
+                backgroundColor: previousState ? Colors.grey[800] : const Color(0xFFFF7074),
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            setState(() {
+              _displayUser = _displayUser!.copyWith(isFavorited: previousState);
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: $e')),
+            );
+          }
+        }
+      },
+      child: Icon(
+        _displayUser!.isFavorited ? Icons.favorite : Icons.favorite_border,
+        color: _displayUser!.isFavorited ? const Color(0xFFFF7074) : iconColor,
+        size: 20,
       ),
     );
   }
