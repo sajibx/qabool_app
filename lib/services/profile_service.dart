@@ -123,6 +123,7 @@ class ProfileService extends ChangeNotifier {
       }
 
       final response = await _apiService.client.put('/profiles/me', data: formData);
+      debugPrint('PUT /profiles/me response: ${response.data}');
       if (response.statusCode == 200) {
         return UserModel.fromJson(response.data);
       }

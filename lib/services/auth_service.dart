@@ -182,6 +182,7 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> updateCurrentUser(UserModel user) async {
+    debugPrint('AuthService: updateCurrentUser. New image: ${user.profileImageUrl}');
     _currentUser = user;
     _apiService.currentUserId = user.id;
     await _apiService.saveUserData(jsonEncode(user.toJson()));

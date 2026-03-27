@@ -92,7 +92,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     // If it's my profile, always use the latest user data from AuthService (which we are watching)
     if (_isMe && currentUser != null) {
-      _displayUser = currentUser;
+      if (_displayUser != currentUser) {
+        debugPrint('ProfileScreen: Updating _displayUser from AuthService. New image: ${currentUser.profileImageUrl}');
+        _displayUser = currentUser;
+      }
     } else {
       _displayUser ??= widget.user;
     }
@@ -381,6 +384,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: double.infinity,
             height: double.infinity,
             child: CachedNetworkImage(
+              key: ValueKey(resolveImageUrl(_displayUser!.profileImageUrl)),
               imageUrl: resolveImageUrl(_displayUser!.profileImageUrl),
               fit: BoxFit.cover,
               placeholder: (context, url) => Container(
