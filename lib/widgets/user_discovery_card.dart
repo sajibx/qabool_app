@@ -24,7 +24,7 @@ class UserDiscoveryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final imageUrl = resolveImageUrl(user.profileImageUrl);
+    final imageUrl = getVersionedImageUrl(user.profileImageUrl, user.updatedAt);
 
     final cardContent = Container(
       margin: isGridMode ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -47,18 +47,21 @@ class UserDiscoveryCard extends StatelessWidget {
           child: Stack(
           children: [
             // Background Image
-            CachedNetworkImage(
-              imageUrl: imageUrl,
-              height: double.infinity,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                color: isDark ? Colors.grey[800] : Colors.grey[200],
-                child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-              ),
-              errorWidget: (context, url, error) => Container(
-                color: isDark ? Colors.grey[800] : Colors.grey[200],
-                child: const Icon(Icons.person, size: 80, color: Colors.grey),
+            Hero(
+              tag: 'user_profile_${user.id}',
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                height: double.infinity,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: isDark ? Colors.grey[800] : Colors.grey[200],
+                  child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: isDark ? Colors.grey[800] : Colors.grey[200],
+                  child: const Icon(Icons.person, size: 80, color: Colors.grey),
+                ),
               ),
             ),
 

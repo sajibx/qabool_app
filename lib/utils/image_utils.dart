@@ -23,3 +23,16 @@ String resolveImageUrl(String? path) {
   debugPrint('resolveImageUrl: $path -> $url');
   return url;
 }
+
+/// Returns a versioned image URL with a cache-busting timestamp based on [updatedAt].
+/// This ensures consistent cache keys for Hero transitions.
+String getVersionedImageUrl(String? path, DateTime? updatedAt) {
+  final url = resolveImageUrl(path);
+  if (url.isEmpty) return '';
+  
+  // Use updatedAt if available, otherwise just use the raw URL (resolved)
+  if (updatedAt == null) return url;
+  
+  final timestamp = updatedAt.millisecondsSinceEpoch;
+  return '$url?v=$timestamp';
+}

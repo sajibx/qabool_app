@@ -506,14 +506,17 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                       margin: const EdgeInsets.only(right: 12),
                                       child: Column(
                                         children: [
-                                          CircleAvatar(
-                                            radius: 30,
-                                            backgroundImage: profile.profileImageUrl != null
-                                                ? CachedNetworkImageProvider(resolveImageUrl(profile.profileImageUrl))
-                                                : null,
-                                            child: profile.profileImageUrl == null
-                                                ? const Icon(Icons.person)
-                                                : null,
+                                          Hero(
+                                            tag: 'user_profile_${profile.id}',
+                                            child: CircleAvatar(
+                                              radius: 30,
+                                              backgroundImage: profile.profileImageUrl != null
+                                                  ? CachedNetworkImageProvider(getVersionedImageUrl(profile.profileImageUrl, profile.updatedAt))
+                                                  : null,
+                                              child: profile.profileImageUrl == null
+                                                  ? const Icon(Icons.person)
+                                                  : null,
+                                            ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(

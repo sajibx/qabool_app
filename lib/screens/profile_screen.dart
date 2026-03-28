@@ -181,12 +181,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               }
                             }
                           }
+                        } else if (value == 'report') {
+                          await _showReportDialog();
                         }
                       },
                       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                         const PopupMenuItem<String>(
                           value: 'block',
-                          child: Text('Block User'),
+                          child: Row(
+                            children: [
+                              Icon(Icons.block, size: 18, color: Colors.redAccent),
+                              SizedBox(width: 10),
+                              Text('Block User'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuDivider(),
+                        const PopupMenuItem<String>(
+                          value: 'report',
+                          child: Row(
+                            children: [
+                              Icon(Icons.flag_outlined, size: 18, color: Colors.orange),
+                              SizedBox(width: 10),
+                              Text('Report User'),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -371,6 +390,150 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _showReportDialog() async {
+    final reasonController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    final submitted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+          contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.flag_outlined, color: Colors.orange, size: 22),
+              ),
+              const SizedBox(width: 12),
+              const Text('Report User', style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Please describe why you are reporting ${_displayUser!.firstName}. Your report will be reviewed by our team.',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13, height: 1.4),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: reasonController,
+                  maxLines: 3,
+                  maxLength: 300,
+                  decoration: InputDecoration(
+                    hintText: 'e.g. Inappropriate behavior, fake profile...',
+                    hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
+                    filled: true,
+                    fillColor: Colors.grey.withOpacity(0.07),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.orange),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  ),
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) {
+                      return 'Please provide a reason for your report.';
+                    }
+                    if (val.trim().length < 10) {
+                      return 'Reason must be at least 10 characters.';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('CANCEL'),
+            ),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              icon: const Icon(Icons.flag, size: 16),
+              label: const Text('REPORT', style: TextStyle(fontWeight: FontWeight.bold)),
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  Navigator.pop(dialogContext, true);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (submitted == true && mounted) {
+      final reason = reasonController.text.trim();
+      try {
+        await context.read<ProfileService>().reportUser(_displayUser!.id, reason);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle_outline, color: Colors.white, size: 18),
+                  const SizedBox(width: 10),
+                  Text('${_displayUser!.firstName} has been reported. Thank you.'),
+                ],
+              ),
+              backgroundColor: Colors.orange[700],
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          final message = e.toString().contains('already reported')
+              ? 'You have already reported ${_displayUser!.firstName}.'
+              : 'Failed to submit report: $e';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.white, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(message)),
+                ],
+              ),
+              backgroundColor: Colors.grey[800],
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
+      }
+    }
+
+    reasonController.dispose();
+  }
+
   Widget _buildHeroSection(bool isDark, Color bgDark, Color primaryColor, Color accentGold) {
     return Column(
       children: [
@@ -380,22 +543,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Stack(
         children: [
           // Full Cover Image
-          SizedBox(
-            width: double.infinity,
-            height: double.infinity,
-            child: CachedNetworkImage(
-              key: ValueKey('${resolveImageUrl(_displayUser!.profileImageUrl)}?v=${_displayUser!.updatedAt?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}'),
-              imageUrl: '${resolveImageUrl(_displayUser!.profileImageUrl)}?v=${_displayUser!.updatedAt?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}',
-              fit: BoxFit.cover,
-              errorWidget: (context, url, error) {
-                debugPrint('CachedNetworkImage ERROR: $error for URL: $url');
-                return Container(
-                  color: isDark ? Colors.grey[800] : Colors.grey[200],
-                  child: Icon(Icons.person,
-                      size: 100,
-                      color: isDark ? Colors.grey[600] : Colors.grey[400]),
-                );
-              },
+          Hero(
+            tag: 'user_profile_${_displayUser!.id}',
+            child: SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: CachedNetworkImage(
+                key: ValueKey(getVersionedImageUrl(_displayUser!.profileImageUrl, _displayUser!.updatedAt)),
+                imageUrl: getVersionedImageUrl(_displayUser!.profileImageUrl, _displayUser!.updatedAt),
+                fit: BoxFit.cover,
+                errorWidget: (context, url, error) {
+                  debugPrint('CachedNetworkImage ERROR: $error for URL: $url');
+                  return Container(
+                    color: isDark ? Colors.grey[800] : Colors.grey[200],
+                    child: Icon(Icons.person,
+                        size: 100,
+                        color: isDark ? Colors.grey[600] : Colors.grey[400]),
+                  );
+                },
+              ),
             ),
           ),
           
@@ -844,9 +1010,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             crossAxisCount: crossAxisCount,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 3.2,
+            mainAxisSpacing: 12.7,
+            crossAxisSpacing: 12.7,
+            childAspectRatio: 3.44,
             children: [
               _buildInfoCard(Icons.wc, 'GENDER', _displayUser!.gender ?? 'Not set', isDark),
               _buildInfoCard(Icons.cake, 'AGE', _displayUser!.displayAge > 0 ? _displayUser!.displayAge.toString() : 'Not set', isDark),
@@ -882,40 +1048,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildInfoCard(IconData icon, String label, String value, bool isDark) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8.5),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFFF1F2),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: isDark ? Colors.white10 : const Color(0xFFFFE4E6),
           width: 1,
         ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: const Color(0xFFF43F5E), size: 18),
-          const SizedBox(width: 6),
+          Icon(icon, color: const Color(0xFFF43F5E), size: 22),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(label, 
+                Text(
+                  label,
                   style: TextStyle(
-                    fontSize: 8, 
-                    fontWeight: FontWeight.w900, 
-                    color: isDark ? Colors.grey[400] : const Color(0xFF94A3B8), 
-                    letterSpacing: 0.5
-                  )
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? Colors.grey[500] : const Color(0xFF94A3B8),
+                    letterSpacing: 0.6,
+                  ),
                 ),
-                Text(value, 
+                const SizedBox(height: 2),
+                Text(
+                  value,
                   style: TextStyle(
-                    fontSize: 12, 
-                    fontWeight: FontWeight.w900, 
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
                     color: isDark ? Colors.white : const Color(0xFF1E293B),
-                    height: 1.1
-                  ), 
-                  overflow: TextOverflow.ellipsis
+                    height: 1.2,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
               ],
             ),

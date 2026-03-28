@@ -226,6 +226,33 @@ class ProfileService extends ChangeNotifier {
     }
   }
 
+  // Reporting
+  Future<void> reportUser(String id, String reason) async {
+    try {
+      await _apiService.client.post('/reports/$id', data: {'reason': reason});
+      notifyListeners();
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null && e.response!.data['message'] != null) {
+        throw Exception(e.response!.data['message']);
+      }
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getMyReports() async {
+    try {
+      final response = await _apiService.client.get('/reports');
+      if (response.statusCode == 200) {
+        return (response.data as List).cast<Map<String, dynamic>>();
+      }
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   void clearData() {
     notifyListeners();
   }

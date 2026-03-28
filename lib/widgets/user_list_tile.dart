@@ -22,7 +22,7 @@ class UserListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final imageUrl = resolveImageUrl(user.profileImageUrl);
+    final imageUrl = getVersionedImageUrl(user.profileImageUrl, user.updatedAt);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -47,20 +47,23 @@ class UserListTile extends StatelessWidget {
             child: Row(
               children: [
                 // Thumbnail
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(40),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: isDark ? Colors.grey[800] : Colors.grey[200],
-                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: isDark ? Colors.grey[800] : Colors.grey[200],
-                      child: const Icon(Icons.person, size: 30, color: Colors.grey),
+                Hero(
+                  tag: 'user_profile_${user.id}',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(40),
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: isDark ? Colors.grey[800] : Colors.grey[200],
+                        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: isDark ? Colors.grey[800] : Colors.grey[200],
+                        child: const Icon(Icons.person, size: 30, color: Colors.grey),
+                      ),
                     ),
                   ),
                 ),
