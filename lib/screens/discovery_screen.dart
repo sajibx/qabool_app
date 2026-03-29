@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:qabool_app/theme.dart';
+import 'package:provider/provider.dart';
 import 'package:qabool_app/services/profile_service.dart';
 import 'package:qabool_app/services/connection_service.dart';
 import 'package:qabool_app/services/auth_service.dart';
@@ -157,7 +157,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('REMOVE', style: TextStyle(color: Colors.red)),
+            child: const Text('REMOVE', style: TextStyle(color: QaboolTheme.primary)),
           ),
         ],
       ),

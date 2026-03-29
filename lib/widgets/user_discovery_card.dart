@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qabool_app/theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/utils/image_utils.dart';
@@ -184,7 +185,7 @@ class UserDiscoveryCard extends StatelessWidget {
               // Main Heart/Connect Button
               _buildActionButton(
                 icon: user.connectionStatus == 'ACCEPTED' ? Icons.chat_bubble : Icons.favorite,
-                color: user.connectionStatus == 'ACCEPTED' ? const Color(0xFF2ECC71) : const Color(0xFFFF2D55),
+                color: user.connectionStatus == 'ACCEPTED' ? const Color(0xFF2ECC71) : QaboolTheme.primary,
                 onTap: onConnect,
                 size: 56,
                 iconSize: 28,

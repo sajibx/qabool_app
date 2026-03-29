@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class QaboolTheme {
   // Core colors for Asian marriage theme
-  static const Color primary = Color(0xFF800000); // Deep Maroon
+  static const Color primary = Color(0xFF8F0D10); // Brand Deep Red
   static const Color accentGold = Color(0xFFD4AF35); // Gold accent
   static const Color backgroundLight = Color(0xFFFDFCFB); 
   static const Color backgroundDark = Color(0xFF1A1616);

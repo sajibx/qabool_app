@@ -1,6 +1,7 @@
 import 'package:qabool_app/utils/image_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:qabool_app/theme.dart';
 import 'package:provider/provider.dart';
 import '../models/connection_model.dart';
 import '../models/user_model.dart';
@@ -468,7 +469,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
                           child: _buildActionButton(
                             'Remove',
                             isDark ? const Color(0x1FFF4444) : const Color(0xFFFFEBEE),
-                            Colors.redAccent,
+                            QaboolTheme.primary,
                             () async {
                               final confirm = await showDialog<bool>(
                                 context: context,
@@ -483,7 +484,7 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> with SingleTicker
                                     ),
                                     TextButton(
                                       onPressed: () => Navigator.pop(context, true), 
-                                      child: const Text('REMOVE', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w900))
+                                      child: const Text('REMOVE', style: TextStyle(color: QaboolTheme.primary, fontWeight: FontWeight.w900))
                                     ),
                                   ],
                                 ),

@@ -297,7 +297,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: QaboolTheme.primary,
           ),
         );
       }

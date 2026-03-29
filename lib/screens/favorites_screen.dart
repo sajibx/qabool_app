@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qabool_app/theme.dart';
 import 'package:provider/provider.dart';
 import '../models/user_model.dart';
 import '../services/profile_service.dart';
@@ -148,7 +149,7 @@ class _FavoritesListState extends State<FavoritesList> {
         }
         
         if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
+          return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: QaboolTheme.primary)));
         }
         
         final profiles = snapshot.data ?? [];

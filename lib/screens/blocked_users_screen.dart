@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qabool_app/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:qabool_app/services/profile_service.dart';
 import 'package:qabool_app/models/user_model.dart';
@@ -150,7 +151,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                             onPressed: () => _unblockUser(user.id),
                             child: const Text('UNBLOCK',
                               style: TextStyle(
-                                color: Colors.redAccent,
+                                color: QaboolTheme.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

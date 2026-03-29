@@ -207,12 +207,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildNavItem(
-                          Icons.favorite, 'Qabool', 0, const Color(0xFFFF2D55), primaryColor, isDark),
-                      _buildNavItem(Icons.explore, 'Explore', 1, const Color(0xFFFF2D55),
+                          Icons.favorite, 'Qabool', 0, QaboolTheme.primary,
                           primaryColor, isDark),
-                      _buildNavItem(Icons.chat_bubble, 'Chat', 2, const Color(0xFFFF2D55),
-                          primaryColor, isDark, badgeCount: totalUnread > 0 ? totalUnread : null),
-                      _buildNavItem(Icons.person, 'Profile', 3, const Color(0xFFFF2D55),
+                      _buildNavItem(Icons.explore, 'Explore', 1, QaboolTheme.primary,
+                          primaryColor, isDark),
+                      _buildNavItem(Icons.chat_bubble, 'Chat', 2, QaboolTheme.primary,
+                          primaryColor, isDark,
+                          badgeCount: totalUnread > 0 ? totalUnread : null),
+                      _buildNavItem(Icons.person, 'Profile', 3, QaboolTheme.primary,
                           primaryColor, isDark),
                     ],
                   );
@@ -255,7 +257,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.redAccent,
+                          color: QaboolTheme.primary,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(

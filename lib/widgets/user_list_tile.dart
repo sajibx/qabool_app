@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qabool_app/theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/utils/image_utils.dart';
@@ -117,7 +118,7 @@ class UserListTile extends StatelessWidget {
                     const SizedBox(width: 8),
                     _buildSmallButton(
                       user.connectionStatus == 'ACCEPTED' ? Icons.chat_bubble : Icons.favorite, 
-                      user.connectionStatus == 'ACCEPTED' ? const Color(0xFF2ECC71) : const Color(0xFFFF2D55), 
+                      user.connectionStatus == 'ACCEPTED' ? const Color(0xFF2ECC71) : QaboolTheme.primary, 
                       onConnect, 
                       isMain: true
                     ),

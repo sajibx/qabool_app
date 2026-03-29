@@ -458,7 +458,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                       children: [
                                         _buildCircularButton(Icons.close, Colors.grey[400]!, 50, () => _handleSkip(_nearbyProfiles.first)),
                                         const SizedBox(width: 12),
-                                        _buildCircularButton(Icons.favorite, const Color(0xFFFF2D55), 65, () => _handleConnect(_nearbyProfiles.first), isHeart: true),
+                                        _buildCircularButton(Icons.favorite, QaboolTheme.primary, 65, () => _handleConnect(_nearbyProfiles.first), isHeart: true),
                                         const SizedBox(width: 12),
                                         _buildCircularButton(Icons.star, const Color(0xFFFFB800), 50, () => _handleFavorite(_nearbyProfiles.first)),
                                       ],

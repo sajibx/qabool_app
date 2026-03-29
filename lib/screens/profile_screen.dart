@@ -586,76 +586,91 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           // User Info Title (Bottom left)
           Positioned(
-             bottom: 24,
-             left: 24,
-             right: 24,
-             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (_displayUser!.verifiedStatus == 'active')
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.verified, color: Color(0xFF3498DB), size: 18),
-                        const SizedBox(width: 4),
-                        const Text('Verified',
-                            style: TextStyle(
+            bottom: 24,
+            left: 0,
+            right: 0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_displayUser!.verifiedStatus == 'active')
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.verified, color: Color(0xFF3498DB), size: 18),
+                            const SizedBox(width: 4),
+                            const Text('Verified',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              '${_displayUser!.firstName}, ${_displayUser!.age ?? ""}',
+                              style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          '${_displayUser!.firstName}, ${_displayUser!.age ?? ""}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.5,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.5,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 14, height: 14,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: const Color(0xFF2ECC71), width: 3),
+                            ),
+                          )
+                        ]
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 14, height: 14,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFF2ECC71), width: 3),
-                        ),
-                      )
-                    ]
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on_outlined, color: Colors.white, size: 18),
-                      const SizedBox(width: 6),
-                      Text(
-                        _displayUser!.region ?? 'No location added',
-                        style: const TextStyle(
-                           color: Colors.white,
-                           fontSize: 16,
-                           fontWeight: FontWeight.w600,
-                        ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on_outlined, color: Colors.white, size: 18),
+                          const SizedBox(width: 6),
+                          Text(
+                            _displayUser!.region ?? 'No location added',
+                            style: const TextStyle(
+                               color: Colors.white,
+                               fontSize: 16,
+                               fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ]
                       ),
-                    ]
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                ),
+                const SizedBox(height: 16),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: _displayUser!.interests.map((interest) => 
-                      _buildInterestTag(interest, _getInterestIcon(interest))
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _buildInterestTag(interest, _getInterestIcon(interest)),
+                      )
                     ).toList(),
                   ),
-                ]
-             )
+                ),
+              ],
+            ),
           ),
           
           // Edit Profile button overlay if it's me
@@ -696,15 +711,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             margin: const EdgeInsets.only(top: 12, left: 20, right: 20),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFFF1F2),
+              color: isDark ? const Color(0xFF1E293B) : QaboolTheme.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: isDark ? Colors.white10 : const Color(0xFFFFE4E6),
+                color: isDark ? Colors.white10 : QaboolTheme.primary.withOpacity(0.12),
                 width: 1,
               ),
               boxShadow: isDark ? [] : [
                 BoxShadow(
-                  color: const Color(0xFFF43F5E).withOpacity(0.03),
+                  color: QaboolTheme.primary.withOpacity(0.03),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 )
@@ -772,11 +787,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF43F5E), 
+                            color: QaboolTheme.primary, 
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFF43F5E).withOpacity(0.35),
+                                color: QaboolTheme.primary.withOpacity(0.35),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               )
@@ -956,13 +971,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           decoration: BoxDecoration(
                             color: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING') 
                                    ? Colors.grey[400] 
-                                   : const Color(0xFFF43F5E),
+                                   : QaboolTheme.primary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
                                 color: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING')
                                     ? Colors.transparent
-                                    : const Color(0xFFF43F5E).withOpacity(0.35),
+                                    : QaboolTheme.primary.withOpacity(0.35),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               )
@@ -988,7 +1003,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildContentSections(bool isDark, Color primaryColor, Color accentGold, {bool showRequirements = true}) {
-    final cardBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFFDF2F4);
+    final cardBg = isDark ? const Color(0xFF1E293B) : QaboolTheme.primary.withOpacity(0.08);
     final sectionTitleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.w900,
@@ -1058,17 +1073,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8.5),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFFF1F2),
+        color: isDark ? const Color(0xFF1E293B) : QaboolTheme.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isDark ? Colors.white10 : const Color(0xFFFFE4E6),
+          color: isDark ? Colors.white10 : QaboolTheme.primary.withOpacity(0.12),
           width: 1,
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: const Color(0xFFF43F5E), size: 22),
+          Icon(icon, color: QaboolTheme.primary, size: 22),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -1113,10 +1128,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: const Color(0xFFF43F5E).withOpacity(0.1),
+              color: QaboolTheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.check, color: const Color(0xFFF43F5E), size: 14),
+            child: Icon(Icons.check, color: QaboolTheme.primary, size: 14),
           ),
           const SizedBox(width: 12),
           Column(
@@ -1142,7 +1157,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFDF2F4),
+        color: isDark ? const Color(0xFF1E293B) : QaboolTheme.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -1152,7 +1167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(_isMe ? 'Your requirements' : 'Requirements', style: sectionTitleStyle),
-              if (_isMe) Icon(Icons.edit_note, color: const Color(0xFFF43F5E), size: 24),
+              if (_isMe) Icon(Icons.edit_note, color: QaboolTheme.primary, size: 24),
             ],
           ),
           const SizedBox(height: 16),
@@ -1234,7 +1249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFDF2F4),
+        color: isDark ? const Color(0xFF1E293B) : QaboolTheme.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -1244,7 +1259,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF1E293B))),
-              Icon(icon, color: const Color(0xFFF43F5E), size: 24),
+              Icon(icon, color: QaboolTheme.primary, size: 24),
             ],
           ),
           const SizedBox(height: 8),
