@@ -53,6 +53,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? _selectedLookingForType;
   String? _selectedLookingForAge;
   String? _selectedLookingForProfession;
+  List<String> _selectedInterests = [];
+
+  final List<String> _availableInterests = [
+    'Cooking', 'Traveling', 'Reading', 'Coding', 'Gaming', 
+    'Music', 'Art', 'Sports', 'Photography', 'Fitness', 
+    'Movies', 'Outdoors', 'Coffee', 'Animals', 'Gardening'
+  ];
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -242,6 +249,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         lookingForAge: _selectedLookingForAge,
         lookingForType: _selectedLookingForType,
         lookingForProfession: _selectedLookingForProfession,
+        interests: _selectedInterests,
         profileImage: _pickedImage,
       );
       if (!mounted) return;
@@ -1049,6 +1057,54 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             maxLines: 4,
                             decoration: inputDecoration(
                                 "Physical accessibility requirements, etc..."),
+                          ),
+                          const SizedBox(height: 24),
+                          Divider(
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFE2E8F0)),
+                          const SizedBox(height: 24),
+
+                          // Interests Section
+                          buildSectionHeader(Icons.interests, 'Your Interests (Select Max 5)'),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _availableInterests.map((interest) {
+                              final isSelected = _selectedInterests.contains(interest);
+                              return FilterChip(
+                                label: Text(interest),
+                                selected: isSelected,
+                                onSelected: (selected) {
+                                  setState(() {
+                                    if (selected) {
+                                      if (_selectedInterests.length < 5) {
+                                        _selectedInterests.add(interest);
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('You can select a maximum of 5 interests')),
+                                        );
+                                      }
+                                    } else {
+                                      _selectedInterests.remove(interest);
+                                    }
+                                  });
+                                },
+                                selectedColor: pColor.withOpacity(0.3),
+                                checkmarkColor: pColor,
+                                labelStyle: TextStyle(
+                                  color: isSelected ? pColor : (isDark ? Colors.white : Colors.black87),
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
+                                backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(
+                                    color: isSelected ? pColor : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
                           const SizedBox(height: 32),
 

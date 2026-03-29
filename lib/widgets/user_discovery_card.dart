@@ -121,8 +121,9 @@ class UserDiscoveryCard extends StatelessWidget {
                         _buildTag(user.profession!, Icons.work_outline, isGridMode),
                       if (user.religion != null) 
                         _buildTag(user.religion!, Icons.church_outlined, isGridMode),
-                      _buildTag('Cooking', Icons.restaurant, isGridMode),
-                      _buildTag('Travel', Icons.flight_takeoff, isGridMode),
+                      ...user.interests.take(3).map((interest) => 
+                        _buildTag(interest, _getInterestIcon(interest), isGridMode)
+                      ),
                     ],
                   ),
                   if (!isGridMode && user.bio != null) ...[
@@ -233,6 +234,45 @@ class UserDiscoveryCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  IconData _getInterestIcon(String interest) {
+    switch (interest.toLowerCase()) {
+      case 'cooking':
+        return Icons.restaurant;
+      case 'traveling':
+        return Icons.flight_takeoff;
+      case 'reading':
+        return Icons.menu_book;
+      case 'coding':
+        return Icons.code;
+      case 'gaming':
+        return Icons.sports_esports;
+      case 'music':
+        return Icons.music_note;
+      case 'art':
+        return Icons.palette;
+      case 'sports':
+        return Icons.sports_soccer;
+      case 'photography':
+        return Icons.camera_alt;
+      case 'fitness':
+        return Icons.fitness_center;
+      case 'movies':
+        return Icons.movie;
+      case 'outdoors':
+        return Icons.terrain;
+      case 'coffee':
+        return Icons.coffee;
+      case 'animals':
+        return Icons.pets;
+      case 'gardening':
+        return Icons.local_florist;
+      case 'hiking':
+        return Icons.hiking;
+      default:
+        return Icons.favorite;
+    }
   }
 
   Widget _buildActionButton({

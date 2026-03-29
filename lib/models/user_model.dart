@@ -42,6 +42,7 @@ class UserModel {
   final String verifiedStatus; // active, inactive
   final String? sect;
   final String? caste;
+  final List<String> interests;
   final DateTime? updatedAt;
 
   UserModel({
@@ -83,6 +84,7 @@ class UserModel {
     this.verifiedStatus = 'inactive',
     this.sect,
     this.caste,
+    this.interests = const [],
     this.updatedAt,
   });
 
@@ -150,6 +152,7 @@ class UserModel {
       verifiedStatus: json['verifiedStatus']?.toString() ?? 'inactive',
       sect: json['sect'],
       caste: json['caste'],
+      interests: json['interests'] != null ? List<String>.from(json['interests']) : const [],
       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
     );
   }
@@ -195,6 +198,7 @@ class UserModel {
       'verifiedStatus': verifiedStatus,
       'sect': sect,
       'caste': caste,
+      'interests': interests,
       'updatedAt': updatedAt?.toIso8601String(),
     };
   }
@@ -238,6 +242,7 @@ class UserModel {
     String? verifiedStatus,
     String? sect,
     String? caste,
+    List<String>? interests,
     DateTime? updatedAt,
   }) {
     return UserModel(
@@ -279,6 +284,7 @@ class UserModel {
       verifiedStatus: verifiedStatus ?? this.verifiedStatus,
       sect: sect ?? this.sect,
       caste: caste ?? this.caste,
+      interests: interests ?? this.interests,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }

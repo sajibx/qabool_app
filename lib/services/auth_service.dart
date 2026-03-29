@@ -75,6 +75,7 @@ class AuthService extends ChangeNotifier {
     String? lookingForAge,
     String? lookingForType,
     String? lookingForProfession,
+    List<String>? interests,
     XFile? profileImage,
   }) async {
     try {
@@ -107,6 +108,7 @@ class AuthService extends ChangeNotifier {
         'lookingForAge': lookingForAge,
         'lookingForType': lookingForType,
         'lookingForProfession': lookingForProfession,
+        'interests': interests,
       };
 
       final formData = FormData.fromMap(dataMap);

@@ -643,9 +643,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                            fontSize: 16,
                            fontWeight: FontWeight.w600,
                         ),
-                      )
+                      ),
                     ]
-                  )
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _displayUser!.interests.map((interest) => 
+                      _buildInterestTag(interest, _getInterestIcon(interest))
+                    ).toList(),
+                  ),
                 ]
              )
           ),
@@ -1154,6 +1162,71 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildInterestTag(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getInterestIcon(String interest) {
+    switch (interest.toLowerCase()) {
+      case 'cooking':
+        return Icons.restaurant;
+      case 'traveling':
+        return Icons.flight_takeoff;
+      case 'reading':
+        return Icons.menu_book;
+      case 'coding':
+        return Icons.code;
+      case 'gaming':
+        return Icons.sports_esports;
+      case 'music':
+        return Icons.music_note;
+      case 'art':
+        return Icons.palette;
+      case 'sports':
+        return Icons.sports_soccer;
+      case 'photography':
+        return Icons.camera_alt;
+      case 'fitness':
+        return Icons.fitness_center;
+      case 'movies':
+        return Icons.movie;
+      case 'outdoors':
+        return Icons.terrain;
+      case 'coffee':
+        return Icons.coffee;
+      case 'animals':
+        return Icons.pets;
+      case 'gardening':
+        return Icons.local_florist;
+      case 'hiking':
+        return Icons.hiking;
+      default:
+        return Icons.favorite;
+    }
   }
 
   Widget _buildActionPlaceholder(String title, String subtitle, IconData icon, bool isDark) {
