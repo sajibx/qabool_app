@@ -16,20 +16,21 @@ class QaboolTheme {
       brightness: Brightness.light,
       primaryColor: primary,
       scaffoldBackgroundColor: backgroundLight,
+      fontFamily: GoogleFonts.montserrat().fontFamily,
       colorScheme: const ColorScheme.light(
         primary: primary,
         secondary: accentGold,
         surface: Colors.white,
       ),
-      textTheme: GoogleFonts.manropeTextTheme().apply(
+      textTheme: GoogleFonts.montserratTextTheme().apply(
         bodyColor: textLight,
         displayColor: textLight,
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: IconThemeData(color: textLight),
-        titleTextStyle: TextStyle(
+        iconTheme: const IconThemeData(color: textLight),
+        titleTextStyle: GoogleFonts.montserrat(
             color: textLight, fontSize: 20, fontWeight: FontWeight.bold),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -50,20 +51,21 @@ class QaboolTheme {
       brightness: Brightness.dark,
       primaryColor: primary,
       scaffoldBackgroundColor: backgroundDark,
+      fontFamily: GoogleFonts.montserrat().fontFamily,
       colorScheme: const ColorScheme.dark(
         primary: primary,
         secondary: accentGold,
         surface: Color(0xFF0F172A),
       ),
-      textTheme: GoogleFonts.manropeTextTheme(ThemeData.dark().textTheme).apply(
+      textTheme: GoogleFonts.montserratTextTheme(ThemeData.dark().textTheme).apply(
         bodyColor: textDark,
         displayColor: textDark,
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF0F172A), // Slate 900
+      appBarTheme: AppBarTheme(
+        backgroundColor: const Color(0xFF0F172A), // Slate 900
         elevation: 0,
-        iconTheme: IconThemeData(color: textDark),
-        titleTextStyle: TextStyle(
+        iconTheme: const IconThemeData(color: textDark),
+        titleTextStyle: GoogleFonts.montserrat(
             color: textDark, fontSize: 20, fontWeight: FontWeight.bold),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
