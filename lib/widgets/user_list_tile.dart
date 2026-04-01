@@ -10,6 +10,8 @@ class UserListTile extends StatelessWidget {
   final VoidCallback onFavorite;
   final VoidCallback onSkip;
   final VoidCallback? onTap;
+  final bool showConnect;
+  final bool showFavorite;
 
   const UserListTile({
     super.key,
@@ -18,6 +20,8 @@ class UserListTile extends StatelessWidget {
     required this.onFavorite,
     required this.onSkip,
     this.onTap,
+    this.showConnect = true,
+    this.showFavorite = true,
   });
 
   @override
@@ -115,15 +119,19 @@ class UserListTile extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _buildSmallButton(Icons.close, const Color(0xFF94A3B8), onSkip),
-                    const SizedBox(width: 8),
-                    _buildSmallButton(
-                      user.connectionStatus == 'ACCEPTED' ? Icons.chat_bubble : Icons.favorite, 
-                      user.connectionStatus == 'ACCEPTED' ? const Color(0xFF2ECC71) : QaboolTheme.primary, 
-                      onConnect, 
-                      isMain: true
-                    ),
-                    const SizedBox(width: 8),
-                    _buildSmallButton(Icons.star, const Color(0xFFFFB800), onFavorite),
+                    if (showConnect) ...[
+                      const SizedBox(width: 8),
+                      _buildSmallButton(
+                        user.connectionStatus == 'ACCEPTED' ? Icons.chat_bubble : Icons.favorite, 
+                        user.connectionStatus == 'ACCEPTED' ? const Color(0xFF2ECC71) : QaboolTheme.primary, 
+                        onConnect, 
+                        isMain: true
+                      ),
+                    ],
+                    if (showFavorite) ...[
+                      const SizedBox(width: 8),
+                      _buildSmallButton(Icons.star, const Color(0xFFFFB800), onFavorite),
+                    ],
                     const SizedBox(width: 4), // right padding inside cylinder
                   ],
                 ),

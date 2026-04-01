@@ -7,7 +7,7 @@ import '../models/message_model.dart';
 import '../models/user_model.dart'; // Added
 import 'api_service.dart';
 import '../widgets/notification_overlay.dart';
-import '../main.dart'; // To access navigatorKey
+import 'package:qabool_app/utils/navigation_utils.dart';
 import '../screens/chat_screen.dart'; // To navigate on tap
 import '../screens/profile_screen.dart';
 
@@ -151,47 +151,6 @@ class ChatService extends ChangeNotifier {
       }
     });
     
-    _socket?.on('new_favorite', (data) {
-      print('New favorite received: $data');
-      try {
-        Map<String, dynamic> jsonData;
-        if (data is String) {
-          jsonData = jsonDecode(data);
-        } else {
-          try {
-            jsonData = jsonDecode(jsonEncode(data));
-          } catch (_) {
-            jsonData = Map<String, dynamic>.from(data as dynamic);
-          }
-        }
-        
-        final from = jsonData['from'];
-        if (from != null) {
-          final sender = UserModel.fromJson(from);
-          final userName = sender.fullName;
-          final profileImageUrl = sender.profileImageUrl;
-          
-          if (navigatorKey.currentContext != null) {
-            NotificationOverlay.show(
-              context: navigatorKey.currentContext!,
-              title: 'New Favorite! ⭐',
-              message: '$userName just added you to their favorites!',
-              imageUrl: profileImageUrl,
-              onTap: () {
-                navigatorKey.currentState?.push(
-                  MaterialPageRoute(
-                    builder: (context) => ProfileScreen(user: sender),
-                  ),
-                );
-              },
-            );
-          }
-        }
-      } catch (e) {
-        print('Error parsing favorite notification: $e');
-      }
-    });
-
     _socket?.on('typing_status', (data) {
       try {
         Map<String, dynamic> jsonData;
@@ -258,46 +217,6 @@ class ChatService extends ChangeNotifier {
         }
       } catch (e) {
         print('Error parsing messages_read: $e');
-      }
-    });
-
-    _socket?.on('new_connection_request', (data) {
-      print('New connection request received: $data');
-      try {
-        Map<String, dynamic> jsonData;
-        if (data is String) {
-          jsonData = jsonDecode(data);
-        } else {
-          try {
-            jsonData = jsonDecode(jsonEncode(data));
-          } catch (_) {
-            jsonData = Map<String, dynamic>.from(data as dynamic);
-          }
-        }
-        
-        final requesterData = jsonData['requester'];
-        final message = jsonData['message'] ?? 'Someone sent you a connection request';
-        
-        if (requesterData != null && navigatorKey.currentContext != null) {
-          final requester = UserModel.fromJson(requesterData);
-          final profileImageUrl = requester.profileImageUrl;
-          
-          NotificationOverlay.show(
-            context: navigatorKey.currentContext!,
-            title: 'Connection Request! 🤝',
-            message: message,
-            imageUrl: profileImageUrl,
-            onTap: () {
-              navigatorKey.currentState?.push(
-                MaterialPageRoute(
-                  builder: (context) => ProfileScreen(user: requester),
-                ),
-              );
-            },
-          );
-        }
-      } catch (e) {
-        print('Error parsing connection notification: $e');
       }
     });
 

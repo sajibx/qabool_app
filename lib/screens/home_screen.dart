@@ -12,6 +12,9 @@ import 'package:qabool_app/screens/chat_screen.dart';
 import 'package:qabool_app/screens/profile_screen.dart';
 import 'package:qabool_app/widgets/user_discovery_card.dart';
 import 'package:qabool_app/widgets/filter_bottom_sheet.dart';
+import 'package:qabool_app/widgets/notification_icon.dart';
+import 'package:qabool_app/widgets/notification_dropdown.dart';
+import 'package:qabool_app/services/notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int index)? onNavigate;
@@ -40,6 +43,9 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
   String? _selectedEducation;
   bool _showConnected = false;
   bool _showSkipped = false;
+  
+  OverlayEntry? _notificationOverlay;
+  final LayerLink _notificationLayerLink = LayerLink();
 
   @override
   void initState() {
@@ -60,6 +66,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
 
   @override
   void dispose() {
+    _hideNotificationDropdown();
     _searchController.dispose();
     _animationController.dispose();
     super.dispose();
@@ -190,6 +197,54 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
     );
   }
 
+  void _showNotificationDropdown() {
+    if (_notificationOverlay != null) {
+      _hideNotificationDropdown();
+      return;
+    }
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth > 800;
+    final dropdownWidth = isLargeScreen ? 400.0 : 320.0;
+    
+    final overlay = Overlay.of(context);
+    _notificationOverlay = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          // Dismiss area
+          GestureDetector(
+            onTap: _hideNotificationDropdown,
+            behavior: HitTestBehavior.opaque,
+            child: Container(color: Colors.transparent),
+          ),
+          Positioned(
+            width: dropdownWidth,
+            child: CompositedTransformFollower(
+              link: _notificationLayerLink,
+              showWhenUnlinked: false,
+              // Adjust offset based on screen size; on mobile we might want it centered vs left-aligned on desktop
+              offset: Offset(isLargeScreen ? -300 : 0, 50),
+              child: Material(
+                color: Colors.transparent,
+                child: NotificationDropdown(
+                  onDismiss: _hideNotificationDropdown,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    overlay.insert(_notificationOverlay!);
+    context.read<NotificationService>().fetchNotifications();
+  }
+
+  void _hideNotificationDropdown() {
+    _notificationOverlay?.remove();
+    _notificationOverlay = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -259,6 +314,13 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                     ],
                   ),
                   child: Icon(Icons.tune, color: pColor, size: 24),
+                ),
+              ),
+              const SizedBox(width: 12),
+              CompositedTransformTarget(
+                link: _notificationLayerLink,
+                child: NotificationIcon(
+                  onTap: _showNotificationDropdown,
                 ),
               ),
             ],

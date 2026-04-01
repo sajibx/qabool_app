@@ -10,6 +10,7 @@ import 'package:qabool_app/models/connection_model.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
 import 'package:qabool_app/screens/profile_screen.dart';
 import 'package:qabool_app/widgets/user_list_tile.dart';
+import 'package:qabool_app/services/navigation_service.dart';
 
 class DiscoveryScreen extends StatefulWidget {
   const DiscoveryScreen({super.key});
@@ -18,8 +19,10 @@ class DiscoveryScreen extends StatefulWidget {
   State<DiscoveryScreen> createState() => DiscoveryScreenState();
 }
 
-class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProviderStateMixin {
+class DiscoveryScreenState extends State<DiscoveryScreen> with TickerProviderStateMixin {
   late TabController _mainTabController;
+  late TabController _historyTabController;
+  late TabController _readyTabController;
   bool _isLoading = true;
   List<UserModel> _favorites = [];
   List<UserModel> _passed = [];
@@ -28,12 +31,34 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
   void initState() {
     super.initState();
     _mainTabController = TabController(length: 2, vsync: this);
+    _historyTabController = TabController(length: 3, vsync: this);
+    _readyTabController = TabController(length: 2, vsync: this);
+    
+    // Listen to navigation service for deep links
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final nav = context.read<NavigationService>();
+      _updateTabsFromService(nav);
+      nav.addListener(() => _updateTabsFromService(nav));
+    });
+
     refreshData();
+  }
+
+  void _updateTabsFromService(NavigationService nav) {
+    if (!mounted) return;
+    if (_mainTabController.index != nav.discoverySubTabIndex) {
+      _mainTabController.animateTo(nav.discoverySubTabIndex);
+    }
+    if (_readyTabController.index != nav.readyToQaboolSubTabIndex) {
+      _readyTabController.animateTo(nav.readyToQaboolSubTabIndex);
+    }
   }
 
   @override
   void dispose() {
     _mainTabController.dispose();
+    _historyTabController.dispose();
+    _readyTabController.dispose();
     super.dispose();
   }
 
@@ -191,6 +216,8 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
     String emptyMessage = "No users found",
     void Function(UserModel)? customOnConnect,
     void Function(UserModel)? customOnSkip,
+    bool showConnect = true,
+    bool showFavorite = true,
   }) {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
     if (users.isEmpty) return Center(child: Text(emptyMessage, style: const TextStyle(fontSize: 16, color: Colors.grey)));
@@ -209,6 +236,8 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
             onConnect: () => customOnConnect != null ? customOnConnect(profile) : _handleConnect(profile),
             onFavorite: () => _handleFavorite(profile),
             onSkip: () => customOnSkip != null ? customOnSkip(profile) : _handleSkip(profile),
+            showConnect: showConnect,
+            showFavorite: showFavorite,
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)));
             },
@@ -255,63 +284,70 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
   }
 
   Widget _buildMyHistoryTab(bool isDark, Color pColor) {
-    return DefaultTabController(
-      length: 3,
-      child: Column(
-        children: [
-          Container(
-            color: isDark ? Colors.black12 : Colors.grey[50],
-            child: TabBar(
-              labelColor: isDark ? Colors.white : Colors.black,
-              unselectedLabelColor: Colors.grey,
-              indicatorSize: TabBarIndicatorSize.label,
-              indicatorColor: pColor,
-              dividerColor: Colors.transparent,
-              tabs: const [
-                Tab(text: "Favorites"),
-                Tab(text: "Liked"),
-                Tab(text: "Passed"),
-              ],
-            ),
+    return Column(
+      children: [
+        Container(
+          color: isDark ? Colors.black12 : Colors.grey[50],
+          child: TabBar(
+            controller: _historyTabController,
+            labelColor: isDark ? Colors.white : Colors.black,
+            unselectedLabelColor: Colors.grey,
+            indicatorSize: TabBarIndicatorSize.label,
+            indicatorColor: pColor,
+            dividerColor: Colors.transparent,
+            tabs: const [
+              Tab(text: "Favorites"),
+              Tab(text: "Liked"),
+              Tab(text: "Passed"),
+            ],
           ),
-          Expanded(
-            child: Consumer2<AuthService, ConnectionService>(
-              builder: (context, auth, connections, child) {
-                final currentUserId = auth.currentUser?.id;
-                
-                final likedUsers = currentUserId == null ? <UserModel>[] : connections.connections
-                    .where((c) => c.status == ConnectionStatus.PENDING && c.requester?.id == currentUserId)
-                    .map((c) => c.recipient)
-                    .whereType<UserModel>()
-                    .toList();
+        ),
+        Expanded(
+          child: Consumer2<AuthService, ConnectionService>(
+            builder: (context, auth, connections, child) {
+              final currentUserId = auth.currentUser?.id;
+              
+              final likedUsers = currentUserId == null ? <UserModel>[] : connections.connections
+                  .where((c) => c.status == ConnectionStatus.PENDING && c.requester?.id == currentUserId)
+                  .map((c) => c.recipient?.copyWith(
+                    connectionId: c.id,
+                    connectionStatus: 'PENDING_SENT',
+                  ))
+                  .whereType<UserModel>()
+                  .toList();
 
-                return TabBarView(
-                  children: [
-                    _buildList(_favorites, emptyMessage: "No favorites yet"),
-                    _buildList(likedUsers, emptyMessage: "No sent requests"),
-                    _buildList(
-                      _passed, 
-                      emptyMessage: "No passed users",
-                      customOnSkip: (u) => _handleUnskip(u),
-                    ),
-                  ],
-                );
-              },
-            ),
+              return TabBarView(
+                controller: _historyTabController,
+                children: [
+                  _buildList(_favorites, emptyMessage: "No favorites yet"),
+                  _buildList(
+                    likedUsers, 
+                    emptyMessage: "No sent requests", 
+                    customOnSkip: (u) => _handleCancelRequest(u),
+                    showConnect: false, // Don't show connect for already sent requests
+                  ),
+                  _buildList(
+                    _passed, 
+                    emptyMessage: "No passed users",
+                    customOnSkip: (u) => _handleUnskip(u),
+                    showConnect: false, // Don't show connect for skipped users either
+                  ),
+                ],
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildReadyToQaboolTab(bool isDark, Color pColor) {
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          Container(
-            color: isDark ? Colors.black12 : Colors.grey[50],
-            child: TabBar(
+    return Column(
+      children: [
+        Container(
+          color: isDark ? Colors.black12 : Colors.grey[50],
+          child: TabBar(
+            controller: _readyTabController,
               labelColor: isDark ? Colors.white : Colors.black,
               unselectedLabelColor: Colors.grey,
               indicatorSize: TabBarIndicatorSize.label,
@@ -341,6 +377,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
                 final receivedUsers = receivedConnections.map((c) => c.requester).whereType<UserModel>().toList();
 
                 return TabBarView(
+                  controller: _readyTabController,
                   children: [
                     _buildList(
                       mutualUsers, 
@@ -365,7 +402,53 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with SingleTickerProvi
             ),
           ),
         ],
+      );
+  }
+
+  Future<void> _handleCancelRequest(UserModel user) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Cancel Request?', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to cancel your connection request to ${user.firstName}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('NO', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('YES, CANCEL REQUEST', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
+
+    if (confirmed == true) {
+      try {
+        final connId = user.connectionId;
+        if (connId == null) throw 'Connection ID not found';
+        
+        await context.read<ConnectionService>().cancelConnectionRequest(connId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Connection request cancelled.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to cancel request: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 }

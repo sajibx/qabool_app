@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/services/api_service.dart';
+import 'package:qabool_app/services/notification_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,8 +34,14 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       
       final token = await context.read<ApiService>().getToken();
-      if (token != null) chatService.initSocket(token);
+      if (token != null) {
+        chatService.initSocket(token);
+        if (mounted) {
+          context.read<NotificationService>().initSocket(token);
+        }
+      }
       
+      if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/main');
     } on Exception catch (e) {
       String message = 'Login failed';

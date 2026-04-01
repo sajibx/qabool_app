@@ -11,7 +11,7 @@ import '../services/profile_service.dart';
 import '../models/message_model.dart';
 import '../models/user_model.dart';
 import '../screens/profile_screen.dart';
-import '../main.dart';
+import 'package:qabool_app/utils/navigation_utils.dart';
 
 class ChatView extends StatefulWidget {
   final String? chatId;

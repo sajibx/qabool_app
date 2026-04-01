@@ -9,9 +9,10 @@ import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/services/profile_service.dart';
 import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/services/connection_service.dart';
+import 'package:qabool_app/services/notification_service.dart';
+import 'package:qabool_app/services/navigation_service.dart';
 import 'package:qabool_app/widgets/floating_chat_overlay.dart';
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+import 'package:qabool_app/utils/navigation_utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,12 +22,16 @@ void main() async {
   final profileService = ProfileService(apiService);
   final chatService = ChatService(apiService);
   final connectionService = ConnectionService(apiService);
-  // Set up logout callback to disconnect socket
+  final notificationService = NotificationService(apiService);
+  final navigationService = NavigationService();
+  
   // Set up logout callback to disconnect socket and clear states
   authService.onLogout = () {
     chatService.disconnectSocket();
     chatService.clearData();
     connectionService.clearData();
+    notificationService.disconnectSocket();
+    notificationService.clearData();
     profileService.clearData(); // If implemented
   };
 
@@ -37,6 +42,8 @@ void main() async {
   final token = await apiService.getToken();
   if (token != null) {
     chatService.initSocket(token);
+    notificationService.initSocket(token);
+    notificationService.fetchUnreadCount();
   }
 
   runApp(
@@ -47,6 +54,8 @@ void main() async {
         ChangeNotifierProvider.value(value: profileService),
         ChangeNotifierProvider.value(value: chatService),
         ChangeNotifierProvider.value(value: connectionService),
+        ChangeNotifierProvider.value(value: notificationService),
+        ChangeNotifierProvider.value(value: navigationService),
       ],
       child: const QaboolApp(),
     ),

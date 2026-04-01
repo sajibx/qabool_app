@@ -20,20 +20,19 @@ class ConnectionService extends ChangeNotifier {
 
   Future<void> fetchConnections() async {
     _isLoading = true;
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) => notifyListeners());
     try {
       final response = await _apiService.client.get('/connections');
       if (response.statusCode == 200) {
         _connections = (response.data as List)
             .map((c) => ConnectionModel.fromJson(c))
             .toList();
-        notifyListeners();
       }
     } catch (e) {
       debugPrint('Error fetching connections: $e');
     } finally {
       _isLoading = false;
-      notifyListeners();
+      WidgetsBinding.instance.addPostFrameCallback((_) => notifyListeners());
     }
   }
 
@@ -55,6 +54,17 @@ class ConnectionService extends ChangeNotifier {
       await fetchConnections();
     } catch (e) {
       debugPrint('Error responding to connection request: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> cancelConnectionRequest(String connectionId) async {
+    try {
+      // Backend handles withdrawal/cancel via PUT with status=REJECTED, 
+      // which deletes the connection record.
+      await respondToRequest(connectionId, ConnectionStatus.REJECTED);
+    } catch (e) {
+      debugPrint('Error canceling connection request: $e');
       rethrow;
     }
   }

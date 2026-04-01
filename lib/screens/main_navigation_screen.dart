@@ -10,6 +10,7 @@ import 'package:qabool_app/widgets/floating_chat_window.dart';
 import 'package:qabool_app/models/chat_model.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/services/api_service.dart';
+import 'package:qabool_app/services/navigation_service.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -46,7 +47,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _onItemTapped(int index) {
-    if (_currentIndex == index) {
+    final navigationService = context.read<NavigationService>();
+    final newTab = AppTab.values[index];
+    
+    if (navigationService.currentTab == newTab) {
       if (index == 0) {
         _homeKey.currentState?.refreshData();
       } else if (index == 1) {
@@ -55,9 +59,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         _messagesKey.currentState?.refreshData();
       }
     }
-    setState(() {
-      _currentIndex = index;
-    });
+    
+    navigationService.setTab(newTab);
     // Update global messages page activity state
     context.read<ChatService>().setMessagesPageActive(index == 2);
   }
@@ -91,9 +94,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     ),
                   ),
                   child: SafeArea(
-                    child: Consumer<ChatService>(
-                      builder: (context, chatService, _) {
+                    child: Consumer2<ChatService, NavigationService>(
+                      builder: (context, chatService, nav, _) {
                         final totalUnread = chatService.totalUnreadCount;
+                        final currentIndex = nav.currentTab.index;
                         return Column(
                           children: [
                             const SizedBox(height: 16),
@@ -137,15 +141,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                         ],
                                       ),
                                     ),
+                                ),
                               ),
-                            ),
                             ),
                             SizedBox(height: _isSidebarCollapsed ? 16 : 48),
                             // Nav Items
-                            _buildSidebarItem(Icons.home_outlined, Icons.home, 'Qabool', 0, accentGold, primaryColor, isDark),
-                            _buildSidebarItem(Icons.explore_outlined, Icons.explore, 'Explore', 1, accentGold, primaryColor, isDark),
-                            _buildSidebarItem(Icons.chat_bubble_outline, Icons.chat_bubble, 'Chat', 2, accentGold, primaryColor, isDark, badgeCount: totalUnread > 0 ? totalUnread : null),
-                            _buildSidebarItem(Icons.person_outline, Icons.person, 'Profile', 3, accentGold, primaryColor, isDark),
+                            _buildSidebarItem(Icons.home_outlined, Icons.home, 'Qabool', 0, accentGold, primaryColor, isDark, currentIndex: currentIndex),
+                            _buildSidebarItem(Icons.explore_outlined, Icons.explore, 'Explore', 1, accentGold, primaryColor, isDark, currentIndex: currentIndex),
+                            _buildSidebarItem(Icons.chat_bubble_outline, Icons.chat_bubble, 'Chat', 2, accentGold, primaryColor, isDark, badgeCount: totalUnread > 0 ? totalUnread : null, currentIndex: currentIndex),
+                            _buildSidebarItem(Icons.person_outline, Icons.person, 'Profile', 3, accentGold, primaryColor, isDark, currentIndex: currentIndex),
                             const Spacer(),
                             // version info
                             if (!_isSidebarCollapsed)
@@ -170,9 +174,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               
               // Main Content
               Expanded(
-                child: IndexedStack(
-                  index: _currentIndex,
-                  children: _screens,
+                child: Consumer<NavigationService>(
+                  builder: (context, nav, _) {
+                    return IndexedStack(
+                      index: nav.currentTab.index,
+                      children: _screens,
+                    );
+                  },
                 ),
               ),
             ],
@@ -181,45 +189,50 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: LayoutBuilder(
         builder: (context, constraints) {
-          if (MediaQuery.of(context).size.width > 800) return const SizedBox.shrink();
+          if (constraints.maxWidth > 800) return const SizedBox.shrink();
           
           return Container(
             decoration: BoxDecoration(
               color: isDark ? bgDark : Colors.white,
               border: Border(
-                  top: BorderSide(
-                      color: isDark
-                          ? const Color(0xFF1E293B)
-                          : primaryColor.withOpacity(0.1))),
+                top: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF1E293B)
+                      : primaryColor.withOpacity(0.1),
+                ),
+              ),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5))
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
               ],
             ),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            child: SafeArea(
-              child: Consumer<ChatService>(
-                builder: (context, chatService, _) {
-                  final totalUnread = chatService.totalUnreadCount;
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildNavItem(
-                          Icons.favorite, 'Qabool', 0, QaboolTheme.primary,
-                          primaryColor, isDark),
-                      _buildNavItem(Icons.explore, 'Explore', 1, QaboolTheme.primary,
-                          primaryColor, isDark),
-                      _buildNavItem(Icons.chat_bubble, 'Chat', 2, QaboolTheme.primary,
-                          primaryColor, isDark,
-                          badgeCount: totalUnread > 0 ? totalUnread : null),
-                      _buildNavItem(Icons.person, 'Profile', 3, QaboolTheme.primary,
-                          primaryColor, isDark),
-                    ],
-                  );
-                },
-              ),
+            child: Consumer2<ChatService, NavigationService>(
+              builder: (context, chatService, nav, _) {
+                final totalUnread = chatService.totalUnreadCount;
+                final currentIndex = nav.currentTab.index;
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildNavItem(
+                      Icons.favorite, 'Qabool', 0, QaboolTheme.primary,
+                      primaryColor, isDark, currentIndex: currentIndex,
+                    ),
+                    _buildNavItem(Icons.explore, 'Explore', 1, QaboolTheme.primary,
+                        primaryColor, isDark, currentIndex: currentIndex),
+                    _buildNavItem(
+                      Icons.chat_bubble, 'Chat', 2, QaboolTheme.primary,
+                      primaryColor, isDark, currentIndex: currentIndex,
+                      badgeCount: totalUnread > 0 ? totalUnread : null,
+                    ),
+                    _buildNavItem(Icons.person, 'Profile', 3, QaboolTheme.primary,
+                        primaryColor, isDark, currentIndex: currentIndex),
+                  ],
+                );
+              },
             ),
           );
         },
@@ -227,8 +240,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  Widget _buildSidebarItem(IconData icon, IconData activeIcon, String label, int index, Color sColor, Color pColor, bool isDark, {int? badgeCount}) {
-    final isActive = _currentIndex == index;
+  Widget _buildSidebarItem(IconData icon, IconData activeIcon, String label, int index, Color sColor, Color pColor, bool isDark, {int? badgeCount, int currentIndex = 0}) {
+    final isActive = currentIndex == index;
     final activeColor = isDark ? pColor : sColor;
     
     return Padding(
@@ -320,8 +333,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Widget _buildNavItem(IconData icon, String label, int index, Color sColor,
       Color pColor, bool isDark,
-      {int? badgeCount}) {
-    final isActive = _currentIndex == index;
+      {int? badgeCount, int currentIndex = 0}) {
+    final isActive = currentIndex == index;
     final activeColor = isDark ? pColor : sColor;
     final color =
         isActive ? activeColor : (isDark ? Colors.grey[600] : Colors.grey[400]);

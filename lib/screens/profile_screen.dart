@@ -533,179 +533,176 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     reasonController.dispose();
   }
-
   Widget _buildHeroSection(bool isDark, Color bgDark, Color primaryColor, Color accentGold) {
     return Column(
       children: [
         SizedBox(
-      height: MediaQuery.of(context).size.height * 0.76,
-      width: double.infinity,
-      child: Stack(
-        children: [
-          // Full Cover Image
-          Hero(
-            tag: 'user_profile_${_displayUser!.id}',
-            child: SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: CachedNetworkImage(
-                key: ValueKey(getVersionedImageUrl(_displayUser!.profileImageUrl, _displayUser!.updatedAt)),
-                imageUrl: getVersionedImageUrl(_displayUser!.profileImageUrl, _displayUser!.updatedAt),
-                fit: BoxFit.cover,
-                errorWidget: (context, url, error) {
-                  debugPrint('CachedNetworkImage ERROR: $error for URL: $url');
-                  return Container(
-                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                    child: Icon(Icons.person,
-                        size: 100,
-                        color: isDark ? Colors.grey[600] : Colors.grey[400]),
-                  );
-                },
-              ),
-            ),
-          ),
-          
-          // Gradient Overlay
-          Positioned.fill(
-             child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.2),
-                      Colors.transparent,
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.8),
-                    ],
-                    stops: const [0.0, 0.1, 0.7, 1.0],
-                  )
-                )
-             )
-          ),
-
-          // User Info Title (Bottom left)
-          Positioned(
-            bottom: 24,
-            left: 0,
-            right: 0,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (_displayUser!.verifiedStatus == 'active')
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.verified, color: Color(0xFF3498DB), size: 18),
-                            const SizedBox(width: 4),
-                            const Text('Verified',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              '${_displayUser!.firstName}, ${_displayUser!.age ?? ""}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 14, height: 14,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: const Color(0xFF2ECC71), width: 3),
-                            ),
-                          )
-                        ]
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.location_on_outlined, color: Colors.white, size: 18),
-                          const SizedBox(width: 6),
-                          Text(
-                            _displayUser!.region ?? 'No location added',
-                            style: const TextStyle(
-                               color: Colors.white,
-                               fontSize: 16,
-                               fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ]
-                      ),
-                    ],
-                  ),
+          height: MediaQuery.of(context).size.height * 0.76,
+          width: double.infinity,
+          child: Stack(
+            children: [
+              // Full Cover Image
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height * 0.76,
+                  minWidth: double.infinity,
                 ),
-                const SizedBox(height: 16),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: _displayUser!.interests.map((interest) => 
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: _buildInterestTag(interest, _getInterestIcon(interest)),
-                      )
-                    ).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Edit Profile button overlay if it's me
-          if (_isMe) ...[
-            Positioned(
-              bottom: 24,
-              right: 24,
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: primaryColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.white),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                child: CachedNetworkImage(
+                  key: ValueKey(getVersionedImageUrl(_displayUser!.profileImageUrl, _displayUser!.updatedAt)),
+                  imageUrl: getVersionedImageUrl(_displayUser!.profileImageUrl, _displayUser!.updatedAt),
+                  fit: BoxFit.cover,
+                  errorWidget: (context, url, error) {
+                    debugPrint('CachedNetworkImage ERROR: $error for URL: $url');
+                    return Container(
+                      color: isDark ? Colors.grey[800] : Colors.grey[200],
+                      child: Icon(Icons.person,
+                          size: 100,
+                          color: isDark ? Colors.grey[600] : Colors.grey[400]),
                     );
                   },
                 ),
               ),
-            ),
-          ],
-        ],
-      ),
-    ),
+              
+              // Gradient Overlay
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.2),
+                        Colors.transparent,
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.8),
+                      ],
+                      stops: const [0.0, 0.1, 0.7, 1.0],
+                    )
+                  )
+                )
+              ),
 
+              // User Info Title (Bottom left)
+              Positioned(
+                bottom: 24,
+                left: 0,
+                right: 0,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (_displayUser!.verifiedStatus == 'active')
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.verified, color: Color(0xFF3498DB), size: 18),
+                                const SizedBox(width: 4),
+                                const Text('Verified',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  '${_displayUser!.firstName}, ${_displayUser!.age ?? ""}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -0.5,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                width: 14, height: 14,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: const Color(0xFF2ECC71), width: 3),
+                                ),
+                              )
+                            ]
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on_outlined, color: Colors.white, size: 18),
+                              const SizedBox(width: 6),
+                              Text(
+                                _displayUser!.region ?? 'No location added',
+                                style: const TextStyle(
+                                   color: Colors.white,
+                                   fontSize: 16,
+                                   fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ]
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: _displayUser!.interests.map((interest) => 
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: _buildInterestTag(interest, _getInterestIcon(interest)),
+                          )
+                        ).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              if (_isMe) ...[
+                Positioned(
+                  bottom: 24,
+                  right: 24,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: primaryColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.white),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        
         if (!_isMe)
           Container(
             margin: const EdgeInsets.only(top: 12, left: 20, right: 20),
@@ -907,18 +904,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                     ]
+                    else if (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING') ...[
+                      // Sent Request Actions
+                      SizedBox(
+                        height: 40,
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Cancel Request?'),
+                                content: Text('Are you sure you want to cancel your connection request to ${_displayUser?.firstName ?? 'this user'}?'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('NO')),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, true),
+                                    child: const Text('CANCEL REQUEST', style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (confirmed == true) {
+                              try {
+                                final connectionService = context.read<ConnectionService>();
+                                final cid = _displayUser?.connectionId;
+                                if (cid != null) {
+                                  await connectionService.cancelConnectionRequest(cid);
+                                  if (mounted) {
+                                    setState(() => _displayUser = _displayUser!.copyWith(connectionStatus: 'NONE'));
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Connection request cancelled.')));
+                                  }
+                                }
+                              } catch (e) {
+                                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to cancel: $e')));
+                               }
+                            }
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: const BorderSide(color: Colors.red),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('CANCEL', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.access_time, color: Colors.grey[600], size: 18),
+                      ),
+                    ]
                     else ...[
-                      // Default Actions (NONE or PENDING_SENT)
+                      // Default Actions (NONE)
                       GestureDetector(
-                        onTap: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING') ? () async {
-                          try {
-                            final connectionService = context.read<ConnectionService>();
-                            await connectionService.respondToRequest(
-                                _displayUser!.connectionId!,
-                                v_conn.ConnectionStatus.REJECTED);
-                            if (mounted) setState(() => _displayUser = _displayUser!.copyWith(connectionStatus: 'NONE'));
-                          } catch (e) {}
-                        } : () async {
+                        onTap: () async {
                           try {
                             final profileService = context.read<ProfileService>();
                             await profileService.skipUser(_displayUser!);
@@ -945,7 +990,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(width: 12),
                       GestureDetector(
-                        onTap: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING') ? null : () async {
+                        onTap: () async {
                           final currentUser = context.read<AuthService>().currentUser;
                           if (currentUser?.verifiedStatus != 'active') {
                              showDialog(
@@ -963,33 +1008,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           try {
                             final connectionService = context.read<ConnectionService>();
                             await connectionService.sendConnectionRequest(_displayUser!.id);
-                            if (mounted) setState(() => _displayUser = _displayUser!.copyWith(connectionStatus: 'PENDING_SENT'));
-                          } catch (e) {}
+                            if (mounted) {
+                              // We should refresh profile to get the connectionId
+                              await _refreshProfile();
+                            }
+                          } catch (e) {
+                             if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                          }
                         },
                         child: Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING') 
-                                   ? Colors.grey[400] 
-                                   : QaboolTheme.primary,
+                            color: QaboolTheme.primary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING')
-                                    ? Colors.transparent
-                                    : QaboolTheme.primary.withOpacity(0.35),
+                                color: QaboolTheme.primary.withOpacity(0.35),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               )
                             ]
                           ),
-                          child: Icon(
-                            (_displayUser!.connectionStatus == 'PENDING_SENT' || _displayUser!.connectionStatus == 'PENDING') 
-                                ? Icons.access_time 
-                                : Icons.favorite_border,
-                            color: Colors.white, 
-                            size: 24
-                          ),
+                          child: const Icon(Icons.favorite_border, color: Colors.white, size: 24),
                         ),
                       ),
                     ]

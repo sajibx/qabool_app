@@ -1,0 +1,237 @@
+Analyzing lib...                                                
+
+   info • The constant name 'PENDING' isn't a lowerCamelCase identifier • models/connection_model.dart:3:25 • constant_identifier_names
+   info • The constant name 'ACCEPTED' isn't a lowerCamelCase identifier • models/connection_model.dart:3:34 • constant_identifier_names
+   info • The constant name 'REJECTED' isn't a lowerCamelCase identifier • models/connection_model.dart:3:44 • constant_identifier_names
+   info • The constant name 'TEXT' isn't a lowerCamelCase identifier • models/message_model.dart:1:20 • constant_identifier_names
+   info • The constant name 'IMAGE' isn't a lowerCamelCase identifier • models/message_model.dart:1:26 • constant_identifier_names
+   info • The constant name 'SENT' isn't a lowerCamelCase identifier • models/message_model.dart:2:22 • constant_identifier_names
+   info • The constant name 'DELIVERED' isn't a lowerCamelCase identifier • models/message_model.dart:2:28 • constant_identifier_names
+   info • The constant name 'READ' isn't a lowerCamelCase identifier • models/message_model.dart:2:39 • constant_identifier_names
+   info • The constant name 'FAVORITE' isn't a lowerCamelCase identifier • models/notification_model.dart:4:3 • constant_identifier_names
+   info • The constant name 'CONNECTION_REQUEST' isn't a lowerCamelCase identifier • models/notification_model.dart:5:3 • constant_identifier_names
+   info • The constant name 'CONNECTION_ACCEPTED' isn't a lowerCamelCase identifier • models/notification_model.dart:6:3 • constant_identifier_names
+warning • Duplicate import • screens/blocked_users_screen.dart:7:8 • duplicate_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/blocked_users_screen.dart:89:70 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/blocked_users_screen.dart:111:49 • deprecated_member_use
+warning • Duplicate import • screens/connections_screen.dart:13:8 • duplicate_import
+   info • Don't use 'BuildContext's across async gaps • screens/connections_screen.dart:37:7 • use_build_context_synchronously
+   info • Use 'const' for final variables initialized to a constant value • screens/connections_screen.dart:51:5 • prefer_const_declarations
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:61:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:155:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:161:44 • deprecated_member_use
+   info • Use 'const' for final variables initialized to a constant value • screens/connections_screen.dart:263:5 • prefer_const_declarations
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:273:32 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:274:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:311:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:312:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:350:95 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:370:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:376:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:382:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/connections_screen.dart:439:42 • deprecated_member_use
+warning • The value of the local variable 'currentUserId' isn't used • screens/discovery_screen.dart:195:15 • unused_local_variable
+   info • Don't use 'BuildContext's across async gaps • screens/discovery_screen.dart:423:15 • use_build_context_synchronously
+warning • Unused import: 'package:qabool_app/services/api_service.dart' • screens/edit_profile_screen.dart:9:8 • unused_import
+   info • Unnecessary braces in a string interpolation • screens/edit_profile_screen.dart:239:72 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • screens/edit_profile_screen.dart:239:90 • unnecessary_brace_in_string_interps
+   info • Don't use 'BuildContext's across async gaps • screens/edit_profile_screen.dart:248:30 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • screens/edit_profile_screen.dart:251:23 • use_build_context_synchronously
+warning • The value of the local variable 'accentGold' isn't used • screens/edit_profile_screen.dart:275:11 • unused_local_variable
+   info • Use 'const' with the constructor to improve performance • screens/edit_profile_screen.dart:359:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • screens/edit_profile_screen.dart:361:30 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • screens/edit_profile_screen.dart:572:28 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • screens/edit_profile_screen.dart:581:28 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/edit_profile_screen.dart:653:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/edit_profile_screen.dart:690:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/edit_profile_screen.dart:732:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/edit_profile_screen.dart:756:57 • deprecated_member_use
+warning • Duplicate import • screens/favorites_screen.dart:7:8 • duplicate_import
+   info • Use 'const' for final variables initialized to a constant value • screens/favorites_screen.dart:28:5 • prefer_const_declarations
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/favorites_screen.dart:40:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/favorites_screen.dart:214:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/favorites_screen.dart:220:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/favorites_screen.dart:220:73 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/favorites_screen.dart:232:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/favorites_screen.dart:274:42 • deprecated_member_use
+warning • The value of the local variable 'neutralSoftUrlLight' isn't used • screens/home_screen.dart:296:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/home_screen.dart:313:53 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/home_screen.dart:334:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/home_screen.dart:334:70 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/home_screen.dart:415:51 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • screens/home_screen.dart:701:45 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • screens/home_screen.dart:706:13 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • screens/home_screen.dart:717:32 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • screens/home_screen.dart:739:30 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • screens/home_screen.dart:744:32 • use_build_context_synchronously
+   info • The 'child' argument should be last in widget constructor invocations • screens/home_screen.dart:871:19 • sort_child_properties_last
+warning • The declaration '_buildTopIconButton' isn't referenced • screens/home_screen.dart:959:10 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/home_screen.dart:968:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/home_screen.dart:989:55 • deprecated_member_use
+  error • The name 'NotificationService' isn't a type, so it can't be used as a type argument • screens/login_screen.dart:39:24 • non_type_as_type_argument
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/login_screen.dart:98:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/login_screen.dart:101:42 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/login_screen.dart:160:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/login_screen.dart:237:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/login_screen.dart:407:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/login_screen.dart:413:45 • deprecated_member_use
+warning • Unused import: 'package:qabool_app/widgets/floating_chat_window.dart' • screens/main_navigation_screen.dart:9:8 • unused_import
+warning • Unused import: 'package:qabool_app/models/chat_model.dart' • screens/main_navigation_screen.dart:10:8 • unused_import
+warning • Unused import: 'package:qabool_app/models/user_model.dart' • screens/main_navigation_screen.dart:11:8 • unused_import
+warning • Unused import: 'package:qabool_app/services/api_service.dart' • screens/main_navigation_screen.dart:12:8 • unused_import
+   info • The private field _currentIndex could be 'final' • screens/main_navigation_screen.dart:26:7 • prefer_final_fields
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/main_navigation_screen.dart:92:80 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • screens/main_navigation_screen.dart:126:37 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • screens/main_navigation_screen.dart:128:46 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • screens/main_navigation_screen.dart:129:51 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • screens/main_navigation_screen.dart:130:43 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/main_navigation_screen.dart:201:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/main_navigation_screen.dart:206:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/main_navigation_screen.dart:256:43 • deprecated_member_use
+warning • Unused import: 'package:qabool_app/models/chat_model.dart' • screens/messages_screen.dart:11:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/messages_screen.dart:130:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/messages_screen.dart:145:56 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/messages_screen.dart:292:42 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/messages_screen.dart:300:45 • deprecated_member_use
+warning • Unused import: 'package:flutter/foundation.dart' • screens/profile_screen.dart:1:8 • unused_import
+warning • The operand can't be 'null', so the condition is always 'true' • screens/profile_screen.dart:71:34 • unnecessary_null_comparison
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • screens/profile_screen.dart:169:37 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • screens/profile_screen.dart:171:54 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • screens/profile_screen.dart:174:47 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • screens/profile_screen.dart:178:54 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:274:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:410:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:438:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:441:65 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:445:65 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • screens/profile_screen.dart:599:29 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • screens/profile_screen.dart:601:41 • prefer_const_literals_to_create_immutables
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:711:77 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:714:70 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:719:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:791:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:821:64 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • screens/profile_screen.dart:847:57 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:864:53 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • screens/profile_screen.dart:881:69 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • screens/profile_screen.dart:885:50 • use_build_context_synchronously
+   info • Empty catch block • screens/profile_screen.dart:888:41 • empty_catches
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:897:64 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • screens/profile_screen.dart:930:59 • use_build_context_synchronously
+   info • Empty catch block • screens/profile_screen.dart:973:39 • empty_catches
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:982:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1026:60 • deprecated_member_use
+warning • The value of the local variable 'cardBg' isn't used • screens/profile_screen.dart:1046:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1046:75 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1129:71 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1132:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1141:34 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1180:71 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1183:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1235:42 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • screens/profile_screen.dart:1238:20 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1264:71 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • screens/profile_screen.dart:1274:26 • prefer_const_constructors
+warning • The declaration '_buildActionPlaceholder' isn't referenced • screens/profile_screen.dart:1351:10 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1356:71 • deprecated_member_use
+warning • The declaration '_buildCard' isn't referenced • screens/profile_screen.dart:1382:10 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1387:49 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1390:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1396:39 • deprecated_member_use
+warning • The declaration '_buildDetailRow' isn't referenced • screens/profile_screen.dart:1406:10 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1419:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1493:51 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1495:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/profile_screen.dart:1498:28 • deprecated_member_use
+warning • The declaration '_buildActivitySection' isn't referenced • screens/profile_screen.dart:1547:10 • unused_element
+warning • Unused import: 'package:qabool_app/services/chat_service.dart' • screens/sign_up_screen.dart:6:8 • unused_import
+warning • Unused import: 'package:qabool_app/services/api_service.dart' • screens/sign_up_screen.dart:7:8 • unused_import
+   info • The private field _selectedInterests could be 'final' • screens/sign_up_screen.dart:57:16 • prefer_final_fields
+   info • Unnecessary braces in a string interpolation • screens/sign_up_screen.dart:241:18 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • screens/sign_up_screen.dart:241:36 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • screens/sign_up_screen.dart:244:23 • unnecessary_brace_in_string_interps
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/sign_up_screen.dart:387:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/sign_up_screen.dart:1106:55 • deprecated_member_use
+   info • Use 'const' for final variables initialized to a constant value • screens/skipped_screen.dart:45:5 • prefer_const_declarations
+warning • The value of the local variable 'primaryColor' isn't used • screens/skipped_screen.dart:45:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • screens/skipped_screen.dart:84:84 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • screens/skipped_screen.dart:114:51 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • services/auth_service.dart:182:7 • avoid_print
+   info • The prefix 'IO' isn't a lower_case_with_underscores identifier • services/chat_service.dart:4:60 • library_prefixes
+warning • Unused import: '../screens/profile_screen.dart' • services/chat_service.dart:12:8 • unused_import
+   info • Don't invoke 'print' in production code • services/chat_service.dart:123:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:128:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:133:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:146:9 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:150:9 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:183:9 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:188:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:219:9 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:297:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:298:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:299:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:300:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:301:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:302:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:390:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:405:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/chat_service.dart:435:7 • avoid_print
+   info • The prefix 'IO' isn't a lower_case_with_underscores identifier • services/notification_service.dart:5:60 • library_prefixes
+   info • Don't invoke 'print' in production code • services/notification_service.dart:37:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:43:34 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:51:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:56:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:73:9 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:78:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:93:9 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:118:9 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:139:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:195:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:210:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:226:7 • avoid_print
+   info • Don't invoke 'print' in production code • services/notification_service.dart:244:7 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • widgets/chat_view.dart:207:28 • use_build_context_synchronously
+   info • Use 'const' for final variables initialized to a constant value • widgets/chat_view.dart:216:5 • prefer_const_declarations
+   info • Use 'const' for final variables initialized to a constant value • widgets/chat_view.dart:217:5 • prefer_const_declarations
+   info • Use 'const' for final variables initialized to a constant value • widgets/chat_view.dart:218:5 • prefer_const_declarations
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/chat_view.dart:238:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/chat_view.dart:238:87 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/chat_view.dart:414:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/chat_view.dart:650:37 • deprecated_member_use
+   info • Use 'const' for final variables initialized to a constant value • widgets/filter_bottom_sheet.dart:96:5 • prefer_const_declarations
+warning • Unused import: 'package:qabool_app/services/api_service.dart' • widgets/floating_chat_overlay.dart:4:8 • unused_import
+warning • Unused import: 'package:qabool_app/models/chat_model.dart' • widgets/floating_chat_overlay.dart:5:8 • unused_import
+warning • Unused import: 'package:qabool_app/models/user_model.dart' • widgets/floating_chat_overlay.dart:6:8 • unused_import
+warning • Unused import: 'package:provider/provider.dart' • widgets/floating_chat_window.dart:2:8 • unused_import
+warning • Unused import: 'package:qabool_app/services/chat_service.dart' • widgets/floating_chat_window.dart:4:8 • unused_import
+warning • Unused import: 'package:qabool_app/models/chat_model.dart' • widgets/floating_chat_window.dart:5:8 • unused_import
+   info • Use 'const' for final variables initialized to a constant value • widgets/floating_chat_window.dart:27:5 • prefer_const_declarations
+   info • Use 'const' for final variables initialized to a constant value • widgets/floating_chat_window.dart:28:5 • prefer_const_declarations
+   info • Use 'const' for final variables initialized to a constant value • widgets/floating_chat_window.dart:29:5 • prefer_const_declarations
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/floating_chat_window.dart:43:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/floating_chat_window.dart:49:57 • deprecated_member_use
+warning • Unused import: 'package:qabool_app/screens/discovery_screen.dart' • widgets/notification_dropdown.dart:9:8 • unused_import
+warning • Unused import: 'package:qabool_app/screens/messages_screen.dart' • widgets/notification_dropdown.dart:10:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/notification_dropdown.dart:37:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/notification_dropdown.dart:93:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/notification_dropdown.dart:96:118 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/notification_dropdown.dart:162:81 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/notification_dropdown.dart:172:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/notification_icon.dart:30:47 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • widgets/notification_icon.dart:36:17 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/notification_overlay.dart:137:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/notification_overlay.dart:153:48 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • widgets/notification_overlay.dart:163:67 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • widgets/notification_overlay.dart:165:27 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/user_discovery_card.dart:37:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/user_discovery_card.dart:79:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/user_discovery_card.dart:80:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/user_discovery_card.dart:81:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/user_discovery_card.dart:137:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/user_discovery_card.dart:218:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/user_discovery_card.dart:220:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/user_discovery_card.dart:298:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/user_list_tile.dart:35:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • widgets/user_list_tile.dart:145:41 • deprecated_member_use
+
+233 issues found. (ran in 6.9s)

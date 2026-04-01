@@ -6,7 +6,9 @@ class ApiService {
   final Dio _dio = Dio(BaseOptions(baseUrl: baseUrl));
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   String? currentUserId;
+  String? _accessToken; // In-memory token to prevent shared storage contamination
   Function? onUnauthorized;
+  bool _initialized = false;
 
   ApiService() {
     _dio.interceptors.add(LogInterceptor(
@@ -20,9 +22,14 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final token = await _storage.read(key: 'access_token');
-          if (token != null) {
-            options.headers['Authorization'] = 'Bearer $token';
+          // Priority: In-memory token. Fallback: Storage (only if not yet initialized)
+          if (!_initialized) {
+            _accessToken = await _storage.read(key: 'access_token');
+            _initialized = true;
+          }
+          
+          if (_accessToken != null) {
+            options.headers['Authorization'] = 'Bearer $_accessToken';
           }
           return handler.next(options);
         },
@@ -39,15 +46,21 @@ class ApiService {
   Dio get client => _dio;
 
   Future<void> saveToken(String token) async {
+    _accessToken = token;
+    _initialized = true;
     await _storage.write(key: 'access_token', value: token);
   }
 
   Future<void> deleteToken() async {
+    _accessToken = null;
     await _storage.delete(key: 'access_token');
   }
 
   Future<String?> getToken() async {
-    return await _storage.read(key: 'access_token');
+    if (_accessToken != null) return _accessToken;
+    _accessToken = await _storage.read(key: 'access_token');
+    _initialized = true;
+    return _accessToken;
   }
 
   Future<void> saveUserData(String userData) async {
