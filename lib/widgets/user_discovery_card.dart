@@ -146,7 +146,7 @@ class UserDiscoveryCard extends StatelessWidget {
                       const Icon(Icons.location_on, color: Colors.white, size: 14),
                       const SizedBox(width: 4),
                       Text(
-                        '${user.city}, ${user.country} • 5 mi',
+                        '${user.city}, ${user.country}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,

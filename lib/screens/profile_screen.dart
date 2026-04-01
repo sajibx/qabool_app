@@ -1061,11 +1061,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 24),
         ],
 
-        // Footer placeholders
-        _buildActionPlaceholder('Define your problem', 'Tell us what\'s on your mind so we can help you better.', Icons.warning_amber_rounded, isDark),
+        // Partner Preference & Past Issues Indicators
+        _buildStatusIndicator(
+          'Partner Preference',
+          'Willing to accept a partner with past issues: ${_displayUser!.acceptsPastIssues ? 'Yes' : 'No'}',
+          _displayUser!.acceptsPastIssues ? Icons.check_circle_outline : Icons.cancel_outlined,
+          _displayUser!.acceptsPastIssues ? Colors.green : Colors.orange,
+          isDark,
+        ),
         const SizedBox(height: 16),
-        _buildActionPlaceholder('Who can you qabool?', 'Specify the qualities of your ideal life partner.', Icons.person_search_outlined, isDark),
+        _buildStatusIndicator(
+          'Personal History',
+          'Has past issues: ${_displayUser!.hasPastIssues ? 'Yes' : 'No'}',
+          _displayUser!.hasPastIssues ? Icons.history_edu_outlined : Icons.info_outline,
+          _displayUser!.hasPastIssues ? Colors.orange : Colors.blue,
+          isDark,
+        ),
       ],
+    );
+  }
+
+  Widget _buildStatusIndicator(String title, String subtitle, IconData icon, Color accentColor, bool isDark) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : QaboolTheme.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? Colors.white10 : QaboolTheme.primary.withOpacity(0.12),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: accentColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: accentColor, size: 24),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? Colors.white : const Color(0xFF1E293B),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

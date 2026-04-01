@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:qabool_app/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:qabool_app/services/auth_service.dart';
@@ -287,10 +288,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } catch (e) {
       debugPrint('SignUp: Registration failed with error: $e');
       String message = 'Registration failed';
-      if (e.toString().contains('409')) {
-        message = 'This email is already registered. Please try logging in.';
+      
+      if (e is DioException) {
+        if (e.response?.statusCode == 409) {
+          message = 'This email is already registered. Please try logging in.';
+        } else if (e.response?.data != null && e.response?.data is Map) {
+          final data = e.response?.data as Map;
+          if (data.containsKey('message')) {
+            message = data['message'].toString();
+          } else {
+            message = 'Server error. Please try again later.';
+          }
+        } else {
+          message = 'Server error. Please try again later.';
+        }
       } else {
-        message = e.toString().contains('DioException') ? 'Server error. Please try again later.' : e.toString();
+        message = e.toString();
       }
 
       if (mounted) {
