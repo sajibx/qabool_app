@@ -33,6 +33,7 @@ void main() async {
     notificationService.disconnectSocket();
     notificationService.clearData();
     profileService.clearData(); // If implemented
+    navigationService.setTab(AppTab.home);
   };
 
   // Check initial auth status (background)

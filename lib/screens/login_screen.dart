@@ -6,6 +6,7 @@ import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/services/chat_service.dart';
 import 'package:qabool_app/services/api_service.dart';
 import 'package:qabool_app/services/notification_service.dart';
+import 'package:qabool_app/services/navigation_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,6 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
       }
       
       if (!mounted) return;
+      // Ensure we always land on Home after login
+      context.read<NavigationService>().setTab(AppTab.home);
       Navigator.pushReplacementNamed(context, '/main');
     } on Exception catch (e) {
       String message = 'Login failed';
