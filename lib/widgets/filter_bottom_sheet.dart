@@ -8,6 +8,7 @@ class FilterBottomSheet extends StatefulWidget {
   final String? initialLocation;
   final bool initialShowConnected;
   final bool initialShowSkipped;
+  final bool isPopover;
   final Function(
     RangeValues ageRange,
     String? religion,
@@ -26,6 +27,7 @@ class FilterBottomSheet extends StatefulWidget {
     required this.initialShowConnected,
     required this.initialShowSkipped,
     required this.onApply,
+    this.isPopover = false,
   });
 
   @override
@@ -99,23 +101,29 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       padding: const EdgeInsets.only(top: 16, left: 24, right: 24, bottom: 32),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: widget.isPopover 
+            ? BorderRadius.circular(24) 
+            : const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: widget.isPopover 
+            ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))]
+            : null,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Handle bar
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[400],
-                borderRadius: BorderRadius.circular(2),
+          if (!widget.isPopover)
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
           const SizedBox(height: 24),
           
           // Header

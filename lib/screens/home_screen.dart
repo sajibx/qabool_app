@@ -46,6 +46,8 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
   
   OverlayEntry? _notificationOverlay;
   final LayerLink _notificationLayerLink = LayerLink();
+  OverlayEntry? _filterOverlay;
+  final LayerLink _filterLayerLink = LayerLink();
 
   @override
   void initState() {
@@ -67,6 +69,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
   @override
   void dispose() {
     _hideNotificationDropdown();
+    _hideFilters();
     _searchController.dispose();
     _animationController.dispose();
     super.dispose();
@@ -171,6 +174,12 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
   }
 
   void _showFilters() {
+    final isLargeScreen = MediaQuery.of(context).size.width > 800;
+    if (isLargeScreen) {
+      _showFilterDropdown();
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -195,6 +204,67 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
         },
       ),
     );
+  }
+
+  void _showFilterDropdown() {
+    if (_filterOverlay != null) {
+      _hideFilters();
+      return;
+    }
+
+    final overlay = Overlay.of(context);
+    _filterOverlay = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          // Dismiss area
+          GestureDetector(
+            onTap: _hideFilters,
+            behavior: HitTestBehavior.opaque,
+            child: Container(color: Colors.transparent),
+          ),
+          Positioned(
+            width: 400,
+            child: CompositedTransformFollower(
+              link: _filterLayerLink,
+              showWhenUnlinked: false,
+              // "floating bit to the left, aligned with the filter button"
+              offset: const Offset(-20, 50),
+              child: Material(
+                color: Colors.transparent,
+                child: FilterBottomSheet(
+                  isPopover: true,
+                  initialAgeRange: _ageRange,
+                  initialReligion: _selectedReligion,
+                  initialEducation: _selectedEducation,
+                  initialLocation: _selectedLocation,
+                  initialShowConnected: _showConnected,
+                  initialShowSkipped: _showSkipped,
+                  onApply: (ageRange, religion, education, location, showConnected, showSkipped) {
+                    setState(() {
+                      _ageRange = ageRange;
+                      _selectedReligion = religion;
+                      _selectedEducation = education;
+                      _selectedLocation = location;
+                      _showConnected = showConnected;
+                      _showSkipped = showSkipped;
+                    });
+                    _fetchProfiles();
+                    _hideFilters();
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    overlay.insert(_filterOverlay!);
+  }
+
+  void _hideFilters() {
+    _filterOverlay?.remove();
+    _filterOverlay = null;
   }
 
   void _showNotificationDropdown() {
@@ -301,19 +371,22 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
           child: Row(
             children: [
-              InkWell(
-                onTap: _showFilters,
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4),
-                    ],
+              CompositedTransformTarget(
+                link: _filterLayerLink,
+                child: InkWell(
+                  onTap: _showFilters,
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4),
+                      ],
+                    ),
+                    child: Icon(Icons.tune, color: pColor, size: 24),
                   ),
-                  child: Icon(Icons.tune, color: pColor, size: 24),
                 ),
               ),
               const SizedBox(width: 12),

@@ -23,6 +23,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with TickerProviderSta
   late TabController _mainTabController;
   late TabController _historyTabController;
   late TabController _readyTabController;
+  AppTab? _lastTab;
   bool _isLoading = true;
   List<UserModel> _favorites = [];
   List<UserModel> _passed = [];
@@ -46,6 +47,18 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with TickerProviderSta
 
   void _updateTabsFromService(NavigationService nav) {
     if (!mounted) return;
+    
+    // Trigger refresh whenever we become the active tab, or if it's a re-navigation (re-tap)
+    if (nav.currentTab == AppTab.discovery) {
+       // Only refresh on a new transition to this tab, or if re-navigated
+       // The MainNavigationScreen handles the re-tap case via GlobalKey, 
+       // but programmatic navigation from other tabs still needs to trigger refresh here.
+       if (_lastTab != AppTab.discovery) {
+          refreshData();
+       }
+    }
+    _lastTab = nav.currentTab;
+
     if (_mainTabController.index != nav.discoverySubTabIndex) {
       _mainTabController.animateTo(nav.discoverySubTabIndex);
     }
