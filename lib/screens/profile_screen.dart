@@ -323,36 +323,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Sidebar Area (Matches HomeScreen sidebar if needed, but here simple connections)
+                // Sidebar Area (Removed for My Profile per request)
                 if (_isMe) ...[
-                  SizedBox(
-                    width: 300,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 80), // AppBar padding
-                        ListTile(
-                          leading: const Icon(Icons.people_outline),
-                          title: const Text('Connections'),
-                          selected: _activeDesktopSection == 'connections',
-                          onTap: () => setState(() => _activeDesktopSection = 'connections'),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.star_outline),
-                          title: const Text('Favorites'),
-                          selected: _activeDesktopSection == 'favorites',
-                          onTap: () => setState(() => _activeDesktopSection = 'favorites'),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.history),
-                          title: const Text('Skipped'),
-                          selected: _activeDesktopSection == 'skipped',
-                          onTap: () => setState(() => _activeDesktopSection = 'skipped'),
-                        ),
-                        const Spacer(),
-                      ],
-                    ),
-                  ),
-                  const VerticalDivider(width: 1),
+                  // Sidebar removed to allow ProfileView to take center stage
                 ],
                 
                 // Main Content (ProfileView)

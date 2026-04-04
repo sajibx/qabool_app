@@ -77,39 +77,17 @@ class _ProfileViewState extends State<ProfileView> {
         children: [
           LayoutBuilder(
             builder: (context, constraints) {
-              final isLargeScreen = constraints.maxWidth > 900;
+              final isLargeScreen = constraints.maxWidth > 700;
               
               if (isLargeScreen) {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // --- LEFT COLUMN (Hero & Primary Info) ---
-                    SizedBox(
-                      width: 420,
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildDesktopHeroImage(context, isDark),
-                            const SizedBox(height: 24),
-                            _buildPrimaryInfoCard(isDark),
-                            if (!widget.isMyProfile) ...[
-                              const SizedBox(height: 24),
-                              _buildActionCard(isDark, primaryColor),
-                            ],
-                            const SizedBox(height: 40),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const VerticalDivider(width: 1),
-                    
-                    // --- RIGHT COLUMN (Details) ---
+                    // --- CENTER/LEFT COLUMN (Details) ---
                     Expanded(
                       child: SingleChildScrollView(
                         controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+                        padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 24),
                         physics: const BouncingScrollPhysics(),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,10 +123,7 @@ class _ProfileViewState extends State<ProfileView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _buildInterestsContent(isDark),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 20),
-                                  child: Divider(),
-                                ),
+                                const SizedBox(height: 16),
                                 _buildPersonalityContent(isDark),
                               ],
                             )),
@@ -165,6 +140,28 @@ class _ProfileViewState extends State<ProfileView> {
                             ],
                             
                             const SizedBox(height: 80),
+                          ],
+                        ),
+                      ),
+                    ),
+
+
+                    // --- ABSOLUTE RIGHT COLUMN (Hero & Primary Info) ---
+                    SizedBox(
+                      width: 420,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildDesktopHeroImage(context, isDark),
+                            const SizedBox(height: 24),
+                            _buildPrimaryInfoCard(isDark),
+                            if (!widget.isMyProfile) ...[
+                              const SizedBox(height: 24),
+                              _buildActionCard(isDark, primaryColor),
+                            ],
+                            const SizedBox(height: 40),
                           ],
                         ),
                       ),
@@ -742,7 +739,7 @@ class _ProfileViewState extends State<ProfileView> {
           ),
           if (widget.isMyProfile)
             Positioned(
-              top: 16,
+              bottom: 16,
               right: 16,
               child: FloatingActionButton.small(
                 onPressed: () => Navigator.pushNamed(context, '/edit_profile'),
@@ -761,7 +758,6 @@ class _ProfileViewState extends State<ProfileView> {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -774,6 +770,7 @@ class _ProfileViewState extends State<ProfileView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Text(
@@ -783,10 +780,14 @@ class _ProfileViewState extends State<ProfileView> {
                     fontWeight: FontWeight.w900,
                     color: isDark ? Colors.white : Colors.black,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (widget.user.verifiedStatus == 'active')
-                const Icon(Icons.verified, color: Colors.blue, size: 28),
+                const Padding(
+                  padding: EdgeInsets.only(left: 8.0),
+                  child: Icon(Icons.verified, color: Colors.blue, size: 28),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -794,15 +795,17 @@ class _ProfileViewState extends State<ProfileView> {
             children: [
               const Icon(Icons.location_on_outlined, size: 18, color: Colors.grey),
               const SizedBox(width: 8),
-              Text(
-                widget.user.region ?? 'No location',
-                style: const TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500),
+              Expanded(
+                child: Text(
+                  widget.user.region ?? 'No location',
+                  style: const TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           _buildInfoRow(Icons.work_outline, widget.user.profession ?? 'Not specified', isDark),
           const SizedBox(height: 12),
           _buildInfoRow(Icons.nightlight_round, widget.user.religion ?? 'Not specified', isDark),
@@ -818,7 +821,13 @@ class _ProfileViewState extends State<ProfileView> {
       children: [
         Icon(icon, size: 16, color: isDark ? Colors.white54 : Colors.black54),
         const SizedBox(width: 12),
-        Text(text, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white70 : Colors.black87)),
+        Expanded(
+          child: Text(
+            text, 
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white70 : Colors.black87),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }
@@ -829,7 +838,6 @@ class _ProfileViewState extends State<ProfileView> {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E293B) : primaryColor.withOpacity(0.05),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: primaryColor.withOpacity(0.1)),
       ),
       child: Column(
         children: [
@@ -882,7 +890,6 @@ class _ProfileViewState extends State<ProfileView> {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -995,7 +1002,6 @@ class _ProfileViewState extends State<ProfileView> {
             icon: Icon(Icons.share, color: isDark ? Colors.white : Colors.black),
             label: Text('Share profile', style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
           ),
-          const Divider(),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
