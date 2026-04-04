@@ -334,6 +334,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
     return Scaffold(
       backgroundColor: isDark ? bgDark : bgLight,
       body: SafeArea(
+        bottom: false,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final isLargeScreen = MediaQuery.of(context).size.width > 800;
@@ -396,44 +397,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              // Sort Button
-              InkWell(
-                onTap: () {}, // Implement sort
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
-                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.swap_vert, color: isDark ? Colors.white : Colors.black, size: 20),
-                      const SizedBox(width: 4),
-                      Text('Sort', style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
-                    ],
-                  ),
-                ),
-              ),
               const Spacer(),
-              // Boost Icon
-              Container(
-                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0D9488),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    children: [
-                      Text('2', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                      SizedBox(width: 4),
-                      Icon(Icons.rocket_launch, color: Colors.white, size: 16),
-                    ],
-                  ),
-              ),
-              const SizedBox(width: 12),
               CompositedTransformTarget(
                 link: _notificationLayerLink,
                 child: NotificationIcon(
@@ -492,229 +456,212 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
               child: RefreshIndicator(
                 onRefresh: refreshData,
                 color: pColor,
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 4),
-
-
-                    // People Nearby Header (Only on Desktop)
-                    if (isLargeScreen)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
+                child: Builder(builder: (context) {
+                  if (isLargeScreen) {
+                    return SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 4),
+                          // People Nearby Header (Only on Desktop)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                if (!_isSearching)
-                                  IconButton(
-                                    icon: Icon(Icons.search, color: pColor, size: 20),
-                                    onPressed: () => setState(() => _isSearching = true),
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                  ),
-                                if (!_isSearching) const SizedBox(width: 8),
-                                Text(
-                                  _isSearching ? 'Search Results' : 'People Nearby',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.grey[100] : Colors.grey[800],
-                                  ),
+                                Row(
+                                  children: [
+                                    if (!_isSearching)
+                                      IconButton(
+                                        icon: Icon(Icons.search, color: pColor, size: 20),
+                                        onPressed: () => setState(() => _isSearching = true),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                      ),
+                                    if (!_isSearching) const SizedBox(width: 8),
+                                    Text(
+                                      _isSearching ? 'Search Results' : 'People Nearby',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? Colors.grey[100] : Colors.grey[800],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: pColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        'NEW',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: pColor,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: pColor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                                GestureDetector(
+                                  onTap: () => widget.onNavigate?.call(1),
                                   child: Text(
-                                    'NEW',
+                                    'View all',
                                     style: TextStyle(
-                                      fontSize: 10,
-                                      color: pColor,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      letterSpacing: 1,
+                                      color: pColor,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            GestureDetector(
-                              onTap: () => widget.onNavigate?.call(1), // Switch to Discovery tab
+                          ),
+                          const SizedBox(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                            child: _isLoadingProfiles
+                                ? const Center(child: CircularProgressIndicator())
+                                : _nearbyProfiles.isEmpty
+                                    ? const Center(child: Text('No profiles nearby'))
+                                    : GridView.builder(
+                                        shrinkWrap: true,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: MediaQuery.of(context).size.width > 800 ? 3 : 2,
+                                          childAspectRatio: 0.55,
+                                          crossAxisSpacing: 16,
+                                          mainAxisSpacing: 16,
+                                        ),
+                                        itemCount: _nearbyProfiles.length,
+                                        itemBuilder: (context, index) {
+                                          final profile = _nearbyProfiles[index];
+                                          return UserDiscoveryCard(
+                                            user: profile,
+                                            isGridMode: true,
+                                            onConnect: () => _handleConnect(profile),
+                                            onFavorite: () => _handleFavorite(profile),
+                                            onSkip: () => _handleSkip(profile),
+                                            onTap: () {
+                                              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)));
+                                            },
+                                          );
+                                        },
+                                      ),
+                          ),
+                          const SizedBox(height: 24),
+                          // Liked You Section
+                          if (_likedMeProfiles.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
                               child: Text(
-                                'View all',
+                                'Who Liked You',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: pColor,
+                                  color: isDark ? Colors.grey[100] : Colors.grey[800],
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    if (isLargeScreen) const SizedBox(height: 16),
-
-                    // People Section
-                    Builder(builder: (context) {
-                      if (isLargeScreen) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                          child: _isLoadingProfiles
-                              ? const Center(child: CircularProgressIndicator())
-                              : _nearbyProfiles.isEmpty
-                                  ? const Center(child: Text('No profiles nearby'))
-                                  : GridView.builder(
-                                      shrinkWrap: true,
-                                      physics: const NeverScrollableScrollPhysics(),
-                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: MediaQuery.of(context).size.width > 800 ? 3 : 2,
-                                        childAspectRatio: 0.55, // Taller cards
-                                        crossAxisSpacing: 16,
-                                        mainAxisSpacing: 16,
-                                      ),
-                                      itemCount: _nearbyProfiles.length,
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 100,
+                              child: _isLoadingLikedMe
+                                  ? const Center(child: CircularProgressIndicator())
+                                  : ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      itemCount: _likedMeProfiles.length,
                                       itemBuilder: (context, index) {
-                                        final profile = _nearbyProfiles[index];
-                                        return UserDiscoveryCard(
-                                          user: profile,
-                                          isGridMode: true,
-                                          onConnect: () => _handleConnect(profile),
-                                          onFavorite: () => _handleFavorite(profile),
-                                          onSkip: () => _handleSkip(profile),
+                                        final profile = _likedMeProfiles[index];
+                                        return GestureDetector(
                                           onTap: () {
-                                            Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)));
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ProfileScreen(user: profile),
+                                              ),
+                                            );
                                           },
+                                          child: Container(
+                                            width: 80,
+                                            margin: const EdgeInsets.only(right: 12),
+                                            child: Column(
+                                              children: [
+                                                Hero(
+                                                  tag: 'user_profile_${profile.id}',
+                                                  child: CircleAvatar(
+                                                    radius: 30,
+                                                    backgroundImage: profile.profileImageUrl != null
+                                                        ? CachedNetworkImageProvider(getVersionedImageUrl(profile.profileImageUrl, profile.updatedAt))
+                                                        : null,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  profile.firstName,
+                                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         );
                                       },
                                     ),
-                        );
-                      }
+                            ),
+                          ],
+                          const SizedBox(height: 100),
+                        ],
+                      ),
+                    );
+                  }
 
-                      // Mobile Single-Card "Tinder" style - Redesigned to Scrollable Profile
-                      return _isLoadingProfiles
-                          ? const Center(child: CircularProgressIndicator())
-                          : _nearbyProfiles.isEmpty
-                              ? const Center(child: Padding(
-                                  padding: EdgeInsets.all(32.0),
-                                  child: Text('No more profiles nearby', textAlign: TextAlign.center),
-                                ))
-                              : SizedBox(
-                                  height: MediaQuery.of(context).size.height - 180, // Adjust height
-                                  child: PageView.builder(
-                                    controller: _pageController,
-                                    scrollDirection: Axis.vertical,
-                                    physics: const NeverScrollableScrollPhysics(),
-                                    itemCount: _nearbyProfiles.length,
-                                    onPageChanged: (index) {
-                                      setState(() => _currentPageIndex = index);
-                                      // Reset bottom nav visibility when moving to fresh page
-                                      context.read<NavigationService>().setBottomNavVisible(true);
-                                    },
-                                    itemBuilder: (context, index) {
-                                      final profile = _nearbyProfiles[index];
-                                      return ProfileView(
-                                        user: profile,
-                                        onConnect: () => _handleConnect(profile, goToNext: true),
-                                        onFavorite: () => _handleFavorite(profile),
-                                        onSkip: () => _handleSkip(profile, goToNext: true),
-                                        onBlock: () => _handleBlock(profile),
-                                        onReport: () => _handleReport(profile),
-                                        onRewind: () {
-                                          if (_currentPageIndex > 0) {
-                                            _pageController.previousPage(
-                                              duration: const Duration(milliseconds: 500),
-                                              curve: Curves.easeInOut,
-                                            );
-                                          }
-                                        },
+                  // Mobile View: Full Screen PageView
+                  return _isLoadingProfiles
+                      ? const Center(child: CircularProgressIndicator())
+                      : _nearbyProfiles.isEmpty
+                          ? const Center(
+                              child: Padding(
+                              padding: EdgeInsets.all(32.0),
+                              child: Text('No more profiles nearby', textAlign: TextAlign.center),
+                            ))
+                          : PageView.builder(
+                              controller: _pageController,
+                              scrollDirection: Axis.vertical,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: _nearbyProfiles.length,
+                              onPageChanged: (index) {
+                                setState(() => _currentPageIndex = index);
+                                context.read<NavigationService>().setBottomNavVisible(true);
+                              },
+                              itemBuilder: (context, index) {
+                                final profile = _nearbyProfiles[index];
+                                return ProfileView(
+                                  user: profile,
+                                  onConnect: () => _handleConnect(profile, goToNext: true),
+                                  onFavorite: () => _handleFavorite(profile),
+                                  onSkip: () => _handleSkip(profile, goToNext: true),
+                                  onBlock: () => _handleBlock(profile),
+                                  onReport: () => _handleReport(profile),
+                                  onRewind: () {
+                                    if (_currentPageIndex > 0) {
+                                      _pageController.previousPage(
+                                        duration: const Duration(milliseconds: 500),
+                                        curve: Curves.easeInOut,
                                       );
-                                    },
-                                  ),
+                                    }
+                                  },
                                 );
-                    }),
-                    const SizedBox(height: 24),
-
-                    // Who Liked You Section (Only on Desktop)
-                    if (isLargeScreen && _likedMeProfiles.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          'Who Liked You',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.grey[100] : Colors.grey[800],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        height: 100,
-                        child: _isLoadingLikedMe
-                            ? const Center(child: CircularProgressIndicator())
-                            : ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                itemCount: _likedMeProfiles.length,
-                                itemBuilder: (context, index) {
-                                  final profile = _likedMeProfiles[index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ProfileScreen(user: profile),
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      width: 80,
-                                      margin: const EdgeInsets.only(right: 12),
-                                      child: Column(
-                                        children: [
-                                          Hero(
-                                            tag: 'user_profile_${profile.id}',
-                                            child: CircleAvatar(
-                                              radius: 30,
-                                              backgroundImage: profile.profileImageUrl != null
-                                                  ? CachedNetworkImageProvider(getVersionedImageUrl(profile.profileImageUrl, profile.updatedAt))
-                                                  : null,
-                                              child: profile.profileImageUrl == null
-                                                  ? const Icon(Icons.person)
-                                                  : null,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            profile.firstName,
-                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
-                  // Mobile-only Chat Section (Hidden based on user request)
-                  if (MediaQuery.of(context).size.width <= 800)
-                    const SizedBox.shrink(), 
-                  const SizedBox(height: 24),
-                ],
+                              },
+                            );
+                }),
               ),
             ),
-          ),
-        ),
       ],
     );
   }
