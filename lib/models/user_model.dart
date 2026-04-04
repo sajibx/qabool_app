@@ -43,6 +43,13 @@ class UserModel {
   final String? sect;
   final String? caste;
   final List<String> interests;
+  final List<String> languages;
+  final List<String> personalityTraits;
+  final List<String> lifeStyle;
+  final List<String> hobbies;
+  final String? marriageIntentions;
+  final String? hasChildren;
+  final String? grewUpIn;
   final DateTime? updatedAt;
 
   UserModel({
@@ -85,6 +92,13 @@ class UserModel {
     this.sect,
     this.caste,
     this.interests = const [],
+    this.languages = const [],
+    this.personalityTraits = const [],
+    this.lifeStyle = const [],
+    this.hobbies = const [],
+    this.marriageIntentions,
+    this.hasChildren,
+    this.grewUpIn,
     this.updatedAt,
   });
 
@@ -153,6 +167,13 @@ class UserModel {
       sect: json['sect'],
       caste: json['caste'],
       interests: json['interests'] != null ? List<String>.from(json['interests']) : const [],
+      languages: json['languages'] != null ? List<String>.from(json['languages']) : const [],
+      personalityTraits: json['personalityTraits'] != null ? List<String>.from(json['personalityTraits']) : const [],
+      lifeStyle: json['lifeStyle'] != null ? List<String>.from(json['lifeStyle']) : const [],
+      hobbies: json['hobbies'] != null ? List<String>.from(json['hobbies']) : const [],
+      marriageIntentions: json['marriageIntentions']?.toString(),
+      hasChildren: json['hasChildren']?.toString(),
+      grewUpIn: json['grewUpIn']?.toString(),
       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
     );
   }
@@ -199,6 +220,13 @@ class UserModel {
       'sect': sect,
       'caste': caste,
       'interests': interests,
+      'languages': languages,
+      'personalityTraits': personalityTraits,
+      'lifeStyle': lifeStyle,
+      'hobbies': hobbies,
+      'marriageIntentions': marriageIntentions,
+      'hasChildren': hasChildren,
+      'grewUpIn': grewUpIn,
       'updatedAt': updatedAt?.toIso8601String(),
     };
   }
@@ -243,6 +271,13 @@ class UserModel {
     String? sect,
     String? caste,
     List<String>? interests,
+    List<String>? languages,
+    List<String>? personalityTraits,
+    List<String>? lifeStyle,
+    List<String>? hobbies,
+    String? marriageIntentions,
+    String? hasChildren,
+    String? grewUpIn,
     DateTime? updatedAt,
   }) {
     return UserModel(
@@ -285,6 +320,13 @@ class UserModel {
       sect: sect ?? this.sect,
       caste: caste ?? this.caste,
       interests: interests ?? this.interests,
+      languages: languages ?? this.languages,
+      personalityTraits: personalityTraits ?? this.personalityTraits,
+      lifeStyle: lifeStyle ?? this.lifeStyle,
+      hobbies: hobbies ?? this.hobbies,
+      marriageIntentions: marriageIntentions ?? this.marriageIntentions,
+      hasChildren: hasChildren ?? this.hasChildren,
+      grewUpIn: grewUpIn ?? this.grewUpIn,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }

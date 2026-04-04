@@ -6,10 +6,12 @@ class NavigationService extends ChangeNotifier {
   AppTab _currentTab = AppTab.home;
   int _discoverySubTabIndex = 0; // 0: My History, 1: Ready to Qabool
   int _readyToQaboolSubTabIndex = 0; // 0: Mutual, 1: Received
+  bool _isBottomNavVisible = true;
 
   AppTab get currentTab => _currentTab;
   int get discoverySubTabIndex => _discoverySubTabIndex;
   int get readyToQaboolSubTabIndex => _readyToQaboolSubTabIndex;
+  bool get isBottomNavVisible => _isBottomNavVisible;
 
   void setTab(AppTab tab, {int? discoverySubTab, int? readyToQaboolSubTab}) {
     _currentTab = tab;
@@ -28,5 +30,11 @@ class NavigationService extends ChangeNotifier {
   
   void goToHome() {
     setTab(AppTab.home);
+  }
+
+  void setBottomNavVisible(bool visible) {
+    if (_isBottomNavVisible == visible) return;
+    _isBottomNavVisible = visible;
+    notifyListeners();
   }
 }

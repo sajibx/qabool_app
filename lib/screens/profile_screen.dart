@@ -16,6 +16,7 @@ import 'package:qabool_app/screens/favorites_screen.dart';
 import 'package:qabool_app/screens/skipped_screen.dart';
 import 'package:qabool_app/utils/image_utils.dart';
 import 'package:qabool_app/models/connection_model.dart' as v_conn;
+import 'package:qabool_app/widgets/profile_view.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel? user;
@@ -79,6 +80,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() => _isRefreshing = false);
       }
     }
+  }
+
+  Future<void> _handleConnect(UserModel profile) async {
+    if (profile.connectionStatus == 'ACCEPTED') {
+      try {
+        final chatService = context.read<ChatService>();
+        final chat = await chatService.createChat(profile.id);
+        if (context.mounted) {
+          final isLargeScreen = MediaQuery.of(context).size.width > 800;
+          if (isLargeScreen) {
+            chatService.toggleFloatingChat(chat.id, open: true, otherUser: profile);
+          } else {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(chatId: chat.id, otherUser: profile)));
+          }
+        }
+      } catch (e) {}
+    } else {
+      try {
+        final connectionService = context.read<ConnectionService>();
+        await connectionService.sendConnectionRequest(profile.id);
+        await _refreshProfile();
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+      }
+    }
+  }
+
+  Future<void> _handleFavorite() async {
+    if (_displayUser == null) return;
+    final profileService = context.read<ProfileService>();
+    final wasFavorited = _displayUser!.isFavorited;
+    try {
+      if (wasFavorited) {
+        await profileService.unfavoriteUser(_displayUser!.id);
+      } else {
+        await profileService.favoriteUser(_displayUser!.id);
+      }
+      await _refreshProfile();
+    } catch (e) {}
+  }
+
+  Future<void> _handleBlock() async {
+    if (_displayUser == null || _isMe) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Block User?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCEL')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('BLOCK', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await context.read<ProfileService>().blockUser(_displayUser!.id);
+      if (mounted) Navigator.pop(context);
+    }
+  }
+
+  Future<void> _handleReport() async {
+    // Basic implementation for now
+    if (_displayUser == null || _isMe) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Report feature coming soon to individual profile view.')));
   }
 
   @override
@@ -259,63 +323,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Left Side (Details & Content) - Moved from right
-                Expanded(
-                  flex: 3,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-                    child: _buildContentSections(isDark, primaryColor, accentGold, showRequirements: false),
-                  ),
-                ),
-                // Divider
-                VerticalDivider(
-                  width: 1,
-                  thickness: 1,
-                  color: primaryColor.withOpacity(0.1),
-                ),
-                // Right Side (Profile Hero & Activity) - Moved from left
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    children: [
-                      if (_activeDesktopSection == 'hero')
-                        Expanded(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.only(top: 0, bottom: 40),
-                            child: Column(
-                                children: [
-                                  _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
-                                  const SizedBox(height: 24),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                                    child: _buildRequirementsSection(isDark, primaryColor, accentGold),
-                                  ),
-                                ],
-                            ),
-                          ),
-                        )
-                      else if (_activeDesktopSection == 'connections')
-                        Expanded(
-                          child: ConnectionsScreen(
-                            isEmbedded: true,
-                            onBack: () => setState(() => _activeDesktopSection = 'hero'),
-                          ),
-                        )
-                      else if (_activeDesktopSection == 'favorites')
-                        Expanded(
-                          child: FavoritesScreen(
-                            isEmbedded: true,
-                            onBack: () => setState(() => _activeDesktopSection = 'hero'),
-                          ),
-                        )
-                      else if (_activeDesktopSection == 'skipped')
-                        Expanded(
-                          child: SkippedScreen(
-                            isEmbedded: true,
-                            onBack: () => setState(() => _activeDesktopSection = 'hero'),
-                          ),
+                // Sidebar Area (Matches HomeScreen sidebar if needed, but here simple connections)
+                if (_isMe) ...[
+                  SizedBox(
+                    width: 300,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 80), // AppBar padding
+                        ListTile(
+                          leading: const Icon(Icons.people_outline),
+                          title: const Text('Connections'),
+                          selected: _activeDesktopSection == 'connections',
+                          onTap: () => setState(() => _activeDesktopSection = 'connections'),
                         ),
-                    ],
+                        ListTile(
+                          leading: const Icon(Icons.star_outline),
+                          title: const Text('Favorites'),
+                          selected: _activeDesktopSection == 'favorites',
+                          onTap: () => setState(() => _activeDesktopSection = 'favorites'),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.history),
+                          title: const Text('Skipped'),
+                          selected: _activeDesktopSection == 'skipped',
+                          onTap: () => setState(() => _activeDesktopSection = 'skipped'),
+                        ),
+                        const Spacer(),
+                      ],
+                    ),
+                  ),
+                  const VerticalDivider(width: 1),
+                ],
+                
+                // Main Content (ProfileView)
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: _isMe ? 0 : 0),
+                    child: _activeDesktopSection == 'hero' 
+                      ? ProfileView(
+                          user: _displayUser!,
+                          isMyProfile: _isMe,
+                          onConnect: () => _handleConnect(_displayUser!),
+                          onFavorite: () => _handleFavorite(),
+                          onSkip: () => Navigator.pop(context),
+                          onBlock: () => _handleBlock(),
+                          onReport: () => _handleReport(),
+                          onRewind: () {},
+                        )
+                      : _activeDesktopSection == 'connections'
+                        ? ConnectionsScreen(isEmbedded: true, onBack: () => setState(() => _activeDesktopSection = 'hero'))
+                        : _activeDesktopSection == 'favorites'
+                          ? FavoritesScreen(isEmbedded: true, onBack: () => setState(() => _activeDesktopSection = 'hero'))
+                          : SkippedScreen(isEmbedded: true, onBack: () => setState(() => _activeDesktopSection = 'hero')),
                   ),
                 ),
               ],
@@ -323,24 +382,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           // Mobile View
-          return SingleChildScrollView(
-            padding: const EdgeInsets.only(top: 0, bottom: 40),
-            child: Column(
-              children: [
-                _buildHeroSection(isDark, bgDark, primaryColor, accentGold),
-                // if (_isMe) ...[
-                //   const SizedBox(height: 16),
-                //   Padding(
-                //     padding: const EdgeInsets.symmetric(horizontal: 24),
-                //     child: _buildActivitySection(isDark, primaryColor, accentGold),
-                //   ),
-                // ],
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: _buildContentSections(isDark, primaryColor, accentGold, showRequirements: true),
-                ),
-              ],
-            ),
+          return ProfileView(
+            user: _displayUser!,
+            isMyProfile: _isMe,
+            onConnect: () => _handleConnect(_displayUser!),
+            onFavorite: () => _handleFavorite(),
+            onSkip: () => Navigator.pop(context),
+            onBlock: () => _handleBlock(),
+            onReport: () => _handleReport(),
+            onRewind: () {},
           );
         },
       ),

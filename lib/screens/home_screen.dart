@@ -11,10 +11,12 @@ import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/screens/chat_screen.dart';
 import 'package:qabool_app/screens/profile_screen.dart';
 import 'package:qabool_app/widgets/user_discovery_card.dart';
+import 'package:qabool_app/widgets/profile_view.dart';
 import 'package:qabool_app/widgets/filter_bottom_sheet.dart';
 import 'package:qabool_app/widgets/notification_icon.dart';
 import 'package:qabool_app/widgets/notification_dropdown.dart';
 import 'package:qabool_app/services/notification_service.dart';
+import 'package:qabool_app/services/navigation_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int index)? onNavigate;
@@ -44,6 +46,9 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
   bool _showConnected = false;
   bool _showSkipped = false;
   
+  late PageController _pageController;
+  int _currentPageIndex = 0;
+  
   OverlayEntry? _notificationOverlay;
   final LayerLink _notificationLayerLink = LayerLink();
   OverlayEntry? _filterOverlay;
@@ -63,11 +68,13 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
       parent: _animationController,
       curve: Curves.easeOutCubic,
     ));
+    _pageController = PageController();
     refreshData();
   }
 
   @override
   void dispose() {
+    _pageController.dispose();
     _hideNotificationDropdown();
     _hideFilters();
     _searchController.dispose();
@@ -390,6 +397,43 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                 ),
               ),
               const SizedBox(width: 12),
+              // Sort Button
+              InkWell(
+                onTap: () {}, // Implement sort
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.swap_vert, color: isDark ? Colors.white : Colors.black, size: 20),
+                      const SizedBox(width: 4),
+                      Text('Sort', style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
+                    ],
+                  ),
+                ),
+              ),
+              const Spacer(),
+              // Boost Icon
+              Container(
+                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0D9488),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    children: [
+                      Text('2', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                      SizedBox(width: 4),
+                      Icon(Icons.rocket_launch, color: Colors.white, size: 16),
+                    ],
+                  ),
+              ),
+              const SizedBox(width: 12),
               CompositedTransformTarget(
                 link: _notificationLayerLink,
                 child: NotificationIcon(
@@ -552,7 +596,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                         );
                       }
 
-                      // Mobile Single-Card "Tinder" style
+                      // Mobile Single-Card "Tinder" style - Redesigned to Scrollable Profile
                       return _isLoadingProfiles
                           ? const Center(child: CircularProgressIndicator())
                           : _nearbyProfiles.isEmpty
@@ -560,45 +604,38 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                   padding: EdgeInsets.all(32.0),
                                   child: Text('No more profiles nearby', textAlign: TextAlign.center),
                                 ))
-                              : Column(
-                                  children: [
-                                    const SizedBox(height: 4),
-                                    Center(
-                                      child: SizedBox(
-                                        width: MediaQuery.of(context).size.width * 0.9,
-                                        height: MediaQuery.of(context).size.height * 0.65,
-                                        child: SlideTransition(
-                                          position: _slideAnimation,
-                                          child: UserDiscoveryCard(
-                                            user: _nearbyProfiles.first,
-                                            onConnect: () => _handleConnect(_nearbyProfiles.first),
-                                            onFavorite: () => _handleFavorite(_nearbyProfiles.first),
-                                            onSkip: () => _handleSkip(_nearbyProfiles.first),
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => ProfileScreen(user: _nearbyProfiles.first),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 15),
-                                    // Large Action Buttons
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        _buildCircularButton(Icons.close, Colors.grey[400]!, 50, () => _handleSkip(_nearbyProfiles.first)),
-                                        const SizedBox(width: 12),
-                                        _buildCircularButton(Icons.favorite, QaboolTheme.primary, 65, () => _handleConnect(_nearbyProfiles.first), isHeart: true),
-                                        const SizedBox(width: 12),
-                                        _buildCircularButton(Icons.star, const Color(0xFFFFB800), 50, () => _handleFavorite(_nearbyProfiles.first)),
-                                      ],
-                                    ),
-                                  ],
+                              : SizedBox(
+                                  height: MediaQuery.of(context).size.height - 180, // Adjust height
+                                  child: PageView.builder(
+                                    controller: _pageController,
+                                    scrollDirection: Axis.vertical,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: _nearbyProfiles.length,
+                                    onPageChanged: (index) {
+                                      setState(() => _currentPageIndex = index);
+                                      // Reset bottom nav visibility when moving to fresh page
+                                      context.read<NavigationService>().setBottomNavVisible(true);
+                                    },
+                                    itemBuilder: (context, index) {
+                                      final profile = _nearbyProfiles[index];
+                                      return ProfileView(
+                                        user: profile,
+                                        onConnect: () => _handleConnect(profile, goToNext: true),
+                                        onFavorite: () => _handleFavorite(profile),
+                                        onSkip: () => _handleSkip(profile, goToNext: true),
+                                        onBlock: () => _handleBlock(profile),
+                                        onReport: () => _handleReport(profile),
+                                        onRewind: () {
+                                          if (_currentPageIndex > 0) {
+                                            _pageController.previousPage(
+                                              duration: const Duration(milliseconds: 500),
+                                              curve: Curves.easeInOut,
+                                            );
+                                          }
+                                        },
+                                      );
+                                    },
+                                  ),
                                 );
                     }),
                     const SizedBox(height: 24),
@@ -766,7 +803,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
     );
   }
 
-  Future<void> _handleConnect(UserModel profile) async {
+  Future<void> _handleConnect(UserModel profile, {bool goToNext = false}) async {
     if (profile.connectionStatus == 'ACCEPTED') {
       try {
         final chatService = context.read<ChatService>();
@@ -812,6 +849,12 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Connection request sent!')),
         );
+        if (goToNext) {
+          _pageController.nextPage(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -891,12 +934,16 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
     }
   }
 
-  void _handleSkip(UserModel profile) async {
-    await _swipeAway(profile, right: false); // Skip = Swipe Left
-    if (!mounted) return;
-    
+  void _handleSkip(UserModel profile, {bool goToNext = false}) async {
     // Add to skipped list in ProfileService
     context.read<ProfileService>().skipUser(profile);
+    
+    if (goToNext) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -904,6 +951,109 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
         duration: const Duration(seconds: 1),
       ),
     );
+  }
+
+  Future<void> _handleBlock(UserModel profile) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Block User?'),
+        content: Text('Are you sure you want to block ${profile.firstName}? They will no longer be able to see your profile or message you.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCEL')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('BLOCK', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await context.read<ProfileService>().blockUser(profile.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${profile.firstName} blocked.')),
+          );
+          _pageController.nextPage(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error blocking user: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _handleReport(UserModel profile) async {
+    final reasonController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    final submitted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Report User'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Please describe why you are reporting ${profile.firstName}.'),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: reasonController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  hintText: 'e.g. Inappropriate behavior...',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (val) => (val == null || val.trim().isEmpty) ? 'Required' : null,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('CANCEL')),
+          ElevatedButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(dialogContext, true);
+              }
+            },
+            child: const Text('REPORT'),
+          ),
+        ],
+      ),
+    );
+
+    if (submitted == true && mounted) {
+      try {
+        await context.read<ProfileService>().reportUser(profile.id, reasonController.text.trim());
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${profile.firstName} reported.')),
+          );
+          _pageController.nextPage(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error reporting user: $e')),
+          );
+        }
+      }
+    }
+    reasonController.dispose();
   }
 
 

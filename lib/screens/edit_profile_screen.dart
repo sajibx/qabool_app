@@ -48,6 +48,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String _heightUnit = 'cm';
   String _weightUnit = 'kg';
   XFile? _pickedImage;
+
+  List<String> _selectedLanguages = [];
+  final List<String> _languagesOfferings = [
+    '🇺🇸 English', '🇧🇩 Bengali', '🇸🇦 Arabic', '🇫🇷 French', '🇪🇸 Spanish', '🇩🇪 German', '🇨🇳 Chinese', '🇮🇳 Hindi', '🇵🇰 Urdu', '🇹🇷 Turkish'
+  ];
+
+  List<String> _selectedPersonalityTraits = [];
+  final List<String> _personalityOfferings = [
+    '😊 Kind', '🧠 Intellectual', '🤣 Humorous', '🎨 Creative', '🤫 Introverted', '🗣️ Extroverted', '🧘 Calm', '⚡ Energetic', '🤝 Empathetic', '🧗 Adventurous'
+  ];
+
+  List<String> _selectedLifeStyle = [];
+  final List<String> _lifestyleOfferings = [
+    '🚭 Non-smoker', '🍽️ Halal only', '🕌 Praying five times', '🏋️ Fitness enthusiast', '🍳 Foodie', '✈️ Traveler', '🎮 Gamer', '🐈 Pet lover'
+  ];
+
+  List<String> _selectedHobbies = [];
+  final List<String> _hobbiesOfferings = [
+    '📸 Photography', '🍳 Cooking', '💃 Dancing', '🎤 Singing', '✍️ Writing', '🧶 Knitting', '♟️ Chess', '🎥 Movies'
+  ];
+
+  List<String> _selectedInterests = [];
+  final List<String> _availableInterests = [
+    'Cooking', 'Traveling', 'Reading', 'Coding', 'Gaming', 
+    'Music', 'Art', 'Sports', 'Photography', 'Fitness', 
+    'Movies', 'Outdoors', 'Coffee', 'Animals', 'Gardening'
+  ];
+
+  String? _selectedHasChildren;
+  late TextEditingController _grewUpInController;
+  double _marriageIntentionsValue = 0.5;
   
   bool _hasPastIssues = false;
   bool _acceptsPastIssues = true;
@@ -104,6 +135,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _selectedEducation = user?.education;
     _hasPastIssues = user?.hasPastIssues ?? false;
     _acceptsPastIssues = user?.acceptsPastIssues ?? true;
+    _selectedHasChildren = user?.hasChildren;
+    _grewUpInController = TextEditingController(text: user?.grewUpIn);
+    
+    _selectedLanguages = List<String>.from(user?.languages ?? []);
+    _selectedPersonalityTraits = List<String>.from(user?.personalityTraits ?? []);
+    _selectedLifeStyle = List<String>.from(user?.lifeStyle ?? []);
+    _selectedHobbies = List<String>.from(user?.hobbies ?? []);
+    _selectedInterests = List<String>.from(user?.interests ?? []);
+    
+    if (user?.marriageIntentions != null) {
+      _marriageIntentionsValue = double.tryParse(user!.marriageIntentions!) ?? 0.5;
+    }
 
     // Handle Region Decomposition
     if (user?.region != null && user!.region!.contains(',')) {
@@ -142,7 +185,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _heightInController.dispose();
     _emailController.dispose();
     _phoneNumberController.dispose();
+    _phoneNumberController.dispose();
     _currentCityController.dispose();
+    _grewUpInController.dispose();
     super.dispose();
   }
 
@@ -238,7 +283,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'specialConsiderations': _specialController.text,
         'region': _selectedCountry != null && _selectedCity != null ? "${_selectedCity}, ${_selectedCountry}" : null,
         'hasPastIssues': _hasPastIssues,
+        'hasPastIssues': _hasPastIssues,
         'acceptsPastIssues': _acceptsPastIssues,
+        'languages': _selectedLanguages,
+        'personalityTraits': _selectedPersonalityTraits,
+        'lifeStyle': _selectedLifeStyle,
+        'hobbies': _selectedHobbies,
+        'interests': _selectedInterests,
+        'marriageIntentions': _marriageIntentionsValue.toString(),
+        'hasChildren': _selectedHasChildren,
+        'grewUpIn': _grewUpInController.text,
       };
 
       final updatedUser = await context.read<ProfileService>().updateProfile(updatedData, image: _pickedImage);
@@ -611,11 +665,132 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 items: ['High School or above', 'Bachelors Degree or above', 'Masters Degree or above', 'PhD or above'],
                 onChanged: (val) => setState(() => _selectedLookingForProfession = val),
               ),
+              const SizedBox(height: 32),
+
+              _buildSectionTitle('PROFILE BUBBLES'),
+              const SizedBox(height: 16),
+              _buildTextField(controller: _grewUpInController, label: 'Where did you grow up?', icon: Icons.flag),
+              const SizedBox(height: 16),
+              _buildDropdownField(
+                label: 'Do you have children?',
+                icon: Icons.child_care,
+                value: _selectedHasChildren,
+                items: ['No', 'Yes, living with me', 'Yes, not living with me'],
+                onChanged: (val) => setState(() => _selectedHasChildren = val),
+              ),
+              const SizedBox(height: 24),
+              _buildSectionTitle('MARRIAGE INTENTIONS'),
+              const SizedBox(height: 8),
+              Text('Match! <---> Agree together <---> 4-12 months', 
+                style: TextStyle(fontSize: 10, color: isDark ? Colors.grey[400] : Colors.grey[600])),
+              Slider(
+                value: _marriageIntentionsValue,
+                activeColor: primaryColor,
+                inactiveColor: primaryColor.withOpacity(0.2),
+                onChanged: (val) => setState(() => _marriageIntentionsValue = val),
+              ),
+              const SizedBox(height: 24),
+              _buildMultiSelect(
+                title: 'Languages',
+                offerings: _languagesOfferings,
+                selectedList: _selectedLanguages,
+                maxSelect: 5,
+                onChanged: (list) => setState(() => _selectedLanguages = list),
+              ),
+              _buildMultiSelect(
+                title: 'Personality Traits',
+                offerings: _personalityOfferings,
+                selectedList: _selectedPersonalityTraits,
+                maxSelect: 5,
+                onChanged: (list) => setState(() => _selectedPersonalityTraits = list),
+              ),
+              _buildMultiSelect(
+                title: 'Life Style',
+                offerings: _lifestyleOfferings,
+                selectedList: _selectedLifeStyle,
+                maxSelect: 5,
+                onChanged: (list) => setState(() => _selectedLifeStyle = list),
+              ),
+              _buildMultiSelect(
+                title: 'Hobbies',
+                offerings: _hobbiesOfferings,
+                selectedList: _selectedHobbies,
+                maxSelect: 5,
+                onChanged: (list) => setState(() => _selectedHobbies = list),
+              ),
+               _buildMultiSelect(
+                title: 'Interests',
+                offerings: _availableInterests,
+                selectedList: _selectedInterests,
+                maxSelect: 5,
+                onChanged: (list) => setState(() => _selectedInterests = list),
+              ),
               const SizedBox(height: 40),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMultiSelect({
+    required String title,
+    required List<String> offerings,
+    required List<String> selectedList,
+    required int maxSelect,
+    required Function(List<String>) onChanged,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pColor = QaboolTheme.primary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(title.toUpperCase()),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: offerings.map((item) {
+            final isSelected = selectedList.contains(item);
+            return FilterChip(
+              label: Text(item),
+              selected: isSelected,
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    if (selectedList.length < maxSelect) {
+                      selectedList.add(item);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Max $maxSelect items allowed')),
+                      );
+                    }
+                  } else {
+                    selectedList.remove(item);
+                  }
+                  onChanged(selectedList);
+                });
+              },
+              selectedColor: pColor.withOpacity(0.3),
+              checkmarkColor: pColor,
+              labelStyle: TextStyle(
+                color: isSelected ? pColor : (isDark ? Colors.white : Colors.black87),
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 12,
+              ),
+              backgroundColor: isDark ? const Color(0xFF2D2626) : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  color: isSelected ? pColor : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 24),
+      ],
     );
   }
 

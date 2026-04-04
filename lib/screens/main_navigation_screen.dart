@@ -73,6 +73,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const bgDark = Color(0xFF1A1616);
 
     return Scaffold(
+      extendBody: true,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isLargeScreen = constraints.maxWidth > 800;
@@ -94,8 +95,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     ),
                   ),
                   child: SafeArea(
-                    child: Consumer2<ChatService, NavigationService>(
-                      builder: (context, chatService, nav, _) {
+                    child: Builder(
+                      builder: (context) {
+                        final chatService = context.watch<ChatService>();
+                        final nav = context.watch<NavigationService>();
                         final totalUnread = chatService.totalUnreadCount;
                         final currentIndex = nav.currentTab.index;
                         return Column(
@@ -191,49 +194,48 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         builder: (context, constraints) {
           if (constraints.maxWidth > 800) return const SizedBox.shrink();
           
-          return Container(
-            decoration: BoxDecoration(
-              color: isDark ? bgDark : Colors.white,
-              border: Border(
-                top: BorderSide(
-                  color: isDark
-                      ? const Color(0xFF1E293B)
-                      : primaryColor.withOpacity(0.1),
-                ),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            child: Consumer2<ChatService, NavigationService>(
-              builder: (context, chatService, nav, _) {
-                final totalUnread = chatService.totalUnreadCount;
-                final currentIndex = nav.currentTab.index;
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildNavItem(
-                      Icons.favorite, 'Qabool', 0, QaboolTheme.primary,
-                      primaryColor, isDark, currentIndex: currentIndex,
+          return Builder(
+            builder: (context) {
+              final chatService = context.watch<ChatService>();
+              final nav = context.watch<NavigationService>();
+              final isVisible = nav.isBottomNavVisible;
+              final totalUnread = chatService.totalUnreadCount;
+              final currentIndex = nav.currentTab.index;
+              
+              return AnimatedSlide(
+                duration: const Duration(milliseconds: 300),
+                offset: isVisible ? Offset.zero : const Offset(0, 1.2), // Slide down to hide
+                curve: Curves.easeInOut,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: isVisible ? 1.0 : 0.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? bgDark : Colors.white,
                     ),
-                    _buildNavItem(Icons.explore, 'Explore', 1, QaboolTheme.primary,
-                        primaryColor, isDark, currentIndex: currentIndex),
-                    _buildNavItem(
-                      Icons.chat_bubble, 'Chat', 2, QaboolTheme.primary,
-                      primaryColor, isDark, currentIndex: currentIndex,
-                      badgeCount: totalUnread > 0 ? totalUnread : null,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildNavItem(
+                          Icons.favorite, 'Qabool', 0, QaboolTheme.primary,
+                          primaryColor, isDark, currentIndex: currentIndex,
+                        ),
+                        _buildNavItem(Icons.explore, 'Explore', 1, QaboolTheme.primary,
+                            primaryColor, isDark, currentIndex: currentIndex),
+                        _buildNavItem(
+                          Icons.chat_bubble, 'Chat', 2, QaboolTheme.primary,
+                          primaryColor, isDark, currentIndex: currentIndex,
+                          badgeCount: totalUnread > 0 ? totalUnread : null,
+                        ),
+                        _buildNavItem(Icons.person, 'Profile', 3, QaboolTheme.primary,
+                            primaryColor, isDark, currentIndex: currentIndex),
+                      ],
                     ),
-                    _buildNavItem(Icons.person, 'Profile', 3, QaboolTheme.primary,
-                        primaryColor, isDark, currentIndex: currentIndex),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ),
+              );
+            },
           );
         },
       ),

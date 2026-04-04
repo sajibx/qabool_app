@@ -62,6 +62,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
     'Movies', 'Outdoors', 'Coffee', 'Animals', 'Gardening'
   ];
 
+  List<String> _selectedLanguages = [];
+  final List<String> _languagesOfferings = [
+    '🇺🇸 English', '🇧🇩 Bengali', '🇸🇦 Arabic', '🇫🇷 French', '🇪🇸 Spanish', '🇩🇪 German', '🇨🇳 Chinese', '🇮🇳 Hindi', '🇵🇰 Urdu', '🇹🇷 Turkish'
+  ];
+
+  List<String> _selectedPersonalityTraits = [];
+  final List<String> _personalityOfferings = [
+    '😊 Kind', '🧠 Intellectual', '🤣 Humorous', '🎨 Creative', '🤫 Introverted', '🗣️ Extroverted', '🧘 Calm', '⚡ Energetic', '🤝 Empathetic', '🧗 Adventurous'
+  ];
+
+  List<String> _selectedLifeStyle = [];
+  final List<String> _lifestyleOfferings = [
+    '🚭 Non-smoker', '🍽️ Halal only', '🕌 Praying five times', '🏋️ Fitness enthusiast', '🍳 Foodie', '✈️ Traveler', '🎮 Gamer', '🐈 Pet lover'
+  ];
+
+  List<String> _selectedHobbies = [];
+  final List<String> _hobbiesOfferings = [
+    '📸 Photography', '🍳 Cooking', '💃 Dancing', '🎤 Singing', '✍️ Writing', '🧶 Knitting', '♟️ Chess', '🎥 Movies'
+  ];
+
+  String? _selectedHasChildren;
+  final _grewUpInController = TextEditingController();
+  double _marriageIntentionsValue = 0.5;
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.gallery);
@@ -109,6 +133,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _specialController.dispose();
     _phoneController.dispose();
     _currentCityController.dispose();
+    _grewUpInController.dispose();
     super.dispose();
   }
 
@@ -251,6 +276,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
         lookingForType: _selectedLookingForType,
         lookingForProfession: _selectedLookingForProfession,
         interests: _selectedInterests,
+        languages: _selectedLanguages,
+        personalityTraits: _selectedPersonalityTraits,
+        lifeStyle: _selectedLifeStyle,
+        hobbies: _selectedHobbies,
+        marriageIntentions: _marriageIntentionsValue.toString(),
+        hasChildren: _selectedHasChildren,
+        grewUpIn: _grewUpInController.text,
         profileImage: _pickedImage,
       );
       if (!mounted) return;
@@ -358,6 +390,64 @@ class _SignUpScreenState extends State<SignUpScreen> {
             color: isDark ? Colors.grey[300] : Colors.grey[700],
           ),
         ),
+      );
+    }
+
+    Widget buildMultiSelect({
+      required String title,
+      required List<String> offerings,
+      required List<String> selectedList,
+      required int maxSelect,
+      required Function(List<String>) onChanged,
+    }) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          buildLabel('$title (Select Max $maxSelect)'),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: offerings.map((item) {
+              final isSelected = selectedList.contains(item);
+              return FilterChip(
+                label: Text(item),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    if (selected) {
+                      if (selectedList.length < maxSelect) {
+                        selectedList.add(item);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('You can select a maximum of $maxSelect $title')),
+                        );
+                      }
+                    } else {
+                      selectedList.remove(item);
+                    }
+                    onChanged(selectedList);
+                  });
+                },
+                selectedColor: pColor.withOpacity(0.3),
+                checkmarkColor: pColor,
+                labelStyle: TextStyle(
+                  color: isSelected ? pColor : (isDark ? Colors.white : Colors.black87),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 12,
+                ),
+                backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: isSelected ? pColor : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
+        ],
       );
     }
 
@@ -1046,6 +1136,68 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             contentPadding: EdgeInsets.zero,
                           ),
                           const SizedBox(height: 16),
+                          buildLabel('Where did you grow up?'),
+                          TextField(
+                            controller: _grewUpInController,
+                            decoration: inputDecoration('e.g. Bangladesh, UK, etc.'),
+                          ),
+                          const SizedBox(height: 16),
+                          buildLabel('Do you have children?'),
+                          DropdownButtonFormField<String>(
+                            value: _selectedHasChildren,
+                            decoration: inputDecoration('Select Answer'),
+                            items: ['No', 'Yes, living with me', 'Yes, not living with me']
+                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (val) => setState(() => _selectedHasChildren = val),
+                          ),
+                          const SizedBox(height: 24),
+                          buildLabel('Marriage Intentions Slider'),
+                          Text('Match! <---> Agree together <---> 4-12 months', 
+                            style: TextStyle(fontSize: 10, color: isDark ? Colors.grey[400] : Colors.grey[600])),
+                          Slider(
+                            value: _marriageIntentionsValue,
+                            activeColor: pColor,
+                            inactiveColor: pColor.withOpacity(0.2),
+                            onChanged: (val) => setState(() => _marriageIntentionsValue = val),
+                          ),
+                          const SizedBox(height: 24),
+                          Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                          const SizedBox(height: 24),
+
+                          // Profile Bubbles Section
+                          buildSectionHeader(Icons.bubble_chart, 'Profile Details'),
+                          buildMultiSelect(
+                            title: 'Languages',
+                            offerings: _languagesOfferings,
+                            selectedList: _selectedLanguages,
+                            maxSelect: 5,
+                            onChanged: (list) => _selectedLanguages = list,
+                          ),
+                          buildMultiSelect(
+                            title: 'Personality Traits',
+                            offerings: _personalityOfferings,
+                            selectedList: _selectedPersonalityTraits,
+                            maxSelect: 5,
+                            onChanged: (list) => _selectedPersonalityTraits = list,
+                          ),
+                          buildMultiSelect(
+                            title: 'Life Style',
+                            offerings: _lifestyleOfferings,
+                            selectedList: _selectedLifeStyle,
+                            maxSelect: 5,
+                            onChanged: (list) => _selectedLifeStyle = list,
+                          ),
+                          buildMultiSelect(
+                            title: 'Hobbies',
+                            offerings: _hobbiesOfferings,
+                            selectedList: _selectedHobbies,
+                            maxSelect: 5,
+                            onChanged: (list) => _selectedHobbies = list,
+                          ),
+                          const SizedBox(height: 24),
+                          Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                          const SizedBox(height: 24),
 
                           // Bio
                           buildSectionHeader(Icons.description, 'Bio'),
@@ -1078,46 +1230,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
 
-                          // Interests Section
-                          buildSectionHeader(Icons.interests, 'Your Interests (Select Max 5)'),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: _availableInterests.map((interest) {
-                              final isSelected = _selectedInterests.contains(interest);
-                              return FilterChip(
-                                label: Text(interest),
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  setState(() {
-                                    if (selected) {
-                                      if (_selectedInterests.length < 5) {
-                                        _selectedInterests.add(interest);
-                                      } else {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('You can select a maximum of 5 interests')),
-                                        );
-                                      }
-                                    } else {
-                                      _selectedInterests.remove(interest);
-                                    }
-                                  });
-                                },
-                                selectedColor: pColor.withOpacity(0.3),
-                                checkmarkColor: pColor,
-                                labelStyle: TextStyle(
-                                  color: isSelected ? pColor : (isDark ? Colors.white : Colors.black87),
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                ),
-                                backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  side: BorderSide(
-                                    color: isSelected ? pColor : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
+                          buildMultiSelect(
+                            title: 'Interests',
+                            offerings: _availableInterests,
+                            selectedList: _selectedInterests,
+                            maxSelect: 5,
+                            onChanged: (list) => _selectedInterests = list,
                           ),
                           const SizedBox(height: 32),
 
