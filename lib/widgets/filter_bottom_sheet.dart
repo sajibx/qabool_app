@@ -17,6 +17,7 @@ class FilterBottomSheet extends StatefulWidget {
     bool showConnected,
     bool showSkipped,
   ) onApply;
+  final VoidCallback? onDismiss;
 
   const FilterBottomSheet({
     super.key,
@@ -28,6 +29,7 @@ class FilterBottomSheet extends StatefulWidget {
     required this.initialShowSkipped,
     required this.onApply,
     this.isPopover = false,
+    this.onDismiss,
   });
 
   @override
@@ -98,14 +100,26 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     final primaryColor = QaboolTheme.primary;
 
     return Container(
-      padding: const EdgeInsets.only(top: 16, left: 24, right: 24, bottom: 32),
+      padding: widget.isPopover 
+          ? const EdgeInsets.fromLTRB(20, 10, 20, 20) 
+          : const EdgeInsets.only(top: 16, left: 24, right: 24, bottom: 32),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: widget.isPopover 
-            ? BorderRadius.circular(24) 
-            : const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: widget.isPopover 
-            ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))]
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ]
+            : null,
+        border: widget.isPopover
+            ? Border.all(
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                width: 1,
+              )
             : null,
       ),
       child: Column(
@@ -124,23 +138,42 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 ),
               ),
             ),
-          const SizedBox(height: 24),
+          SizedBox(height: widget.isPopover ? 8 : 24),
           
           // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Filters',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              TextButton(
-                onPressed: _resetFilters,
-                child: Text('Reset', style: TextStyle(color: primaryColor)),
-              ),
-            ],
+          Padding(
+            padding: widget.isPopover 
+                ? const EdgeInsets.fromLTRB(20, 8, 12, 12)
+                : const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Filters',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: _resetFilters,
+                      style: TextButton.styleFrom(
+                        foregroundColor: primaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                      child: const Text('Reset', style: TextStyle(fontSize: 12)),
+                    ),
+                    if (widget.isPopover)
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 20),
+                        onPressed: widget.onDismiss,
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
+          if (widget.isPopover) const Divider(height: 1),
+          SizedBox(height: widget.isPopover ? 16 : 16),
 
           Flexible(
             child: SingleChildScrollView(
@@ -197,7 +230,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   _buildToggle('Show Skipped', _showSkipped, (val) {
                     setState(() => _showSkipped = val);
                   }, isDark),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -214,7 +247,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 _showConnected,
                 _showSkipped,
               );
-              Navigator.pop(context);
+              if (!widget.isPopover) {
+                Navigator.pop(context);
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,

@@ -181,36 +181,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
   }
 
   void _showFilters() {
-    final isLargeScreen = MediaQuery.of(context).size.width > 800;
-    if (isLargeScreen) {
-      _showFilterDropdown();
-      return;
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => FilterBottomSheet(
-        initialAgeRange: _ageRange,
-        initialReligion: _selectedReligion,
-        initialEducation: _selectedEducation,
-        initialLocation: _selectedLocation,
-        initialShowConnected: _showConnected,
-        initialShowSkipped: _showSkipped,
-        onApply: (ageRange, religion, education, location, showConnected, showSkipped) {
-          setState(() {
-            _ageRange = ageRange;
-            _selectedReligion = religion;
-            _selectedEducation = education;
-            _selectedLocation = location;
-            _showConnected = showConnected;
-            _showSkipped = showSkipped;
-          });
-          _fetchProfiles();
-        },
-      ),
-    );
+    _showFilterDropdown();
   }
 
   void _showFilterDropdown() {
@@ -218,6 +189,10 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
       _hideFilters();
       return;
     }
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth > 800;
+    final dropdownWidth = isLargeScreen ? 400.0 : 320.0;
 
     final overlay = Overlay.of(context);
     _filterOverlay = OverlayEntry(
@@ -230,12 +205,12 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
             child: Container(color: Colors.transparent),
           ),
           Positioned(
-            width: 400,
+            width: dropdownWidth,
             child: CompositedTransformFollower(
               link: _filterLayerLink,
               showWhenUnlinked: false,
-              // "floating bit to the left, aligned with the filter button"
-              offset: const Offset(-20, 50),
+              // Align the right edge of the filter dropdown with the filter icon for screen safety
+              offset: Offset(-(dropdownWidth - 44), 50),
               child: Material(
                 color: Colors.transparent,
                 child: FilterBottomSheet(
@@ -246,6 +221,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                   initialLocation: _selectedLocation,
                   initialShowConnected: _showConnected,
                   initialShowSkipped: _showSkipped,
+                  onDismiss: _hideFilters,
                   onApply: (ageRange, religion, education, location, showConnected, showSkipped) {
                     setState(() {
                       _ageRange = ageRange;
@@ -299,8 +275,8 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
             child: CompositedTransformFollower(
               link: _notificationLayerLink,
               showWhenUnlinked: false,
-              // Adjust offset based on screen size; on mobile we might want it centered vs left-aligned on desktop
-              offset: Offset(isLargeScreen ? -300 : 0, 50),
+              // Align the right edge of the dropdown with the icon to prevent cut-off
+              offset: Offset(-(dropdownWidth - 44), 50),
               child: Material(
                 color: Colors.transparent,
                 child: NotificationDropdown(
@@ -333,11 +309,9 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
 
     return Scaffold(
       backgroundColor: isDark ? bgDark : bgLight,
-      body: SafeArea(
-        bottom: false,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isLargeScreen = MediaQuery.of(context).size.width > 800;
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isLargeScreen = MediaQuery.of(context).size.width > 800;
 
             if (isLargeScreen) {
               return Row(
@@ -366,47 +340,14 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
             return _buildMainContent(isDark, pColor, bgDark, bgLight, isLargeScreen: false);
           },
         ),
-      ),
-    );
-  }
+      );
+    }
 
   Widget _buildMainContent(bool isDark, Color pColor, Color bgDark, Color bgLight, {required bool isLargeScreen}) {
     const neutralSoftUrlLight = Color(0xFFF4F1F0);
     return Column(
       children: [
-        // Top Left Filter Settings Icon
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-          child: Row(
-            children: [
-              CompositedTransformTarget(
-                link: _filterLayerLink,
-                child: InkWell(
-                  onTap: _showFilters,
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                      boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4),
-                      ],
-                    ),
-                    child: Icon(Icons.tune, color: pColor, size: 24),
-                  ),
-                ),
-              ),
-              const Spacer(),
-              CompositedTransformTarget(
-                link: _notificationLayerLink,
-                child: NotificationIcon(
-                  onTap: _showNotificationDropdown,
-                ),
-              ),
-            ],
-          ),
-        ),
+        // Top content area removed to eliminate white bar, buttons now overlay the image below
 
         if (isLargeScreen && _isSearching)
           Container(
@@ -452,10 +393,12 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
             ),
           ),
 
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: refreshData,
-                color: pColor,
+        Expanded(
+              child: Stack(
+                children: [
+                  RefreshIndicator(
+                    onRefresh: refreshData,
+                    color: pColor,
                 child: Builder(builder: (context) {
                   if (isLargeScreen) {
                     return SingleChildScrollView(
@@ -531,8 +474,8 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                     : GridView.builder(
                                         shrinkWrap: true,
                                         physics: const NeverScrollableScrollPhysics(),
-                                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: MediaQuery.of(context).size.width > 800 ? 3 : 2,
+                                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                          maxCrossAxisExtent: 250,
                                           childAspectRatio: 0.55,
                                           crossAxisSpacing: 16,
                                           mainAxisSpacing: 16,
@@ -615,7 +558,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                     ),
                             ),
                           ],
-                          const SizedBox(height: 100),
+                          const SizedBox(height: 32),
                         ],
                       ),
                     );
@@ -659,7 +602,75 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                 );
                               },
                             );
-                }),
+                          }),
+                        ),
+
+                  // Overlay Buttons (Top Left)
+                  Positioned(
+                    top: MediaQuery.of(context).padding.top + 10,
+                    right: 16,
+                    child: Row(
+                      children: [
+                        // Filter Button
+                        CompositedTransformTarget(
+                          link: _filterLayerLink,
+                          child: IconButton(
+                            icon: const Icon(Icons.tune_outlined, color: Colors.white, size: 28),
+                            onPressed: _showFilters,
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.black.withOpacity(0.2),
+                              padding: const EdgeInsets.all(8),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Notification Button
+                        CompositedTransformTarget(
+                          link: _notificationLayerLink,
+                          child: Stack(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 26),
+                                onPressed: _showNotificationDropdown,
+                                style: IconButton.styleFrom(
+                                  side: BorderSide(color: Colors.white.withOpacity(0.6), width: 1.5),
+                                  padding: const EdgeInsets.all(10),
+                                  backgroundColor: Colors.black.withOpacity(0.15), // Very subtle for visibility
+                                ),
+                              ),
+                              Consumer<NotificationService>(
+                                builder: (context, notificationService, _) {
+                                  final unreadCount = notificationService.unreadCount;
+                                  if (unreadCount == 0) return const SizedBox.shrink();
+                                  return Positioned(
+                                    right: 4,
+                                    top: 4,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: QaboolTheme.primary,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      constraints: const BoxConstraints(
+                                        minWidth: 16,
+                                        minHeight: 16,
+                                      ),
+                                      child: Text(
+                                        unreadCount > 9 ? '9+' : '$unreadCount',
+                                        style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
       ],

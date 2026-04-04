@@ -77,7 +77,7 @@ class _ProfileViewState extends State<ProfileView> {
         children: [
           Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
+              constraints: const BoxConstraints(maxWidth: 500),
               child: SingleChildScrollView(
                 controller: _scrollController,
                 physics: const BouncingScrollPhysics(),
@@ -87,34 +87,40 @@ class _ProfileViewState extends State<ProfileView> {
                     // 1. Top Image Section
                     _buildTopImage(context, isDark),
 
-                    // 2. Your Similarities
-                    _buildSimilaritiesSection(isDark),
-
-                    // 3. About Me Section
+                    // 2. About Me Section (Sub-bubbles)
                     _buildAboutMeSection(isDark),
 
-                    // 4. Marriage Intentions
+                    // 3. Marriage Intentions (Progress Bar)
                     _buildMarriageIntentionsSection(isDark, primaryColor),
 
-                    // 5. Education and Career
+                    // 4. My Faith Section (Sub-bubbles)
+                    _buildMyFaithSection(isDark),
+
+                    // 5. Future Plans Section (Sub-bubbles)
+                    _buildFuturePlansSection(isDark),
+
+                    // 6. Interests Section (Wrap bubbles)
+                    _buildInterestsSection(isDark),
+
+                    // 7. Personality Section (Sub-bubbles)
+                    _buildPersonalitySection(isDark),
+
+                    // 8. Education and Career (Sub-bubbles)
                     _buildEducationCareerSection(isDark),
 
-                    // 6. Languages and Ethnicity
+                    // 8.5 Languages and Ethnicity
                     _buildLanguagesEthnicitySection(isDark),
 
-                    // 7. Bio
+                    // 9. Bio
                     _buildBioSection(isDark),
 
-                    // 8. Verified Profile Placeholder
-                    _buildVerifiedProfile(isDark),
+                    // 10. Preference Section
+                    _buildPreferenceSection(isDark),
 
-                    // 9. Compliment Section
-                    if (!widget.isMyProfile) _buildComplimentSection(context, isDark),
-
-                    // 10. Secondary Actions (Favorite, Block, Report)
+                    // 11. Secondary Actions (Favorite, Block, Report)
                     if (!widget.isMyProfile) _buildSecondaryActions(isDark),
 
-                    const SizedBox(height: 100), // Reduced space for bottom buttons
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
@@ -146,10 +152,10 @@ class _ProfileViewState extends State<ProfileView> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 800;
     
-    // Adjust height based on screen size
+    // Adjust height based on screen size (increased by 15%)
     final imageHeight = isLargeScreen 
-        ? MediaQuery.of(context).size.height * 0.7 
-        : MediaQuery.of(context).size.height * 0.6;
+        ? MediaQuery.of(context).size.height * 1.05 
+        : MediaQuery.of(context).size.height * 1.2;
 
     return Stack(
       children: [
@@ -278,99 +284,132 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildSimilaritiesSection(bool isDark) {
+  Widget _buildSectionHeader(String title, IconData icon, bool isDark) {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(20, 40, 20, 12),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: isDark ? Colors.white : Colors.black,
+          letterSpacing: -0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileBubble(String text, IconData? icon, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : const Color(0xFFF3F4F6), // Very light grey
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Your similarities', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
+          if (icon != null) ...[
+            Icon(icon, size: 16, color: isDark ? Colors.white70 : Colors.black87),
+            const SizedBox(width: 6),
+          ],
           Text(
-            'You and ${widget.user.firstName} already share similarities. Explore your connection more.',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.grey[600], fontSize: 14),
+            text,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.white : Colors.black,
+            ),
           ),
-          const SizedBox(height: 12),
-          _buildInfoBubble('Grew up in ${widget.user.grewUpIn ?? "Bangladesh"}', isDark),
         ],
       ),
     );
   }
 
   Widget _buildAboutMeSection(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('About me', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('About me', Icons.person_outline, isDark),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
             children: [
-              _buildInfoBubble('${widget.user.height?.toInt() ?? "155"}cm', isDark, icon: Icons.height),
-              _buildInfoBubble(widget.user.maritalStatus ?? "Single", isDark, icon: Icons.favorite_border),
-              _buildInfoBubble(widget.user.hasChildren ?? "No children", isDark, icon: Icons.child_care),
+              _buildProfileBubble('🎂 ${widget.user.age} years', null, isDark),
+              _buildProfileBubble('📏 ${widget.user.height?.toInt()} cm', null, isDark),
+              _buildProfileBubble('⚖️ ${widget.user.weight?.toInt()} kg', null, isDark),
+              _buildProfileBubble('💍 ${widget.user.maritalStatus ?? "Single"}', null, isDark),
+              _buildProfileBubble('👶 ${widget.user.hasChildren ?? "No children"}', null, isDark),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildMarriageIntentionsSection(bool isDark, Color primaryColor) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.grey[900] : Colors.grey[100],
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${widget.user.firstName}\'s marriage intentions', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                _buildMiniBubble('Family', Icons.people, isDark),
-                const SizedBox(width: 8),
-                _buildMiniBubble('Marriage', Icons.favorite, isDark),
-              ],
+    final value = double.tryParse(widget.user.marriageIntentions ?? "0.5") ?? 0.5;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Marriage Intentions', Icons.favorite, isDark),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[900] : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
             ),
-            const SizedBox(height: 16),
-            // Custom Slider-like UI
-            Stack(
-              alignment: Alignment.center,
+            child: Column(
               children: [
-                Container(
-                  height: 4,
-                  decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white10 : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment(value * 2 - 1, 0),
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: QaboolTheme.primary,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: QaboolTheme.primary.withOpacity(0.3),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                Positioned(
-                  left: 20,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                    child: const Icon(Icons.favorite, color: Colors.white, size: 12),
-                  ),
+                const SizedBox(height: 12),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Match!', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    Text('Agree together', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    Text('4-12 months', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Match!', style: TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
-                Text('Agree together', style: TextStyle(color: isDark ? Colors.white70 : Colors.grey[600], fontSize: 10)),
-                Text('4-12 months', style: TextStyle(color: isDark ? Colors.white70 : Colors.grey[600], fontSize: 10)),
-              ],
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -393,58 +432,123 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildEducationCareerSection(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Education and career', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
+  Widget _buildMyFaithSection(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('My faith', Icons.nightlight_round, isDark),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
             children: [
-              _buildInfoBubble(widget.user.education ?? "Not specified", isDark, icon: Icons.school_outlined),
-              _buildInfoBubble(widget.user.profession ?? "Not specified", isDark, icon: Icons.work_outline),
+              _buildProfileBubble('🕌 ${widget.user.religion ?? "Not specified"}', null, isDark),
+              if (widget.user.sect != null) _buildProfileBubble('🛐 ${widget.user.sect!}', null, isDark),
+              if (widget.user.caste != null) _buildProfileBubble('👥 ${widget.user.caste!}', null, isDark),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFuturePlansSection(bool isDark) {
+    // Note: Originally preferences were placed here, now moved back to Preference Section.
+    // If you have actual future plans data, add it here. Otherwise, shrink if empty.
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildInterestsSection(bool isDark) {
+    if (widget.user.interests.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Interests', Icons.auto_awesome, isDark),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: widget.user.interests.take(15).map((interest) {
+              return _buildProfileBubble(interest, null, isDark);
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPersonalitySection(bool isDark) {
+    if (widget.user.personalityTraits.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Personality', Icons.psychology, isDark),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: widget.user.personalityTraits.map((trait) {
+              return _buildProfileBubble(trait, null, isDark);
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEducationCareerSection(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Education and career', Icons.school, isDark),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _buildProfileBubble('🎓 ${widget.user.education ?? "Not specified"}', null, isDark),
+              _buildProfileBubble('💼 ${widget.user.profession ?? "Not specified"}', null, isDark),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildLanguagesEthnicitySection(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Languages and ethnicity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
+    if (widget.user.languages.isEmpty && widget.user.grewUpIn == null && widget.user.ethnicity == null) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Languages and ethnicity', Icons.translate, isDark),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
             children: [
-              ...widget.user.languages.map((l) => _buildInfoBubble(l, isDark, icon: Icons.translate)),
-              _buildInfoBubble('Grew up in ${widget.user.grewUpIn ?? "Bangladesh"}', isDark),
-              _buildInfoBubble(widget.user.ethnicity ?? "Bangladeshi", isDark, icon: Icons.flag),
+              ...widget.user.languages.map((lang) => _buildProfileBubble(lang, Icons.translate, isDark)),
+              if (widget.user.grewUpIn != null) _buildProfileBubble('Grew up in ${widget.user.grewUpIn}', null, isDark),
+              if (widget.user.ethnicity != null) _buildProfileBubble('🌍 ${widget.user.ethnicity}', null, isDark),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildBioSection(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Bio', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          Text(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Bio', Icons.format_quote, isDark),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Text(
             widget.user.bio ?? "No bio provided.",
             style: TextStyle(
               fontSize: 15,
@@ -452,8 +556,43 @@ class _ProfileViewState extends State<ProfileView> {
               color: isDark ? Colors.white70 : Colors.black87,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPreferenceSection(bool isDark) {
+    final hasPreferences = widget.user.lookingForAge != null || 
+                           widget.user.lookingForType != null || 
+                           widget.user.lookingForProfession != null || 
+                           widget.user.hasPastIssues || 
+                           widget.user.acceptsPastIssues;
+
+    if (!hasPreferences) {
+      return const SizedBox.shrink();
+    }
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Preferences', Icons.tune, isDark),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              if (widget.user.lookingForAge != null) _buildProfileBubble('🎂 Looking for ${widget.user.lookingForAge}', null, isDark),
+              if (widget.user.lookingForType != null) _buildProfileBubble('💘 ${widget.user.lookingForType!}', null, isDark),
+              if (widget.user.lookingForProfession != null) _buildProfileBubble('💼 ${widget.user.lookingForProfession!}', null, isDark),
+              if (widget.user.hasPastIssues && widget.user.pastIssuesDetails != null) 
+                _buildProfileBubble('⚠️ Past issues: ${widget.user.pastIssuesDetails}', null, isDark),
+              if (widget.user.acceptsPastIssues && widget.user.acceptedPastIssuesDetails != null)
+                _buildProfileBubble('✅ Accepts: ${widget.user.acceptedPastIssuesDetails}', null, isDark),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

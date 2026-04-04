@@ -55,11 +55,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? _selectedLookingForAge;
   String? _selectedLookingForProfession;
   List<String> _selectedInterests = [];
+  String? _selectedPastIssueDetails;
+  String? _selectedAcceptedPastIssueDetails;
+  List<String> _missingFields = [];
+
+  final List<String> _pastIssuesOptions = [
+    'Divorced', 'Widowed', 'Separated', 'Other'
+  ];
 
   final List<String> _availableInterests = [
     'Cooking', 'Traveling', 'Reading', 'Coding', 'Gaming', 
     'Music', 'Art', 'Sports', 'Photography', 'Fitness', 
-    'Movies', 'Outdoors', 'Coffee', 'Animals', 'Gardening'
+    'Movies', 'Outdoors', 'Coffee', 'Animals', 'Gardening',
+    'Politics', 'History', 'Movie Buff', 'Tech Enthusiast', 'Volunteer Work', 
+    'Dancing', 'Chess', 'Meditation', 'Yoga', 'Podcasts', 
+    'Financial Literacy', 'Fashion', 'Astronomy', 'Architecture', 'Interior Design', 
+    'Philosophy', 'Sustainability', 'Languages', 'Hiking', 'Camping', 
+    'Coffee Lover', 'Tea Enthusiast', 'Foodie', 'Public Speaking', 'Blogging',
+    'Painting', 'Sculpting', 'Martial Arts', 'Entrepreneurship', 'DIY Projects'
   ];
 
   List<String> _selectedLanguages = [];
@@ -160,36 +173,62 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+  String _toCamelCase(String text) {
+    if (text.isEmpty) return text;
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
+
   void _handleSignUp(AuthService auth) async {
     debugPrint('SignUp: _handleSignUp called');
     
     // 1. Mandatory Field Validation
-    if (_firstNameController.text.isEmpty ||
-        _lastNameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _selectedGender == null ||
-        _selectedCountry == null ||
-        _selectedCity == null ||
-        _selectedDob == null ||
-        _selectedEthnicity == null ||
-        _selectedReligion == null ||
-        _selectedCountryCode == null ||
-        _phoneController.text.isEmpty ||
-        _weightController.text.isEmpty ||
-        _jobController.text.isEmpty ||
-        _educationController.text.isEmpty ||
-        _selectedMaritalStatus == null ||
-        _currentCityController.text.isEmpty ||
-        _selectedMonthlyIncome == null ||
-        _selectedSiblings == null ||
-        _selectedFamilyMembers == null ||
-        _selectedLookingForType == null ||
-        _selectedLookingForAge == null ||
-        _selectedLookingForProfession == null) {
-      debugPrint('SignUp: Mandatory fields validation failed');
+    final Map<String, bool> validationMap = {
+      'First Name': _firstNameController.text.isNotEmpty,
+      'Last Name': _lastNameController.text.isNotEmpty,
+      'Email': _emailController.text.isNotEmpty,
+      'Password': _passwordController.text.isNotEmpty,
+      'Gender': _selectedGender != null,
+      'Country': _selectedCountry != null,
+      'City': _selectedCity != null,
+      'Date of Birth': _selectedDob != null,
+      'Race/Ethnicity': _selectedEthnicity != null,
+      'Religion': _selectedReligion != null,
+      'Phone Code': _selectedCountryCode != null,
+      'Phone Number': _phoneController.text.isNotEmpty,
+      'Weight': _weightController.text.isNotEmpty,
+      'Work/Profession': _jobController.text.isNotEmpty,
+      'Education': _educationController.text.isNotEmpty,
+      'Marital Status': _selectedMaritalStatus != null,
+      'Current City': _currentCityController.text.isNotEmpty,
+      'Monthly Income': _selectedMonthlyIncome != null,
+      'Siblings': _selectedSiblings != null,
+      'Family Members': _selectedFamilyMembers != null,
+      'Partner (Type)': _selectedLookingForType != null,
+      'Partner (Age)': _selectedLookingForAge != null,
+      'Partner (Profession)': _selectedLookingForProfession != null,
+    };
+
+    final List<String> missingFields = validationMap.entries
+        .where((e) => !e.value)
+        .map((e) => e.key)
+        .toList();
+
+    setState(() {
+      _missingFields = missingFields;
+    });
+
+    if (missingFields.isNotEmpty) {
+      debugPrint('SignUp: Mandatory fields validation failed: $missingFields');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all mandatory fields')),
+        SnackBar(
+          content: Text('Please fill: ${missingFields.join(", ")}'),
+          backgroundColor: QaboolTheme.primary,
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(label: 'OK', textColor: Colors.white, onPressed: () {}),
+        ),
       );
       return;
     }
@@ -281,8 +320,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
         lifeStyle: _selectedLifeStyle,
         hobbies: _selectedHobbies,
         marriageIntentions: _marriageIntentionsValue.toString(),
-        hasChildren: _selectedHasChildren,
-        grewUpIn: _grewUpInController.text,
+        hasChildren: _selectedMaritalStatus == 'Single' ? 'No' : _selectedHasChildren,
+        grewUpIn: _toCamelCase(_grewUpInController.text),
+        pastIssuesDetails: _hasPastIssues ? _selectedPastIssueDetails : null,
+        acceptedPastIssuesDetails: _acceptsPastIssues ? _selectedAcceptedPastIssueDetails : null,
         profileImage: _pickedImage,
       );
       if (!mounted) return;
@@ -985,10 +1026,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   inputDecoration('Current occupation')),
                           const SizedBox(height: 16),
                           buildLabel('Studies / Education'),
-                          TextField(
-                              controller: _educationController,
-                              decoration:
-                                  inputDecoration('Highest degree earned')),
+                          DropdownButtonFormField<String>(
+                            value: _educationController.text.isEmpty ? null : _educationController.text,
+                            decoration: inputDecoration('Highest degree earned'),
+                            items: [
+                              'High School', 'Associate Degree', 'Bachelors Degree', 
+                              'Masters Degree', 'PhD', 'Other'
+                            ]
+                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (val) => setState(() => _educationController.text = val ?? ''),
+                          ),
                           const SizedBox(height: 16),
 
                           // Household & Additional Info
@@ -1126,6 +1174,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             onChanged: (val) => setState(() => _hasPastIssues = val),
                             contentPadding: EdgeInsets.zero,
                           ),
+                          if (_hasPastIssues) ...[
+                            const SizedBox(height: 8),
+                            buildLabel('Type of past issue'),
+                            DropdownButtonFormField<String>(
+                              value: _selectedPastIssueDetails,
+                              decoration: inputDecoration('Select Detail'),
+                              items: _pastIssuesOptions
+                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                  .toList(),
+                              onChanged: (val) => setState(() => _selectedPastIssueDetails = val),
+                            ),
+                          ],
                           const SizedBox(height: 8),
                           SwitchListTile(
                             title: const Text('Will you accept someone with past issues?', style: TextStyle(fontSize: 14)),
@@ -1135,6 +1195,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             onChanged: (val) => setState(() => _acceptsPastIssues = val),
                             contentPadding: EdgeInsets.zero,
                           ),
+                          if (_acceptsPastIssues) ...[
+                            const SizedBox(height: 8),
+                            buildLabel('Whom will you accept?'),
+                            DropdownButtonFormField<String>(
+                              value: _selectedAcceptedPastIssueDetails,
+                              decoration: inputDecoration('Select Detail'),
+                              items: _pastIssuesOptions
+                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                  .toList(),
+                              onChanged: (val) => setState(() => _selectedAcceptedPastIssueDetails = val),
+                            ),
+                          ],
                           const SizedBox(height: 16),
                           buildLabel('Where did you grow up?'),
                           TextField(
@@ -1142,15 +1214,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             decoration: inputDecoration('e.g. Bangladesh, UK, etc.'),
                           ),
                           const SizedBox(height: 16),
-                          buildLabel('Do you have children?'),
-                          DropdownButtonFormField<String>(
-                            value: _selectedHasChildren,
-                            decoration: inputDecoration('Select Answer'),
-                            items: ['No', 'Yes, living with me', 'Yes, not living with me']
-                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                .toList(),
-                            onChanged: (val) => setState(() => _selectedHasChildren = val),
-                          ),
+                          const SizedBox(height: 16),
+                          if (_selectedMaritalStatus != 'Single') ...[
+                            buildLabel('Do you have children?'),
+                            DropdownButtonFormField<String>(
+                              value: _selectedHasChildren,
+                              decoration: inputDecoration('Select Answer'),
+                              items: ['No', 'Yes, living with me', 'Yes, not living with me']
+                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                  .toList(),
+                              onChanged: (val) => setState(() => _selectedHasChildren = val),
+                            ),
+                          ],
                           const SizedBox(height: 24),
                           buildLabel('Marriage Intentions Slider'),
                           Text('Match! <---> Agree together <---> 4-12 months', 
@@ -1234,10 +1309,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             title: 'Interests',
                             offerings: _availableInterests,
                             selectedList: _selectedInterests,
-                            maxSelect: 5,
+                            maxSelect: 15,
                             onChanged: (list) => _selectedInterests = list,
                           ),
                           const SizedBox(height: 32),
+
+                          if (_missingFields.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.red.withOpacity(0.5)),
+                              ),
+                              child: Text(
+                                'Please fill all mandatory fields: ${_missingFields.join(", ")}',
+                                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                              ),
+                            ),
 
                           // Create Account Button
                            Consumer<AuthService>(

@@ -27,6 +27,8 @@ class UserModel {
   final String? connectionId;
   final bool hasPastIssues;
   final bool acceptsPastIssues;
+  final String? pastIssuesDetails;
+  final String? acceptedPastIssuesDetails;
   final String? phoneNumber;
 
   
@@ -79,6 +81,8 @@ class UserModel {
     this.connectionId,
     this.hasPastIssues = false,
     this.acceptsPastIssues = true,
+    this.pastIssuesDetails,
+    this.acceptedPastIssuesDetails,
     this.phoneNumber,
     this.maritalStatus,
     this.currentCity,
@@ -174,6 +178,8 @@ class UserModel {
       marriageIntentions: json['marriageIntentions']?.toString(),
       hasChildren: json['hasChildren']?.toString(),
       grewUpIn: json['grewUpIn']?.toString(),
+      pastIssuesDetails: json['pastIssuesDetails']?.toString(),
+      acceptedPastIssuesDetails: json['acceptedPastIssuesDetails']?.toString(),
       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
     );
   }
@@ -227,6 +233,8 @@ class UserModel {
       'marriageIntentions': marriageIntentions,
       'hasChildren': hasChildren,
       'grewUpIn': grewUpIn,
+      'pastIssuesDetails': pastIssuesDetails,
+      'acceptedPastIssuesDetails': acceptedPastIssuesDetails,
       'updatedAt': updatedAt?.toIso8601String(),
     };
   }
