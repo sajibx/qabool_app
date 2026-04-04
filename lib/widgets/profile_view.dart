@@ -75,67 +75,146 @@ class _ProfileViewState extends State<ProfileView> {
       color: backgroundColor,
       child: Stack(
         children: [
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 500),
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                physics: const BouncingScrollPhysics(),
-                child: Column(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isLargeScreen = constraints.maxWidth > 900;
+              
+              if (isLargeScreen) {
+                return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 1. Top Image Section
-                    _buildTopImage(context, isDark),
+                    // --- LEFT COLUMN (Hero & Primary Info) ---
+                    SizedBox(
+                      width: 420,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildDesktopHeroImage(context, isDark),
+                            const SizedBox(height: 24),
+                            _buildPrimaryInfoCard(isDark),
+                            if (!widget.isMyProfile) ...[
+                              const SizedBox(height: 24),
+                              _buildActionCard(isDark, primaryColor),
+                            ],
+                            const SizedBox(height: 40),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const VerticalDivider(width: 1),
+                    
+                    // --- RIGHT COLUMN (Details) ---
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Profile Details',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                                color: isDark ? Colors.white : Colors.black87,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            
+                            // Detailed sections in Cards
+                            _buildDetailCard(isDark, 'Bio', Icons.format_quote, _buildBioContent(isDark)),
+                            const SizedBox(height: 24),
+                            
+                            _buildDetailCard(isDark, 'About me', Icons.person_outline, _buildAboutMeContent(isDark)),
+                            const SizedBox(height: 24),
 
-                    // 2. About Me Section (Sub-bubbles)
-                    _buildAboutMeSection(isDark),
+                            _buildDetailCard(isDark, 'Marriage Intentions', Icons.favorite_border, _buildMarriageIntentionsContent(isDark, primaryColor)),
+                            const SizedBox(height: 24),
+                            
+                            _buildDetailCard(isDark, 'My faith', Icons.nightlight_round, _buildMyFaithContent(isDark)),
+                            const SizedBox(height: 24),
 
-                    // 3. Marriage Intentions (Progress Bar)
-                    _buildMarriageIntentionsSection(isDark, primaryColor),
+                            _buildDetailCard(isDark, 'Education & Career', Icons.school_outlined, _buildEducationCareerContent(isDark)),
+                            const SizedBox(height: 24),
 
-                    // 4. My Faith Section (Sub-bubbles)
-                    _buildMyFaithSection(isDark),
+                            _buildDetailCard(isDark, 'Interests & Personality', Icons.auto_awesome_outlined, Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildInterestsContent(isDark),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 20),
+                                  child: Divider(),
+                                ),
+                                _buildPersonalityContent(isDark),
+                              ],
+                            )),
+                            const SizedBox(height: 24),
 
-                    // 5. Future Plans Section (Sub-bubbles)
-                    _buildFuturePlansSection(isDark),
+                            _buildDetailCard(isDark, 'Languages & Ethnicity', Icons.translate, _buildLanguagesEthnicityContent(isDark)),
+                            const SizedBox(height: 24),
 
-                    // 6. Interests Section (Wrap bubbles)
-                    _buildInterestsSection(isDark),
-
-                    // 7. Personality Section (Sub-bubbles)
-                    _buildPersonalitySection(isDark),
-
-                    // 8. Education and Career (Sub-bubbles)
-                    _buildEducationCareerSection(isDark),
-
-                    // 8.5 Languages and Ethnicity
-                    _buildLanguagesEthnicitySection(isDark),
-
-                    // 9. Bio
-                    _buildBioSection(isDark),
-
-                    // 10. Preference Section
-                    _buildPreferenceSection(isDark),
-
-                    // 11. Secondary Actions (Favorite, Block, Report)
-                    if (!widget.isMyProfile) _buildSecondaryActions(isDark),
-
-                    const SizedBox(height: 32),
+                            _buildDetailCard(isDark, 'Preferences', Icons.tune, _buildPreferenceContent(isDark)),
+                            
+                            if (!widget.isMyProfile) ...[
+                              const SizedBox(height: 48),
+                              _buildSecondaryActions(isDark),
+                            ],
+                            
+                            const SizedBox(height: 80),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
+                );
+              }
+
+              // --- MOBILE/TABLET VIEW (Existing single column) ---
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTopImage(context, isDark),
+                        _buildAboutMeSection(isDark),
+                        _buildMarriageIntentionsSection(isDark, primaryColor),
+                        _buildMyFaithSection(isDark),
+                        _buildInterestsSection(isDark),
+                        _buildPersonalitySection(isDark),
+                        _buildEducationCareerSection(isDark),
+                        _buildLanguagesEthnicitySection(isDark),
+                        _buildBioSection(isDark),
+                        _buildPreferenceSection(isDark),
+                        if (!widget.isMyProfile) _buildSecondaryActions(isDark),
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
 
-          // Floating Action Buttons at Bottom (Hidden for My Profile)
+          // Floating Action Buttons at Bottom (Hidden for My Profile, only for mobile)
           if (!widget.isMyProfile)
             Consumer<NavigationService>(
               builder: (context, nav, _) {
                 final isNavVisible = nav.isBottomNavVisible;
+                final screenWidth = MediaQuery.of(context).size.width;
+                if (screenWidth > 900) return const SizedBox.shrink(); // Action card handles it on desktop
+                
                 return AnimatedPositioned(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  bottom: isNavVisible ? 85 : 20, // Lowered positions
+                  bottom: isNavVisible ? 85 : 20,
                   left: 0,
                   right: 0,
                   child: _buildBottomActions(primaryColor),
@@ -333,83 +412,91 @@ class _ProfileViewState extends State<ProfileView> {
         _buildSectionHeader('About me', Icons.person_outline, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _buildProfileBubble('🎂 ${widget.user.age} years', null, isDark),
-              _buildProfileBubble('📏 ${widget.user.height?.toInt()} cm', null, isDark),
-              _buildProfileBubble('⚖️ ${widget.user.weight?.toInt()} kg', null, isDark),
-              _buildProfileBubble('💍 ${widget.user.maritalStatus ?? "Single"}', null, isDark),
-              _buildProfileBubble('👶 ${widget.user.hasChildren ?? "No children"}', null, isDark),
-            ],
-          ),
+          child: _buildAboutMeContent(isDark),
         ),
       ],
     );
   }
 
+  Widget _buildAboutMeContent(bool isDark) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        _buildProfileBubble('🎂 ${widget.user.age} years', null, isDark),
+        _buildProfileBubble('📏 ${widget.user.height?.toInt()} cm', null, isDark),
+        _buildProfileBubble('⚖️ ${widget.user.weight?.toInt()} kg', null, isDark),
+        _buildProfileBubble('💍 ${widget.user.maritalStatus ?? "Single"}', null, isDark),
+        _buildProfileBubble('👶 ${widget.user.hasChildren ?? "No children"}', null, isDark),
+      ],
+    );
+  }
+
   Widget _buildMarriageIntentionsSection(bool isDark, Color primaryColor) {
-    final value = double.tryParse(widget.user.marriageIntentions ?? "0.5") ?? 0.5;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader('Marriage Intentions', Icons.favorite, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.grey[900] : Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
-            ),
-            child: Column(
-              children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.white10 : Colors.grey[200],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(value * 2 - 1, 0),
-                      child: Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: QaboolTheme.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: QaboolTheme.primary.withOpacity(0.3),
-                              blurRadius: 8,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Match!', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
-                    Text('Agree together', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
-                    Text('4-12 months', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          child: _buildMarriageIntentionsContent(isDark, primaryColor),
         ),
       ],
+    );
+  }
+
+  Widget _buildMarriageIntentionsContent(bool isDark, Color primaryColor) {
+    final value = double.tryParse(widget.user.marriageIntentions ?? "0.5") ?? 0.5;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
+      ),
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white10 : Colors.grey[200],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              Align(
+                alignment: Alignment(value * 2 - 1, 0),
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: QaboolTheme.primary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: QaboolTheme.primary.withOpacity(0.3),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Match!', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text('Agree together', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text('4-12 months', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -439,16 +526,20 @@ class _ProfileViewState extends State<ProfileView> {
         _buildSectionHeader('My faith', Icons.nightlight_round, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _buildProfileBubble('🕌 ${widget.user.religion ?? "Not specified"}', null, isDark),
-              if (widget.user.sect != null) _buildProfileBubble('🛐 ${widget.user.sect!}', null, isDark),
-              if (widget.user.caste != null) _buildProfileBubble('👥 ${widget.user.caste!}', null, isDark),
-            ],
-          ),
+          child: _buildMyFaithContent(isDark),
         ),
+      ],
+    );
+  }
+
+  Widget _buildMyFaithContent(bool isDark) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        _buildProfileBubble('🕌 ${widget.user.religion ?? "Not specified"}', null, isDark),
+        if (widget.user.sect != null) _buildProfileBubble('🛐 ${widget.user.sect!}', null, isDark),
+        if (widget.user.caste != null) _buildProfileBubble('👥 ${widget.user.caste!}', null, isDark),
       ],
     );
   }
@@ -467,15 +558,19 @@ class _ProfileViewState extends State<ProfileView> {
         _buildSectionHeader('Interests', Icons.auto_awesome, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: widget.user.interests.take(15).map((interest) {
-              return _buildProfileBubble(interest, null, isDark);
-            }).toList(),
-          ),
+          child: _buildInterestsContent(isDark),
         ),
       ],
+    );
+  }
+
+  Widget _buildInterestsContent(bool isDark) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: widget.user.interests.take(15).map((interest) {
+        return _buildProfileBubble(interest, null, isDark);
+      }).toList(),
     );
   }
 
@@ -487,15 +582,19 @@ class _ProfileViewState extends State<ProfileView> {
         _buildSectionHeader('Personality', Icons.psychology, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: widget.user.personalityTraits.map((trait) {
-              return _buildProfileBubble(trait, null, isDark);
-            }).toList(),
-          ),
+          child: _buildPersonalityContent(isDark),
         ),
       ],
+    );
+  }
+
+  Widget _buildPersonalityContent(bool isDark) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: widget.user.personalityTraits.map((trait) {
+        return _buildProfileBubble(trait, null, isDark);
+      }).toList(),
     );
   }
 
@@ -506,15 +605,19 @@ class _ProfileViewState extends State<ProfileView> {
         _buildSectionHeader('Education and career', Icons.school, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _buildProfileBubble('🎓 ${widget.user.education ?? "Not specified"}', null, isDark),
-              _buildProfileBubble('💼 ${widget.user.profession ?? "Not specified"}', null, isDark),
-            ],
-          ),
+          child: _buildEducationCareerContent(isDark),
         ),
+      ],
+    );
+  }
+
+  Widget _buildEducationCareerContent(bool isDark) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        _buildProfileBubble('🎓 ${widget.user.education ?? "Not specified"}', null, isDark),
+        _buildProfileBubble('💼 ${widget.user.profession ?? "Not specified"}', null, isDark),
       ],
     );
   }
@@ -527,16 +630,20 @@ class _ProfileViewState extends State<ProfileView> {
         _buildSectionHeader('Languages and ethnicity', Icons.translate, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              ...widget.user.languages.map((lang) => _buildProfileBubble(lang, Icons.translate, isDark)),
-              if (widget.user.grewUpIn != null) _buildProfileBubble('Grew up in ${widget.user.grewUpIn}', null, isDark),
-              if (widget.user.ethnicity != null) _buildProfileBubble('🌍 ${widget.user.ethnicity}', null, isDark),
-            ],
-          ),
+          child: _buildLanguagesEthnicityContent(isDark),
         ),
+      ],
+    );
+  }
+
+  Widget _buildLanguagesEthnicityContent(bool isDark) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        ...widget.user.languages.map((lang) => _buildProfileBubble(lang, Icons.translate, isDark)),
+        if (widget.user.grewUpIn != null) _buildProfileBubble('Grew up in ${widget.user.grewUpIn}', null, isDark),
+        if (widget.user.ethnicity != null) _buildProfileBubble('🌍 ${widget.user.ethnicity}', null, isDark),
       ],
     );
   }
@@ -548,16 +655,20 @@ class _ProfileViewState extends State<ProfileView> {
         _buildSectionHeader('Bio', Icons.format_quote, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Text(
-            widget.user.bio ?? "No bio provided.",
-            style: TextStyle(
-              fontSize: 15,
-              height: 1.5,
-              color: isDark ? Colors.white70 : Colors.black87,
-            ),
-          ),
+          child: _buildBioContent(isDark),
         ),
       ],
+    );
+  }
+
+  Widget _buildBioContent(bool isDark) {
+    return Text(
+      widget.user.bio ?? "No bio provided.",
+      style: TextStyle(
+        fontSize: 15,
+        height: 1.6,
+        color: isDark ? Colors.white70 : Colors.black87,
+      ),
     );
   }
 
@@ -578,21 +689,229 @@ class _ProfileViewState extends State<ProfileView> {
         _buildSectionHeader('Preferences', Icons.tune, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              if (widget.user.lookingForAge != null) _buildProfileBubble('🎂 Looking for ${widget.user.lookingForAge}', null, isDark),
-              if (widget.user.lookingForType != null) _buildProfileBubble('💘 ${widget.user.lookingForType!}', null, isDark),
-              if (widget.user.lookingForProfession != null) _buildProfileBubble('💼 ${widget.user.lookingForProfession!}', null, isDark),
-              if (widget.user.hasPastIssues && widget.user.pastIssuesDetails != null) 
-                _buildProfileBubble('⚠️ Past issues: ${widget.user.pastIssuesDetails}', null, isDark),
-              if (widget.user.acceptsPastIssues && widget.user.acceptedPastIssuesDetails != null)
-                _buildProfileBubble('✅ Accepts: ${widget.user.acceptedPastIssuesDetails}', null, isDark),
-            ],
-          ),
+          child: _buildPreferenceContent(isDark),
         ),
       ],
+    );
+  }
+
+  Widget _buildPreferenceContent(bool isDark) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        if (widget.user.lookingForAge != null) _buildProfileBubble('🎂 Looking for ${widget.user.lookingForAge}', null, isDark),
+        if (widget.user.lookingForType != null) _buildProfileBubble('💘 ${widget.user.lookingForType!}', null, isDark),
+        if (widget.user.lookingForProfession != null) _buildProfileBubble('💼 ${widget.user.lookingForProfession!}', null, isDark),
+        if (widget.user.hasPastIssues && widget.user.pastIssuesDetails != null) 
+          _buildProfileBubble('⚠️ Past issues: ${widget.user.pastIssuesDetails}', null, isDark),
+        if (widget.user.acceptsPastIssues && widget.user.acceptedPastIssuesDetails != null)
+          _buildProfileBubble('✅ Accepts: ${widget.user.acceptedPastIssuesDetails}', null, isDark),
+      ],
+    );
+  }
+
+  // --- NEW DESKTOP HELPER WIDGETS ---
+
+  Widget _buildDesktopHeroImage(BuildContext context, bool isDark) {
+    final imageUrl = getVersionedImageUrl(widget.user.profileImageUrl, widget.user.updatedAt);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: Stack(
+        children: [
+          CachedNetworkImage(
+            imageUrl: imageUrl,
+            height: 520,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.1),
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.5),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (widget.isMyProfile)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: FloatingActionButton.small(
+                onPressed: () => Navigator.pushNamed(context, '/edit_profile'),
+                backgroundColor: QaboolTheme.primary,
+                child: const Icon(Icons.edit, size: 18, color: Colors.white),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrimaryInfoCard(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${widget.user.firstName}, ${widget.user.age ?? ""}',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                ),
+              ),
+              if (widget.user.verifiedStatus == 'active')
+                const Icon(Icons.verified, color: Colors.blue, size: 28),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(Icons.location_on_outlined, size: 18, color: Colors.grey),
+              const SizedBox(width: 8),
+              Text(
+                widget.user.region ?? 'No location',
+                style: const TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          const Divider(),
+          const SizedBox(height: 16),
+          _buildInfoRow(Icons.work_outline, widget.user.profession ?? 'Not specified', isDark),
+          const SizedBox(height: 12),
+          _buildInfoRow(Icons.nightlight_round, widget.user.religion ?? 'Not specified', isDark),
+          const SizedBox(height: 12),
+          _buildInfoRow(Icons.public, widget.user.ethnicity ?? 'Not specified', isDark),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text, bool isDark) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: isDark ? Colors.white54 : Colors.black54),
+        const SizedBox(width: 12),
+        Text(text, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white70 : Colors.black87)),
+      ],
+    );
+  }
+
+  Widget _buildActionCard(bool isDark, Color primaryColor) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : primaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: primaryColor.withOpacity(0.1)),
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: widget.onConnect,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: const Text('Connect with Me', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: widget.onFavorite,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('Favorite'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              IconButton.outlined(
+                onPressed: widget.onSkip,
+                icon: const Icon(Icons.close),
+                style: IconButton.styleFrom(
+                  padding: const EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailCard(bool isDark, String title, IconData icon, Widget content) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 24, color: QaboolTheme.primary),
+              const SizedBox(width: 16),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          content,
+        ],
+      ),
     );
   }
 
