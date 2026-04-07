@@ -30,6 +30,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _emailController;
   late TextEditingController _phoneNumberController;
   late TextEditingController _currentCityController;
+  late TextEditingController _pastIssuesDetailsController;
+  late TextEditingController _acceptedPastIssuesDetailsController;
   
   DateTime? _selectedDob;
   String? _selectedGender;
@@ -144,6 +146,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _selectedHobbies = List<String>.from(user?.hobbies ?? []);
     _selectedInterests = List<String>.from(user?.interests ?? []);
     
+    
+    _pastIssuesDetailsController = TextEditingController(text: user?.pastIssuesDetails);
+    _acceptedPastIssuesDetailsController = TextEditingController(text: user?.acceptedPastIssuesDetails);
+
     if (user?.marriageIntentions != null) {
       _marriageIntentionsValue = double.tryParse(user!.marriageIntentions!) ?? 0.5;
     }
@@ -188,6 +194,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _phoneNumberController.dispose();
     _currentCityController.dispose();
     _grewUpInController.dispose();
+    _pastIssuesDetailsController.dispose();
+    _acceptedPastIssuesDetailsController.dispose();
     super.dispose();
   }
 
@@ -283,8 +291,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'specialConsiderations': _specialController.text,
         'region': _selectedCountry != null && _selectedCity != null ? "${_selectedCity}, ${_selectedCountry}" : null,
         'hasPastIssues': _hasPastIssues,
-        'hasPastIssues': _hasPastIssues,
+        'pastIssuesDetails': _hasPastIssues ? _pastIssuesDetailsController.text : null,
         'acceptsPastIssues': _acceptsPastIssues,
+        'acceptedPastIssuesDetails': _acceptsPastIssues ? _acceptedPastIssuesDetailsController.text : null,
         'languages': _selectedLanguages,
         'personalityTraits': _selectedPersonalityTraits,
         'lifeStyle': _selectedLifeStyle,
@@ -638,6 +647,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 onChanged: (val) => setState(() => _acceptsPastIssues = val),
                 contentPadding: EdgeInsets.zero,
               ),
+              if (_hasPastIssues) ...[
+                const SizedBox(height: 8),
+                _buildTextField(
+                  controller: _pastIssuesDetailsController,
+                  label: 'Past Issues Details',
+                  icon: Icons.description_outlined,
+                  maxLines: 2,
+                ),
+              ],
+              if (_acceptsPastIssues) ...[
+                const SizedBox(height: 16),
+                _buildTextField(
+                  controller: _acceptedPastIssuesDetailsController,
+                  label: 'Acceptance Criteria/Details',
+                  icon: Icons.checklist_rtl,
+                  maxLines: 2,
+                ),
+              ],
               const SizedBox(height: 32),
 
               _buildSectionTitle('PARTNER PREFERENCES'),

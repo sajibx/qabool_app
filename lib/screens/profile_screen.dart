@@ -142,7 +142,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _handleReport() async {
     // Basic implementation for now
     if (_displayUser == null || _isMe) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Report feature coming soon to individual profile view.')));
+    await _showReportDialog();
+  }
+
+  Future<void> _handleSkip() async {
+    if (_displayUser == null || _isMe) return;
+    try {
+      final profileService = context.read<ProfileService>();
+      await profileService.skipUser(_displayUser!);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User skipped.')));
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to skip: $e')));
+    }
+  }
+
+  Future<void> _handleAcceptRequest() async {
+    if (_displayUser == null || _displayUser!.connectionId == null) return;
+    try {
+      final connectionService = context.read<ConnectionService>();
+      await connectionService.respondToRequest(
+          _displayUser!.connectionId!,
+          v_conn.ConnectionStatus.ACCEPTED);
+      await _refreshProfile();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Connection request accepted!')));
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to accept: $e')));
+    }
+  }
+
+  Future<void> _handleRejectRequest() async {
+    if (_displayUser == null || _displayUser!.connectionId == null) return;
+    try {
+      final connectionService = context.read<ConnectionService>();
+      await connectionService.respondToRequest(
+          _displayUser!.connectionId!,
+          v_conn.ConnectionStatus.REJECTED);
+      await _refreshProfile();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Connection request rejected.')));
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to reject: $e')));
+    }
+  }
+
+  Future<void> _handleCancelRequest() async {
+    if (_displayUser == null || _displayUser!.connectionId == null) return;
+    
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel Request?'),
+        content: Text('Are you sure you want to cancel your connection request to ${_displayUser?.firstName ?? 'this user'}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('NO')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('CANCEL REQUEST', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        final connectionService = context.read<ConnectionService>();
+        await connectionService.cancelConnectionRequest(_displayUser!.connectionId!);
+        await _refreshProfile();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Connection request cancelled.')));
+        }
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to cancel: $e')));
+      }
+    }
   }
 
   @override
@@ -338,9 +416,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           isMyProfile: _isMe,
                           onConnect: () => _handleConnect(_displayUser!),
                           onFavorite: () => _handleFavorite(),
-                          onSkip: () => Navigator.pop(context),
+                          onSkip: () => _handleSkip(),
                           onBlock: () => _handleBlock(),
                           onReport: () => _handleReport(),
+                          onAccept: () => _handleAcceptRequest(),
+                          onReject: () => _handleRejectRequest(),
+                          onCancel: () => _handleCancelRequest(),
                           onRewind: () {},
                         )
                       : _activeDesktopSection == 'connections'
@@ -360,9 +441,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             isMyProfile: _isMe,
             onConnect: () => _handleConnect(_displayUser!),
             onFavorite: () => _handleFavorite(),
-            onSkip: () => Navigator.pop(context),
+            onSkip: () => _handleSkip(),
             onBlock: () => _handleBlock(),
             onReport: () => _handleReport(),
+            onAccept: () => _handleAcceptRequest(),
+            onReject: () => _handleRejectRequest(),
+            onCancel: () => _handleCancelRequest(),
             onRewind: () {},
           );
         },

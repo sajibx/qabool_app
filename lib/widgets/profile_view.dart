@@ -15,6 +15,9 @@ class ProfileView extends StatefulWidget {
   final VoidCallback? onRewind;
   final VoidCallback? onBlock;
   final VoidCallback? onReport;
+  final VoidCallback? onAccept;
+  final VoidCallback? onReject;
+  final VoidCallback? onCancel;
   final bool isMyProfile;
 
   const ProfileView({
@@ -26,6 +29,9 @@ class ProfileView extends StatefulWidget {
     this.onRewind,
     this.onBlock,
     this.onReport,
+    this.onAccept,
+    this.onReject,
+    this.onCancel,
     this.isMyProfile = false,
   });
 
@@ -104,9 +110,6 @@ class _ProfileViewState extends State<ProfileView> {
                             const SizedBox(height: 32),
                             
                             // Detailed sections in Cards
-                            _buildDetailCard(isDark, 'Bio', Icons.format_quote, _buildBioContent(isDark)),
-                            const SizedBox(height: 24),
-                            
                             _buildDetailCard(isDark, 'About me', Icons.person_outline, _buildAboutMeContent(isDark)),
                             const SizedBox(height: 24),
 
@@ -133,6 +136,9 @@ class _ProfileViewState extends State<ProfileView> {
                             const SizedBox(height: 24),
 
                             _buildDetailCard(isDark, 'Preferences', Icons.tune, _buildPreferenceContent(isDark)),
+                            const SizedBox(height: 24),
+                            
+                            _buildDetailCard(isDark, 'Past Issues & Acceptance', Icons.info_outline, _buildPastIssuesContent(isDark)),
                             
                             if (!widget.isMyProfile) ...[
                               const SizedBox(height: 48),
@@ -181,6 +187,7 @@ class _ProfileViewState extends State<ProfileView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildTopImage(context, isDark),
+                        if (!widget.isMyProfile) _buildReadyToQaboolCard(isDark),
                         _buildAboutMeSection(isDark),
                         _buildMarriageIntentionsSection(isDark, primaryColor),
                         _buildMyFaithSection(isDark),
@@ -188,8 +195,8 @@ class _ProfileViewState extends State<ProfileView> {
                         _buildPersonalitySection(isDark),
                         _buildEducationCareerSection(isDark),
                         _buildLanguagesEthnicitySection(isDark),
-                        _buildBioSection(isDark),
                         _buildPreferenceSection(isDark),
+                        _buildPastIssuesSection(isDark),
                         if (!widget.isMyProfile) _buildSecondaryActions(isDark),
                         const SizedBox(height: 100),
                       ],
@@ -200,24 +207,7 @@ class _ProfileViewState extends State<ProfileView> {
             },
           ),
 
-          // Floating Action Buttons at Bottom (Hidden for My Profile, only for mobile)
-          if (!widget.isMyProfile)
-            Consumer<NavigationService>(
-              builder: (context, nav, _) {
-                final isNavVisible = nav.isBottomNavVisible;
-                final screenWidth = MediaQuery.of(context).size.width;
-                if (screenWidth > 900) return const SizedBox.shrink(); // Action card handles it on desktop
-                
-                return AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  bottom: isNavVisible ? 85 : 20,
-                  left: 0,
-                  right: 0,
-                  child: _buildBottomActions(primaryColor),
-                );
-              },
-            ),
+           // Floating Action Buttons at Bottom (REMOVED)
         ],
       ),
     );
@@ -323,16 +313,6 @@ class _ProfileViewState extends State<ProfileView> {
                 ],
               ),
               const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _buildImageBubble(widget.user.country, Icons.flag),
-                  _buildImageBubble(widget.user.profession ?? "", Icons.work),
-                  _buildImageBubble(widget.user.religion ?? "", Icons.nightlight_round),
-                  _buildImageBubble(widget.user.ethnicity ?? "", Icons.public),
-                ],
-              ),
             ],
           ),
         ),
@@ -340,25 +320,118 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildImageBubble(String text, IconData icon) {
-    if (text.isEmpty) return const SizedBox.shrink();
+  Widget _buildReadyToQaboolCard(bool isDark) {
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subtitleColor = isDark ? Colors.grey[400] : const Color(0xFF64748B);
+    
+    final status = widget.user.connectionStatus;
+    final isReceived = status == 'PENDING_RECEIVED';
+    final isSent = status == 'PENDING_SENT' || status == 'PENDING';
+    
+    String title = 'Ready to Qabool?';
+    String subtitle = isReceived 
+        ? '${widget.user.firstName} sent you a request!' 
+        : isSent 
+            ? 'Waiting for response...' 
+            : 'Is ${widget.user.gender?.toLowerCase() == 'male' ? 'he' : 'she'} your perfect match?';
+    
+    IconData primaryIcon = isReceived ? Icons.check : isSent ? Icons.access_time : Icons.favorite_border;
+    IconData secondaryIcon = Icons.close;
+    
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        color: cardBg,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white, size: 14),
-          const SizedBox(width: 6),
-          Text(text, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: textColor,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: subtitleColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildReadyActionButton(
+                icon: secondaryIcon,
+                color: const Color(0xFFF43F5E),
+                onTap: isSent 
+                    ? (widget.onCancel ?? () {}) 
+                    : isReceived 
+                        ? (widget.onReject ?? () {}) 
+                        : (widget.onSkip ?? () {}),
+              ),
+              const SizedBox(width: 12),
+              _buildReadyActionButton(
+                icon: primaryIcon,
+                color: isReceived 
+                    ? const Color(0xFF2ECC71) 
+                    : isSent 
+                        ? Colors.grey 
+                        : QaboolTheme.primary,
+                onTap: isSent ? () {} : (isReceived ? (widget.onAccept ?? () {}) : (widget.onConnect ?? () {})),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
+
+  Widget _buildReadyActionButton({required IconData icon, required Color color, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: Colors.white, size: 24),
+      ),
+    );
+  }
+
 
   Widget _buildSectionHeader(String title, IconData icon, bool isDark) {
     return Padding(
@@ -409,23 +482,104 @@ class _ProfileViewState extends State<ProfileView> {
         _buildSectionHeader('About me', Icons.person_outline, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: _buildAboutMeContent(isDark),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildAboutMeContent(isDark),
+              const SizedBox(height: 24),
+              _buildInfoGrid(isDark),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildAboutMeContent(bool isDark) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
+  Widget _buildInfoGrid(bool isDark) {
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 8,
+      crossAxisSpacing: 8,
+      childAspectRatio: 2.8, // Shorter bubbles
       children: [
-        _buildProfileBubble('🎂 ${widget.user.age} years', null, isDark),
-        _buildProfileBubble('📏 ${widget.user.height?.toInt()} cm', null, isDark),
-        _buildProfileBubble('⚖️ ${widget.user.weight?.toInt()} kg', null, isDark),
-        _buildProfileBubble('💍 ${widget.user.maritalStatus ?? "Single"}', null, isDark),
-        _buildProfileBubble('👶 ${widget.user.hasChildren ?? "No children"}', null, isDark),
+        _buildInfoCard(Icons.wc, 'GENDER', widget.user.gender ?? 'N/A', isDark),
+        _buildInfoCard(Icons.cake, 'AGE', widget.user.displayAge.toString(), isDark),
+        _buildInfoCard(Icons.favorite_border, 'MARITAL STATUS', widget.user.maritalStatus ?? 'N/A', isDark),
+        _buildInfoCard(Icons.monitor_weight_outlined, 'WEIGHT', widget.user.weight != null ? '${widget.user.weight?.toInt()}kg' : 'N/A', isDark),
+        _buildInfoCard(Icons.height, 'HEIGHT', widget.user.height != null ? '${widget.user.height?.toInt()}cm' : 'N/A', isDark),
+        _buildInfoCard(Icons.location_city, 'CURRENT CITY', widget.user.currentCity ?? 'N/A', isDark),
+        _buildInfoCard(Icons.school_outlined, 'EDUCATION', widget.user.education ?? 'N/A', isDark),
+        _buildInfoCard(Icons.mosque_outlined, 'RELIGION', widget.user.religion ?? 'N/A', isDark),
+        _buildInfoCard(Icons.account_balance, 'SECT', widget.user.sect ?? 'N/A', isDark),
+        _buildInfoCard(Icons.groups_outlined, 'CASTE', widget.user.caste ?? 'N/A', isDark),
+        _buildInfoCard(Icons.payments_outlined, 'MONTHLY INCOME', widget.user.monthlyIncome != null ? '€${widget.user.monthlyIncome?.toInt()}' : 'N/A', isDark),
+        _buildInfoCard(Icons.work_outline, 'PROFESSION', widget.user.profession ?? 'N/A', isDark),
+        _buildInfoCard(Icons.people_outline, 'SIBLINGS', widget.user.siblings?.toString() ?? 'N/A', isDark),
+        _buildInfoCard(Icons.family_restroom_outlined, 'FAMILY MEMBERS', widget.user.familyMembers?.toString() ?? 'N/A', isDark),
+        _buildInfoCard(Icons.public, 'NATIONALITY', widget.user.country, isDark),
+        _buildInfoCard(Icons.language, 'LANGUAGE', widget.user.languages.take(2).join(', '), isDark),
       ],
+    );
+  }
+
+  Widget _buildInfoCard(IconData icon, String label, String value, bool isDark) {
+    if (value.isEmpty || value == 'null') value = 'N/A';
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), // Shorter padding
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(30), // More rounded
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(icon, color: QaboolTheme.primary, size: 14), // Slightly smaller icon to compensate for shorter height
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 9, // Larger label
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                    letterSpacing: 0.1,
+                  ),
+                ),
+                const SizedBox(height: 0.5),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 11, // Larger value
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? Colors.white : const Color(0xFF1E293B),
+                    height: 1.1,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAboutMeContent(bool isDark) {
+    return Text(
+      widget.user.bio ?? "No bio provided.",
+      style: TextStyle(
+        fontSize: 15,
+        height: 1.6,
+        color: isDark ? Colors.white70 : Colors.black87,
+      ),
     );
   }
 
@@ -645,29 +799,85 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildBioSection(bool isDark) {
+  Widget _buildPastIssuesSection(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Bio', Icons.format_quote, isDark),
+        _buildSectionHeader('Past Issues & Acceptance', Icons.info_outline, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: _buildBioContent(isDark),
+          child: _buildPastIssuesContent(isDark),
         ),
       ],
     );
   }
 
-  Widget _buildBioContent(bool isDark) {
-    return Text(
-      widget.user.bio ?? "No bio provided.",
-      style: TextStyle(
-        fontSize: 15,
-        height: 1.6,
-        color: isDark ? Colors.white70 : Colors.black87,
-      ),
+  Widget _buildPastIssuesContent(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // User's own past issues
+        Text(
+          'Personal Status',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white70 : Colors.black54,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            _buildProfileBubble(
+              widget.user.hasPastIssues ? '⚠️ Has Past Issues' : '✅ No Past Issues',
+              null,
+              isDark,
+            ),
+          ],
+        ),
+        if (widget.user.hasPastIssues && widget.user.pastIssuesDetails != null && widget.user.pastIssuesDetails!.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            widget.user.pastIssuesDetails!,
+            style: TextStyle(fontSize: 14, color: isDark ? Colors.white60 : Colors.black87),
+          ),
+        ],
+        const SizedBox(height: 24),
+        
+        // Acceptance preferences
+        Text(
+          'Acceptance Preference',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white70 : Colors.black54,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            _buildProfileBubble(
+              widget.user.acceptsPastIssues ? '🤝 Willing to Accept' : '🚫 Not Accepting',
+              null,
+              isDark,
+            ),
+          ],
+        ),
+        if (widget.user.acceptsPastIssues && widget.user.acceptedPastIssuesDetails != null && widget.user.acceptedPastIssuesDetails!.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            widget.user.acceptedPastIssuesDetails!,
+            style: TextStyle(fontSize: 14, color: isDark ? Colors.white60 : Colors.black87),
+          ),
+        ],
+      ],
     );
   }
+
 
   Widget _buildPreferenceSection(bool isDark) {
     final hasPreferences = widget.user.lookingForAge != null || 
