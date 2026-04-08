@@ -130,6 +130,24 @@ class UserModel {
     return region!.split(',').last.trim();
   }
 
+  String get lastSeenStatus {
+    if (isOnline) return 'Active now';
+    if (lastSeen == null) return 'Active today'; // Fallback if data missing but we assume active today
+    
+    final now = DateTime.now();
+    final difference = now.difference(lastSeen!);
+    
+    if (difference.inMinutes <= 20) {
+      return 'Active now';
+    } else if (difference.inHours <= 24) {
+      return 'Active today';
+    } else {
+      final days = difference.inDays;
+      if (days == 0) return 'Active today';
+      return 'Active $days ${days == 1 ? 'day' : 'days'} ago';
+    }
+  }
+
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id']?.toString() ?? '',

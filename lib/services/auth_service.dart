@@ -85,6 +85,8 @@ class AuthService extends ChangeNotifier {
     String? marriageIntentions,
     String? hasChildren,
     String? grewUpIn,
+    String? sect,
+    String? caste,
     XFile? profileImage,
   }) async {
     try {
@@ -127,6 +129,8 @@ class AuthService extends ChangeNotifier {
         'marriageIntentions': marriageIntentions,
         'hasChildren': hasChildren,
         'grewUpIn': grewUpIn,
+        'sect': sect,
+        'caste': caste,
       };
 
       final formData = FormData.fromMap(dataMap);

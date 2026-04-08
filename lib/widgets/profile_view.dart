@@ -113,13 +113,16 @@ class _ProfileViewState extends State<ProfileView> {
                             _buildDetailCard(isDark, 'About me', Icons.person_outline, _buildAboutMeContent(isDark)),
                             const SizedBox(height: 24),
 
-                            _buildDetailCard(isDark, 'Marriage Intentions', Icons.favorite_border, _buildMarriageIntentionsContent(isDark, primaryColor)),
-                            const SizedBox(height: 24),
-                            
-                            _buildDetailCard(isDark, 'My faith', Icons.nightlight_round, _buildMyFaithContent(isDark)),
+                            _buildInfoGrid(isDark, true),
                             const SizedBox(height: 24),
 
-                            _buildDetailCard(isDark, 'Education & Career', Icons.school_outlined, _buildEducationCareerContent(isDark)),
+                            _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, true)),
+                            const SizedBox(height: 24),
+
+                            _buildDetailCard(isDark, 'Marriage Intentions', Icons.favorite_border, _buildMarriageIntentionsContent(isDark, primaryColor)),
+                            const SizedBox(height: 24),
+
+                            _buildDetailCard(isDark, 'My faith', Icons.nightlight_round, _buildMyFaithContent(isDark)),
                             const SizedBox(height: 24),
 
                             _buildDetailCard(isDark, 'Interests & Personality', Icons.auto_awesome_outlined, Column(
@@ -132,14 +135,17 @@ class _ProfileViewState extends State<ProfileView> {
                             )),
                             const SizedBox(height: 24),
 
+                            _buildDetailCard(isDark, 'Education & Career', Icons.school_outlined, _buildEducationCareerContent(isDark)),
+                            const SizedBox(height: 24),
+
                             _buildDetailCard(isDark, 'Languages & Ethnicity', Icons.translate, _buildLanguagesEthnicityContent(isDark)),
                             const SizedBox(height: 24),
 
                             _buildDetailCard(isDark, 'Preferences', Icons.tune, _buildPreferenceContent(isDark)),
                             const SizedBox(height: 24),
-                            
+
                             _buildDetailCard(isDark, 'Past Issues & Acceptance', Icons.info_outline, _buildPastIssuesContent(isDark)),
-                            
+                            const SizedBox(height: 24),
                             if (!widget.isMyProfile) ...[
                               const SizedBox(height: 48),
                               _buildSecondaryActions(isDark),
@@ -189,6 +195,10 @@ class _ProfileViewState extends State<ProfileView> {
                         _buildTopImage(context, isDark),
                         if (!widget.isMyProfile) _buildReadyToQaboolCard(isDark),
                         _buildAboutMeSection(isDark),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          child: _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, false)),
+                        ),
                         _buildMarriageIntentionsSection(isDark, primaryColor),
                         _buildMyFaithSection(isDark),
                         _buildInterestsSection(isDark),
@@ -267,10 +277,15 @@ class _ProfileViewState extends State<ProfileView> {
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: widget.user.lastSeenStatus.contains('now') || widget.user.lastSeenStatus.contains('today') 
+                      ? Colors.green 
+                      : Colors.grey, 
+                    shape: BoxShape.circle
+                  ),
                 ),
                 const SizedBox(width: 6),
-                const Text('Active today', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                Text(widget.user.lastSeenStatus, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -487,7 +502,7 @@ class _ProfileViewState extends State<ProfileView> {
             children: [
               _buildAboutMeContent(isDark),
               const SizedBox(height: 24),
-              _buildInfoGrid(isDark),
+              _buildInfoGrid(isDark, false),
             ],
           ),
         ),
@@ -495,43 +510,117 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildInfoGrid(bool isDark) {
+  Widget _buildRequirementSection(bool isDark, bool isLargeScreen) {
+    final items = [
+      _RequirementData(Icons.cake_outlined, 'Age', "${widget.user.displayAge}"),
+      _RequirementData(Icons.school_outlined, 'Education', widget.user.education ?? 'N/A'),
+      _RequirementData(Icons.location_city_outlined, 'City', widget.user.currentCity ?? 'N/A'),
+      _RequirementData(Icons.mosque_outlined, 'Religion', widget.user.religion ?? 'N/A'),
+      _RequirementData(Icons.account_balance_outlined, 'Religion-Sect', widget.user.sect ?? 'N/A'),
+      _RequirementData(Icons.groups_outlined, 'Religion-Cast', widget.user.caste ?? 'N/A'),
+      _RequirementData(Icons.height, 'Height', widget.user.height != null ? '${widget.user.height?.toInt()}cm' : 'N/A'),
+      _RequirementData(Icons.monitor_weight_outlined, 'Weight', widget.user.weight != null ? '${widget.user.weight?.toInt()}kg' : 'N/A'),
+      _RequirementData(Icons.payments_outlined, 'Income', widget.user.monthlyIncome != null ? '€${widget.user.monthlyIncome?.toInt()}' : 'N/A'),
+    ];
+
+     return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: isLargeScreen ? 3 : 2,
+        crossAxisSpacing: isLargeScreen ? 30 : 16,
+        mainAxisSpacing: isLargeScreen ? 20 : 16,
+        childAspectRatio: isLargeScreen ? 4 : 2.2,
+      ),
+      itemCount: items.length,
+      itemBuilder: (context, index) => _buildPolishedRequirementItem(items[index], isDark),
+    );
+  }
+
+  Widget _buildPolishedRequirementItem(_RequirementData item, bool isDark) {
+    String val = item.value;
+    if (val.isEmpty || val == 'null') val = 'N/A';
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: QaboolTheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(item.icon, size: 16, color: QaboolTheme.primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  item.label.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                    color: isDark ? Colors.grey[500] : Colors.grey[600],
+                  ),
+                ),
+                Text(
+                  val,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+   Widget _buildInfoGrid(bool isDark, bool isLargeScreen) {
     return GridView.count(
-      crossAxisCount: 3,
+      crossAxisCount: isLargeScreen ? 4 : 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
-      childAspectRatio: 2.8, // Shorter bubbles
+      childAspectRatio: isLargeScreen ? 3.6 : 2.8, // Shorter on desktop
       children: [
-        _buildInfoCard(Icons.wc, 'GENDER', widget.user.gender ?? 'N/A', isDark),
-        _buildInfoCard(Icons.cake, 'AGE', widget.user.displayAge.toString(), isDark),
-        _buildInfoCard(Icons.favorite_border, 'MARITAL STATUS', widget.user.maritalStatus ?? 'N/A', isDark),
-        _buildInfoCard(Icons.monitor_weight_outlined, 'WEIGHT', widget.user.weight != null ? '${widget.user.weight?.toInt()}kg' : 'N/A', isDark),
-        _buildInfoCard(Icons.height, 'HEIGHT', widget.user.height != null ? '${widget.user.height?.toInt()}cm' : 'N/A', isDark),
-        _buildInfoCard(Icons.location_city, 'CURRENT CITY', widget.user.currentCity ?? 'N/A', isDark),
-        _buildInfoCard(Icons.school_outlined, 'EDUCATION', widget.user.education ?? 'N/A', isDark),
-        _buildInfoCard(Icons.mosque_outlined, 'RELIGION', widget.user.religion ?? 'N/A', isDark),
-        _buildInfoCard(Icons.account_balance, 'SECT', widget.user.sect ?? 'N/A', isDark),
-        _buildInfoCard(Icons.groups_outlined, 'CASTE', widget.user.caste ?? 'N/A', isDark),
-        _buildInfoCard(Icons.payments_outlined, 'MONTHLY INCOME', widget.user.monthlyIncome != null ? '€${widget.user.monthlyIncome?.toInt()}' : 'N/A', isDark),
-        _buildInfoCard(Icons.work_outline, 'PROFESSION', widget.user.profession ?? 'N/A', isDark),
-        _buildInfoCard(Icons.people_outline, 'SIBLINGS', widget.user.siblings?.toString() ?? 'N/A', isDark),
-        _buildInfoCard(Icons.family_restroom_outlined, 'FAMILY MEMBERS', widget.user.familyMembers?.toString() ?? 'N/A', isDark),
-        _buildInfoCard(Icons.public, 'NATIONALITY', widget.user.country, isDark),
-        _buildInfoCard(Icons.language, 'LANGUAGE', widget.user.languages.take(2).join(', '), isDark),
+        _buildInfoCard(Icons.wc, 'GENDER', widget.user.gender ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.cake, 'AGE', widget.user.displayAge.toString(), isDark, isLargeScreen),
+        _buildInfoCard(Icons.favorite_border, 'MARITAL STATUS', widget.user.maritalStatus ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.monitor_weight_outlined, 'WEIGHT', widget.user.weight != null ? '${widget.user.weight?.toInt()}kg' : 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.height, 'HEIGHT', widget.user.height != null ? '${widget.user.height?.toInt()}cm' : 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.location_city, 'CURRENT CITY', widget.user.currentCity ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.school_outlined, 'EDUCATION', widget.user.education ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.mosque_outlined, 'RELIGION', widget.user.religion ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.account_balance, 'SECT', widget.user.sect ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.groups_outlined, 'CASTE', widget.user.caste ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.payments_outlined, 'MONTHLY INCOME', widget.user.monthlyIncome != null ? '€${widget.user.monthlyIncome?.toInt()}' : 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.work_outline, 'PROFESSION', widget.user.profession ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.people_outline, 'SIBLINGS', widget.user.siblings?.toString() ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.family_restroom_outlined, 'FAMILY MEMBERS', widget.user.familyMembers?.toString() ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.public, 'NATIONALITY', widget.user.country, isDark, isLargeScreen),
+        _buildInfoCard(Icons.language, 'LANGUAGE', widget.user.languages.take(2).join(', '), isDark, isLargeScreen),
       ],
     );
   }
 
-  Widget _buildInfoCard(IconData icon, String label, String value, bool isDark) {
+  Widget _buildInfoCard(IconData icon, String label, String value, bool isDark, bool isLargeScreen) {
     if (value.isEmpty || value == 'null') value = 'N/A';
     
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), // Shorter padding
+      padding: EdgeInsets.symmetric(horizontal: isLargeScreen ? 8 : 10, vertical: isLargeScreen ? 2 : 4), 
       decoration: BoxDecoration(
         color: isDark ? Colors.grey[900] : const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(30), // More rounded
+        borderRadius: BorderRadius.circular(isLargeScreen ? 40 : 30), 
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -1294,4 +1383,11 @@ class _ProfileViewState extends State<ProfileView> {
       ),
     );
   }
+}
+
+class _RequirementData {
+  final IconData icon;
+  final String label;
+  final String value;
+  _RequirementData(this.icon, this.label, this.value);
 }

@@ -44,6 +44,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _bioController = TextEditingController();
   final _specialController = TextEditingController();
   final _currentCityController = TextEditingController();
+  final _sectController = TextEditingController();
+  final _casteController = TextEditingController();
   
   bool _hasPastIssues = false;
   bool _acceptsPastIssues = true;
@@ -146,6 +148,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _specialController.dispose();
     _phoneController.dispose();
     _currentCityController.dispose();
+    _sectController.dispose();
+    _casteController.dispose();
     _grewUpInController.dispose();
     super.dispose();
   }
@@ -209,6 +213,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'Partner (Type)': _selectedLookingForType != null,
       'Partner (Age)': _selectedLookingForAge != null,
       'Partner (Profession)': _selectedLookingForProfession != null,
+      'Sect': _sectController.text.isNotEmpty,
+      'Caste': _casteController.text.isNotEmpty,
     };
 
     final List<String> missingFields = validationMap.entries
@@ -322,6 +328,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         marriageIntentions: _marriageIntentionsValue.toString(),
         hasChildren: _selectedMaritalStatus == 'Single' ? 'No' : _selectedHasChildren,
         grewUpIn: _toCamelCase(_grewUpInController.text),
+        sect: _sectController.text,
+        caste: _casteController.text,
         pastIssuesDetails: _hasPastIssues ? _selectedPastIssueDetails : null,
         acceptedPastIssuesDetails: _acceptsPastIssues ? _selectedAcceptedPastIssueDetails : null,
         profileImage: _pickedImage,
@@ -816,7 +824,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const SizedBox(height: 16),
 
                           // City Dropdown
-                          buildLabel('City'),
+                          buildLabel('City (Region)'),
                           DropdownButtonFormField<String>(
                             value: _selectedCity,
                             decoration: inputDecoration('Select City'),
@@ -831,53 +839,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             },
                           ),
                           const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    buildLabel('Religion'),
-                                    DropdownButtonFormField<String>(
-                                      value: _selectedReligion,
-                                      decoration: inputDecoration('Select'),
-                                      items: [
-                                        'Islam (Sunni)',
-                                        'Islam (Shia)',
-                                        'Islam (Other)'
-                                      ]
-                                          .map((e) => DropdownMenuItem(
-                                              value: e, child: Text(e)))
-                                          .toList(),
-                                      onChanged: (val) => setState(() => _selectedReligion = val),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    buildLabel('Date of Birth'),
-                                    InkWell(
-                                      onTap: () => _selectDate(context),
-                                      child: IgnorePointer(
-                                        child: TextField(
-                                          decoration: inputDecoration(
-                                            _selectedDob == null
-                                                ? 'Select Date'
-                                                : "${_selectedDob!.day}/${_selectedDob!.month}/${_selectedDob!.year}",
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
                           buildLabel('Race/Ethnicity'),
                           DropdownButtonFormField<String>(
                             value: _selectedEthnicity,
@@ -887,128 +848,254 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 .toList(),
                             onChanged: (val) => setState(() => _selectedEthnicity = val),
                           ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(height: 24),
+                          Divider(
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFE2E8F0)),
+                          const SizedBox(height: 24),
+
+                          // Requirement Section (Moving requested fields here)
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: isDark ? Colors.white10 : Colors.grey[300]!),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
                                   children: [
-                                    buildLabel('Height'),
-                                    Row(
-                                      children: [
-                                        if (_heightUnit == 'cm')
-                                          Expanded(
-                                            flex: 2,
-                                            child: TextField(
-                                              controller: _heightCmController,
-                                              keyboardType: TextInputType.number,
-                                              decoration: inputDecoration('cm'),
-                                            ),
-                                          )
-                                        else ...[
-                                          Expanded(
-                                            child: TextField(
-                                              controller: _heightFtController,
-                                              keyboardType: TextInputType.number,
-                                              decoration: inputDecoration('ft'),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: TextField(
-                                              controller: _heightInController,
-                                              keyboardType: TextInputType.number,
-                                              decoration: inputDecoration('in'),
-                                            ),
-                                          ),
-                                        ],
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          flex: 1,
-                                          child: InputDecorator(
-                                            decoration: inputDecoration(
-                                              '',
-                                              borderRadius: BorderRadius.circular(12),
-                                            ).copyWith(
-                                              contentPadding:
-                                                  const EdgeInsets.symmetric(horizontal: 8),
-                                            ),
-                                            child: DropdownButtonHideUnderline(
-                                              child: DropdownButton<String>(
-                                                value: _heightUnit,
-                                                isExpanded: true,
-                                                icon: const Icon(Icons.arrow_drop_down),
-                                                items: ['cm', 'ft']
-                                                    .map((e) => DropdownMenuItem(
-                                                        value: e, child: Text(e)))
-                                                    .toList(),
-                                                onChanged: (val) {
-                                                  if (val != null) {
-                                                    setState(() => _heightUnit = val);
-                                                  }
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                    Icon(Icons.assignment_turned_in, color: pColor, size: 20),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'REQUIREMENT',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w900,
+                                        color: isDark ? pColor : aColor,
+                                        letterSpacing: 1.2,
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                const SizedBox(height: 16),
+                                
+                                // Age (DOB)
+                                buildLabel('Date of Birth (Age)'),
+                                InkWell(
+                                  onTap: () => _selectDate(context),
+                                  child: IgnorePointer(
+                                    child: TextField(
+                                      decoration: inputDecoration(
+                                        _selectedDob == null
+                                            ? 'Select Date'
+                                            : "${_selectedDob!.day}/${_selectedDob!.month}/${_selectedDob!.year}",
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Education
+                                buildLabel('Education'),
+                                DropdownButtonFormField<String>(
+                                  value: _educationController.text.isEmpty ? null : _educationController.text,
+                                  decoration: inputDecoration('Highest degree earned'),
+                                  items: [
+                                    'High School', 'Associate Degree', 'Bachelors Degree', 
+                                    'Masters Degree', 'PhD', 'Other'
+                                  ]
+                                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => _educationController.text = val ?? ''),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // City
+                                buildLabel('Current City'),
+                                TextField(
+                                  controller: _currentCityController,
+                                  decoration: inputDecoration('e.g. London, UK'),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Religion
+                                buildLabel('Religion'),
+                                DropdownButtonFormField<String>(
+                                  value: _selectedReligion,
+                                  decoration: inputDecoration('Select Religion'),
+                                  items: [
+                                    'Islam (Sunni)',
+                                    'Islam (Shia)',
+                                    'Islam (Other)'
+                                  ]
+                                      .map((e) => DropdownMenuItem(
+                                          value: e, child: Text(e)))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => _selectedReligion = val),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Sect
+                                buildLabel('Religion-Sect'),
+                                TextField(
+                                  controller: _sectController,
+                                  decoration: inputDecoration('e.g. Hanafi, Maliki, etc.'),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Caste
+                                buildLabel('Religion-Cast'),
+                                TextField(
+                                  controller: _casteController,
+                                  decoration: inputDecoration('e.g. Sayyid, Sheikh, etc.'),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Height
+                                buildLabel('Height'),
+                                Row(
                                   children: [
-                                    buildLabel('Weight'),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          flex: 2,
-                                          child: TextField(
-                                            controller: _weightController,
-                                            keyboardType: TextInputType.number,
-                                            decoration: inputDecoration('Value'),
+                                    if (_heightUnit == 'cm')
+                                      Expanded(
+                                        flex: 2,
+                                        child: TextField(
+                                          controller: _heightCmController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: inputDecoration('cm'),
+                                        ),
+                                      )
+                                    else ...[
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _heightFtController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: inputDecoration('ft'),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _heightInController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: inputDecoration('in'),
+                                        ),
+                                      ),
+                                    ],
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      flex: 1,
+                                      child: InputDecorator(
+                                        decoration: inputDecoration(
+                                          '',
+                                          borderRadius: BorderRadius.circular(12),
+                                        ).copyWith(
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(horizontal: 8),
+                                        ),
+                                        child: DropdownButtonHideUnderline(
+                                          child: DropdownButton<String>(
+                                            value: _heightUnit,
+                                            isExpanded: true,
+                                            icon: const Icon(Icons.arrow_drop_down),
+                                            items: ['cm', 'ft']
+                                                .map((e) => DropdownMenuItem(
+                                                    value: e, child: Text(e)))
+                                                .toList(),
+                                            onChanged: (val) {
+                                              if (val != null) {
+                                                setState(() => _heightUnit = val);
+                                              }
+                                            },
                                           ),
                                         ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          flex: 1,
-                                          child: InputDecorator(
-                                            decoration: inputDecoration(
-                                              '',
-                                              borderRadius: BorderRadius.circular(12),
-                                            ).copyWith(
-                                              contentPadding:
-                                                  const EdgeInsets.symmetric(horizontal: 8),
-                                            ),
-                                            child: DropdownButtonHideUnderline(
-                                              child: DropdownButton<String>(
-                                                value: _weightUnit,
-                                                isExpanded: true,
-                                                icon: const Icon(Icons.arrow_drop_down),
-                                                items: ['kg', 'lbs']
-                                                    .map((e) => DropdownMenuItem(
-                                                        value: e, child: Text(e)))
-                                                    .toList(),
-                                                onChanged: (val) {
-                                                  if (val != null) {
-                                                    setState(() => _weightUnit = val);
-                                                  }
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 16),
+
+                                // Weight
+                                buildLabel('Weight'),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: TextField(
+                                        controller: _weightController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: inputDecoration('Value'),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      flex: 1,
+                                      child: InputDecorator(
+                                        decoration: inputDecoration(
+                                          '',
+                                          borderRadius: BorderRadius.circular(12),
+                                        ).copyWith(
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(horizontal: 8),
+                                        ),
+                                        child: DropdownButtonHideUnderline(
+                                          child: DropdownButton<String>(
+                                            value: _weightUnit,
+                                            isExpanded: true,
+                                            icon: const Icon(Icons.arrow_drop_down),
+                                            items: ['kg', 'lbs']
+                                                .map((e) => DropdownMenuItem(
+                                                    value: e, child: Text(e)))
+                                                .toList(),
+                                            onChanged: (val) {
+                                              if (val != null) {
+                                                setState(() => _weightUnit = val);
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Income
+                                buildLabel('Monthly Income'),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: DropdownButtonFormField<String>(
+                                        value: _selectedMonthlyIncome,
+                                        decoration: inputDecoration('Select Income'),
+                                        items: ['0', '500', '1000', '2000', '3000', '4000', '5000', '7500', '10000']
+                                            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                            .toList(),
+                                        onChanged: (val) => setState(() => _selectedMonthlyIncome = val),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Euro',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
+                          const SizedBox(height: 24),
+                          Divider(
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFE2E8F0)),
+                          const SizedBox(height: 24),
                           const SizedBox(height: 24),
                           Divider(
                               color: isDark
@@ -1025,19 +1112,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               decoration:
                                   inputDecoration('Current occupation')),
                           const SizedBox(height: 16),
-                          buildLabel('Studies / Education'),
-                          DropdownButtonFormField<String>(
-                            value: _educationController.text.isEmpty ? null : _educationController.text,
-                            decoration: inputDecoration('Highest degree earned'),
-                            items: [
-                              'High School', 'Associate Degree', 'Bachelors Degree', 
-                              'Masters Degree', 'PhD', 'Other'
-                            ]
-                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                .toList(),
-                            onChanged: (val) => setState(() => _educationController.text = val ?? ''),
-                          ),
-                          const SizedBox(height: 16),
 
                           // Household & Additional Info
                           buildSectionHeader(Icons.home, 'Household & Additional Info'),
@@ -1051,35 +1125,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             onChanged: (val) => setState(() => _selectedMaritalStatus = val),
                           ),
                           const SizedBox(height: 16),
-                          buildLabel('Current City'),
-                          TextField(
-                            controller: _currentCityController,
-                            decoration: inputDecoration('e.g. London, UK'),
-                          ),
-                          const SizedBox(height: 16),
-                          buildLabel('Monthly Income'),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: DropdownButtonFormField<String>(
-                                  value: _selectedMonthlyIncome,
-                                  decoration: inputDecoration('Select Income'),
-                                  items: ['0', '500', '1000', '2000', '3000', '4000', '5000', '7500', '10000']
-                                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                      .toList(),
-                                  onChanged: (val) => setState(() => _selectedMonthlyIncome = val),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Euro',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.grey[300] : Colors.grey[700],
-                                ),
-                              ),
-                            ],
-                          ),
                           const SizedBox(height: 16),
                           Row(
                             children: [
