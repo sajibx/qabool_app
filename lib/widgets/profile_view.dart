@@ -119,6 +119,9 @@ class _ProfileViewState extends State<ProfileView> {
                             _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, true)),
                             const SizedBox(height: 24),
 
+                            _buildDetailCard(isDark, 'Are you ready to qabool', Icons.volunteer_activism_outlined, _buildChallengesContent(isDark)),
+                            const SizedBox(height: 24),
+
                             _buildDetailCard(isDark, 'Interests & Personality', Icons.auto_awesome_outlined, Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -183,7 +186,7 @@ class _ProfileViewState extends State<ProfileView> {
                           child: _buildAboutMeSection(isDark),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8),
                           child: _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, false)),
                         ),
                         Padding(
@@ -196,6 +199,8 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                         const SizedBox(height: 48),
                         Center(child: _buildIssuesBadges(isDark)),
+                        const SizedBox(height: 32),
+                        _buildChallengesSection(isDark),
                         const SizedBox(height: 40),
                         if (!widget.isMyProfile) _buildSecondaryActions(isDark),
                         const SizedBox(height: 40),
@@ -505,7 +510,7 @@ class _ProfileViewState extends State<ProfileView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildAboutMeContent(isDark),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12), // Reduced from 24
               _buildInfoGrid(isDark, false),
             ],
           ),
@@ -806,7 +811,71 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  // --- NEW DESKTOP HELPER WIDGETS ---
+  // Removed _buildReadyToQaboolSummary and _buildStatusIndicator as per request
+
+  Widget _buildChallengesSection(bool isDark) {
+    if (!widget.user.facingChallenges && widget.user.readyToQaboolChallengesList.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('Are you ready to qabool', Icons.volunteer_activism_outlined, isDark),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: _buildChallengesContent(isDark),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChallengesContent(bool isDark) {
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subHeaderStyle = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w900,
+      color: textColor.withOpacity(0.7),
+      letterSpacing: 0.5,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.user.facingChallenges) ...[
+          Row(
+            children: [
+              Icon(Icons.check_circle_outline, color: Colors.orange, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                'IS FACING PERSONAL CHALLENGES',
+                style: subHeaderStyle.copyWith(color: Colors.orange, fontSize: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
+        if (widget.user.readyToQaboolChallenges) ...[
+          Text('WHO ARE YOU READY TO QABOOL', style: subHeaderStyle),
+          const SizedBox(height: 12),
+          if (widget.user.readyToQaboolChallengesList.isNotEmpty)
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: widget.user.readyToQaboolChallengesList.map((item) {
+                return _buildProfileBubble(item, null, isDark);
+              }).toList(),
+            )
+          else
+            Text(
+              'Open to all situations',
+              style: TextStyle(
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+                color: textColor.withOpacity(0.5),
+              ),
+            ),
+        ],
+      ],
+    );
+  }
 
   Widget _buildDesktopHeroImage(BuildContext context, bool isDark) {
     final imageUrl = getVersionedImageUrl(widget.user.profileImageUrl, widget.user.updatedAt);
@@ -984,7 +1053,7 @@ class _ProfileViewState extends State<ProfileView> {
   Widget _buildDetailCard(bool isDark, String title, IconData icon, Widget content) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(24),

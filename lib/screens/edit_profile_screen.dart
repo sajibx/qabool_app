@@ -32,6 +32,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _currentCityController;
   late TextEditingController _pastIssuesDetailsController;
   late TextEditingController _acceptedPastIssuesDetailsController;
+  late TextEditingController _languageController;
+
+  bool _managedBySomeoneElse = false;
+  bool _facingChallenges = false;
+  bool _readyToQaboolChallenges = false;
+  
+  List<String> _selectedFacingChallenges = [];
+  List<String> _selectedReadyToQaboolChallenges = [];
+
+  final List<String> _challengeOptions = [
+    'Age problem',
+    'Sexual disorder',
+    'Financial problem',
+    'Divorced with/without children',
+    'Widow',
+    'Physical disability',
+    'Already married',
+    'Any other issue'
+  ];
   
   DateTime? _selectedDob;
   String? _selectedGender;
@@ -149,6 +168,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     
     _pastIssuesDetailsController = TextEditingController(text: user?.pastIssuesDetails);
     _acceptedPastIssuesDetailsController = TextEditingController(text: user?.acceptedPastIssuesDetails);
+    _languageController = TextEditingController(text: user?.language);
+
+    _managedBySomeoneElse = user?.managedBySomeoneElse ?? false;
+    _facingChallenges = user?.facingChallenges ?? false;
+    _readyToQaboolChallenges = user?.readyToQaboolChallenges ?? false;
+    
+    _selectedFacingChallenges = List<String>.from(user?.facingChallengesList ?? []);
+    _selectedReadyToQaboolChallenges = List<String>.from(user?.readyToQaboolChallengesList ?? []);
 
     if (user?.marriageIntentions != null) {
       _marriageIntentionsValue = double.tryParse(user!.marriageIntentions!) ?? 0.5;
@@ -196,6 +223,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _grewUpInController.dispose();
     _pastIssuesDetailsController.dispose();
     _acceptedPastIssuesDetailsController.dispose();
+    _languageController.dispose();
     super.dispose();
   }
 
@@ -302,6 +330,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'marriageIntentions': _marriageIntentionsValue.toString(),
         'hasChildren': _selectedHasChildren,
         'grewUpIn': _grewUpInController.text,
+        'managedBySomeoneElse': _managedBySomeoneElse,
+        'facingChallenges': _facingChallenges,
+        'facingChallengesList': _selectedFacingChallenges,
+        'readyToQaboolChallenges': _readyToQaboolChallenges,
+        'readyToQaboolChallengesList': _selectedReadyToQaboolChallenges,
+        'language': _languageController.text,
       };
 
       final updatedUser = await context.read<ProfileService>().updateProfile(updatedData, image: _pickedImage);
@@ -624,6 +658,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 onChanged: (val) => setState(() => _selectedEducation = val),
               ),
               const SizedBox(height: 16),
+              _buildTextField(controller: _languageController, label: 'Native/Preferred Language', icon: Icons.translate),
+              const SizedBox(height: 16),
               _buildTextField(controller: _specialController, label: 'Special Considerations', icon: Icons.info, maxLines: 2),
               const SizedBox(height: 32),
 
@@ -663,6 +699,62 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   label: 'Acceptance Criteria/Details',
                   icon: Icons.checklist_rtl,
                   maxLines: 2,
+                ),
+              ],
+              const SizedBox(height: 32),
+
+              _buildSectionTitle('MANAGEMENT & CHALLENGES'),
+              const SizedBox(height: 16),
+              
+              SwitchListTile(
+                title: Text('Managed by a Representative', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14)),
+                subtitle: Text('Toggle if your parents/representative manages this account', style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 12)),
+                secondary: Icon(Icons.supervisor_account, color: primaryColor),
+                value: _managedBySomeoneElse,
+                activeColor: primaryColor,
+                onChanged: (val) => setState(() => _managedBySomeoneElse = val),
+                contentPadding: EdgeInsets.zero,
+              ),
+              const SizedBox(height: 8),
+
+              SwitchListTile(
+                title: Text('Is Facing Challenges', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14)),
+                subtitle: Text('Toggle if you are facing any personal challenges', style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 12)),
+                secondary: Icon(Icons.warning_amber_rounded, color: primaryColor),
+                value: _facingChallenges,
+                activeColor: primaryColor,
+                onChanged: (val) => setState(() => _facingChallenges = val),
+                contentPadding: EdgeInsets.zero,
+              ),
+              if (_facingChallenges) ...[
+                const SizedBox(height: 8),
+                _buildMultiSelect(
+                  title: 'Your Challenges (Max 5)',
+                  offerings: _challengeOptions,
+                  selectedList: _selectedFacingChallenges,
+                  maxSelect: 5,
+                  onChanged: (list) => setState(() => _selectedFacingChallenges = list),
+                ),
+              ],
+              const SizedBox(height: 16),
+
+              SwitchListTile(
+                title: Text('Ready to Qabool Challenges', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14)),
+                subtitle: Text('Toggle if you are ready to accept partner with challenges', style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 12)),
+                secondary: Icon(Icons.volunteer_activism_outlined, color: primaryColor),
+                value: _readyToQaboolChallenges,
+                activeColor: primaryColor,
+                onChanged: (val) => setState(() => _readyToQaboolChallenges = val),
+                contentPadding: EdgeInsets.zero,
+              ),
+              if (_readyToQaboolChallenges) ...[
+                const SizedBox(height: 8),
+                _buildMultiSelect(
+                  title: 'Ready to Qabool (Max 5)',
+                  offerings: _challengeOptions,
+                  selectedList: _selectedReadyToQaboolChallenges,
+                  maxSelect: 5,
+                  onChanged: (list) => setState(() => _selectedReadyToQaboolChallenges = list),
                 ),
               ],
               const SizedBox(height: 32),
