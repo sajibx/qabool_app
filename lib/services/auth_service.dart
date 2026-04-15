@@ -82,11 +82,16 @@ class AuthService extends ChangeNotifier {
     List<String>? personalityTraits,
     List<String>? lifeStyle,
     List<String>? hobbies,
-    String? marriageIntentions,
-    String? hasChildren,
     String? grewUpIn,
     String? sect,
     String? caste,
+    String? otherRequirements,
+    bool managedBySomeoneElse = false,
+    bool facingChallenges = false,
+    List<String>? facingChallengesList,
+    bool readyToQaboolChallenges = false,
+    List<String>? readyToQaboolChallengesList,
+    String? language,
     XFile? profileImage,
   }) async {
     try {
@@ -126,11 +131,16 @@ class AuthService extends ChangeNotifier {
         'personalityTraits': personalityTraits,
         'lifeStyle': lifeStyle,
         'hobbies': hobbies,
-        'marriageIntentions': marriageIntentions,
-        'hasChildren': hasChildren,
         'grewUpIn': grewUpIn,
         'sect': sect,
         'caste': caste,
+        'otherRequirements': otherRequirements,
+        'managedBySomeoneElse': managedBySomeoneElse,
+        'facingChallenges': facingChallenges,
+        'facingChallengesList': facingChallengesList,
+        'readyToQaboolChallenges': readyToQaboolChallenges,
+        'readyToQaboolChallengesList': readyToQaboolChallengesList,
+        'language': language,
       };
 
       final formData = FormData.fromMap(dataMap);

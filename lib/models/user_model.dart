@@ -30,6 +30,7 @@ class UserModel {
   final String? pastIssuesDetails;
   final String? acceptedPastIssuesDetails;
   final String? phoneNumber;
+  final String? otherRequirements;
 
   
   // New Fields
@@ -52,6 +53,12 @@ class UserModel {
   final String? marriageIntentions;
   final String? hasChildren;
   final String? grewUpIn;
+  final bool managedBySomeoneElse;
+  final bool facingChallenges;
+  final List<String> facingChallengesList;
+  final bool readyToQaboolChallenges;
+  final List<String> readyToQaboolChallengesList;
+  final String? language;
   final DateTime? updatedAt;
 
   UserModel({
@@ -103,6 +110,13 @@ class UserModel {
     this.marriageIntentions,
     this.hasChildren,
     this.grewUpIn,
+    this.otherRequirements,
+    this.managedBySomeoneElse = false,
+    this.facingChallenges = false,
+    this.facingChallengesList = const [],
+    this.readyToQaboolChallenges = false,
+    this.readyToQaboolChallengesList = const [],
+    this.language,
     this.updatedAt,
   });
 
@@ -198,6 +212,13 @@ class UserModel {
       grewUpIn: json['grewUpIn']?.toString(),
       pastIssuesDetails: json['pastIssuesDetails']?.toString(),
       acceptedPastIssuesDetails: json['acceptedPastIssuesDetails']?.toString(),
+      otherRequirements: json['otherRequirements']?.toString(),
+      managedBySomeoneElse: json['managedBySomeoneElse'] ?? false,
+      facingChallenges: json['facingChallenges'] ?? false,
+      facingChallengesList: json['facingChallengesList'] != null ? List<String>.from(json['facingChallengesList']) : const [],
+      readyToQaboolChallenges: json['readyToQaboolChallenges'] ?? false,
+      readyToQaboolChallengesList: json['readyToQaboolChallengesList'] != null ? List<String>.from(json['readyToQaboolChallengesList']) : const [],
+      language: json['language']?.toString(),
       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
     );
   }
@@ -253,6 +274,13 @@ class UserModel {
       'grewUpIn': grewUpIn,
       'pastIssuesDetails': pastIssuesDetails,
       'acceptedPastIssuesDetails': acceptedPastIssuesDetails,
+      'otherRequirements': otherRequirements,
+      'managedBySomeoneElse': managedBySomeoneElse,
+      'facingChallenges': facingChallenges,
+      'facingChallengesList': facingChallengesList,
+      'readyToQaboolChallenges': readyToQaboolChallenges,
+      'readyToQaboolChallengesList': readyToQaboolChallengesList,
+      'language': language,
       'updatedAt': updatedAt?.toIso8601String(),
     };
   }
@@ -304,6 +332,13 @@ class UserModel {
     String? marriageIntentions,
     String? hasChildren,
     String? grewUpIn,
+    String? otherRequirements,
+    bool? managedBySomeoneElse,
+    bool? facingChallenges,
+    List<String>? facingChallengesList,
+    bool? readyToQaboolChallenges,
+    List<String>? readyToQaboolChallengesList,
+    String? language,
     DateTime? updatedAt,
   }) {
     return UserModel(
@@ -353,6 +388,13 @@ class UserModel {
       marriageIntentions: marriageIntentions ?? this.marriageIntentions,
       hasChildren: hasChildren ?? this.hasChildren,
       grewUpIn: grewUpIn ?? this.grewUpIn,
+      otherRequirements: otherRequirements ?? this.otherRequirements,
+      managedBySomeoneElse: managedBySomeoneElse ?? this.managedBySomeoneElse,
+      facingChallenges: facingChallenges ?? this.facingChallenges,
+      facingChallengesList: facingChallengesList ?? this.facingChallengesList,
+      readyToQaboolChallenges: readyToQaboolChallenges ?? this.readyToQaboolChallenges,
+      readyToQaboolChallengesList: readyToQaboolChallengesList ?? this.readyToQaboolChallengesList,
+      language: language ?? this.language,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }

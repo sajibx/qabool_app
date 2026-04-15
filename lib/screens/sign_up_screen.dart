@@ -46,6 +46,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _currentCityController = TextEditingController();
   final _sectController = TextEditingController();
   final _casteController = TextEditingController();
+  final _otherRequirementsController = TextEditingController();
   
   bool _hasPastIssues = false;
   bool _acceptsPastIssues = true;
@@ -59,6 +60,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
   List<String> _selectedInterests = [];
   String? _selectedPastIssueDetails;
   String? _selectedAcceptedPastIssueDetails;
+  
+  bool _managedBySomeoneElse = false;
+  bool _facingChallenges = false;
+  List<String> _selectedFacingChallenges = [];
+  bool _readyToQaboolChallenges = false;
+  List<String> _selectedReadyToQaboolChallenges = [];
+  final _languageController = TextEditingController();
+
+  final List<String> _challengeOptions = [
+    'Age problem',
+    'Sexual disorder',
+    'Financial problem',
+    'Divorced with/without children',
+    'Widow',
+    'Physical disability',
+    'Already married',
+    'Any other issue'
+  ];
+
   List<String> _missingFields = [];
 
   final List<String> _pastIssuesOptions = [
@@ -151,6 +171,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _sectController.dispose();
     _casteController.dispose();
     _grewUpInController.dispose();
+    _otherRequirementsController.dispose();
+    _languageController.dispose();
     super.dispose();
   }
 
@@ -325,11 +347,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
         personalityTraits: _selectedPersonalityTraits,
         lifeStyle: _selectedLifeStyle,
         hobbies: _selectedHobbies,
-        marriageIntentions: _marriageIntentionsValue.toString(),
-        hasChildren: _selectedMaritalStatus == 'Single' ? 'No' : _selectedHasChildren,
         grewUpIn: _toCamelCase(_grewUpInController.text),
         sect: _sectController.text,
         caste: _casteController.text,
+        otherRequirements: _otherRequirementsController.text,
+        managedBySomeoneElse: _managedBySomeoneElse,
+        facingChallenges: _facingChallenges,
+        facingChallengesList: _selectedFacingChallenges,
+        readyToQaboolChallenges: _readyToQaboolChallenges,
+        readyToQaboolChallengesList: _selectedReadyToQaboolChallenges,
+        language: _languageController.text,
         pastIssuesDetails: _hasPastIssues ? _selectedPastIssueDetails : null,
         acceptedPastIssuesDetails: _acceptsPastIssues ? _selectedAcceptedPastIssueDetails : null,
         profileImage: _pickedImage,
@@ -735,6 +762,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             },
                           ),
                           const SizedBox(height: 16),
+                          SwitchListTile(
+                            title: const Text('Managed by a Representative?'),
+                            subtitle: const Text('e.g. Profile managed by parents or siblings'),
+                            value: _managedBySomeoneElse,
+                            activeColor: QaboolTheme.primary,
+                            onChanged: (val) => setState(() => _managedBySomeoneElse = val),
+                          ),
+                          const SizedBox(height: 16),
                           buildLabel('Email Address'),
                           TextField(
                               controller: _emailController,
@@ -1087,6 +1122,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 16),
+                                buildLabel('Other Requirements'),
+                                TextField(
+                                  controller: _otherRequirementsController,
+                                  maxLines: 3,
+                                  decoration: inputDecoration('Additional requirements for your partner...'),
+                                ),
+                                const SizedBox(height: 16),
+                                buildLabel('Preferred Language'),
+                                TextField(
+                                  controller: _languageController,
+                                  decoration: inputDecoration('e.g. English, Arabic, Bengali'),
+                                ),
                               ],
                             ),
                           ),
@@ -1103,17 +1151,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
 
-                          // Professional & Educational
-                          buildSectionHeader(
-                              Icons.school, 'Professional & Educational'),
-                          buildLabel('Work / Profession'),
-                          TextField(
-                              controller: _jobController,
-                              decoration:
-                                  inputDecoration('Current occupation')),
                           const SizedBox(height: 16),
 
-                          // Household & Additional Info
                           buildSectionHeader(Icons.home, 'Household & Additional Info'),
                           buildLabel('Marital Status'),
                           DropdownButtonFormField<String>(
@@ -1125,7 +1164,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             onChanged: (val) => setState(() => _selectedMaritalStatus = val),
                           ),
                           const SizedBox(height: 16),
-                          const SizedBox(height: 16),
+                          if (_selectedMaritalStatus != 'Single') ...[
+                            buildLabel('Do you have children?'),
+                            DropdownButtonFormField<String>(
+                              value: _selectedHasChildren,
+                              decoration: inputDecoration('Select Answer'),
+                              items: ['No', 'Yes, living with me', 'Yes, not living with me']
+                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                  .toList(),
+                              onChanged: (val) => setState(() => _selectedHasChildren = val),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
                           Row(
                             children: [
                               Expanded(
@@ -1164,136 +1214,52 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ],
                           ),
                           const SizedBox(height: 24),
-                          Divider(
-                              color: isDark
-                                  ? const Color(0xFF334155)
-                                  : const Color(0xFFE2E8F0)),
+                          Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
 
-                          // Partner Requirements
-                          buildSectionHeader(Icons.favorite, 'Partner Requirements'),
-                          buildLabel('Looking For (Type)'),
-                          DropdownButtonFormField<String>(
-                            value: _selectedLookingForType,
-                            decoration: inputDecoration('Select Type'),
-                            items: ['Practising Muslim', 'Moderate Muslim', 'Liberal Muslim', 'Other']
-                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                .toList(),
-                            onChanged: (val) => setState(() => _selectedLookingForType = val),
-                          ),
-                          const SizedBox(height: 16),
-                          buildLabel('Preferred Age Range'),
-                          DropdownButtonFormField<String>(
-                            value: _selectedLookingForAge,
-                            decoration: inputDecoration('Select Age Range'),
-                            items: ['18 - 25 years old', '25 - 35 years old', '35 - 45 years old', '45+ years old']
-                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                .toList(),
-                            onChanged: (val) => setState(() => _selectedLookingForAge = val),
-                          ),
-                          const SizedBox(height: 16),
-                          buildLabel('Preferred Education/Profession'),
-                          DropdownButtonFormField<String>(
-                            value: _selectedLookingForProfession,
-                            decoration: inputDecoration('Select Education'),
-                            items: ['High School or above', 'Bachelors Degree or above', 'Masters Degree or above', 'PhD or above']
-                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                .toList(),
-                            onChanged: (val) => setState(() => _selectedLookingForProfession = val),
-                          ),
-                          const SizedBox(height: 24),
-                          Divider(
-                              color: isDark
-                                  ? const Color(0xFF334155)
-                                  : const Color(0xFFE2E8F0)),
-                          const SizedBox(height: 24),
-
-                          // Background & Preferences
-                          buildSectionHeader(Icons.info_outline, 'Background & Preferences'),
+                          // Issues & Challenges
+                          buildSectionHeader(Icons.warning_amber_rounded, 'Issues & Challenges'),
                           
+                          // Facing Challenges
                           SwitchListTile(
-                            title: const Text('Do you have any past issues/problems?', style: TextStyle(fontSize: 14)),
-                            subtitle: Text('This information helps in transparent matchmaking.', style: TextStyle(fontSize: 12, color: isDark ? Colors.grey[400] : Colors.grey[600])),
-                            value: _hasPastIssues,
-                            activeColor: pColor,
-                            onChanged: (val) => setState(() => _hasPastIssues = val),
-                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Do you face any issues/challenges?'),
+                            subtitle: const Text('e.g. physical disability, divorced, etc.'),
+                            value: _facingChallenges,
+                            activeColor: QaboolTheme.primary,
+                            onChanged: (val) => setState(() => _facingChallenges = val),
                           ),
-                          if (_hasPastIssues) ...[
-                            const SizedBox(height: 8),
-                            buildLabel('Type of past issue'),
-                            DropdownButtonFormField<String>(
-                              value: _selectedPastIssueDetails,
-                              decoration: inputDecoration('Select Detail'),
-                              items: _pastIssuesOptions
-                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                  .toList(),
-                              onChanged: (val) => setState(() => _selectedPastIssueDetails = val),
+                          if (_facingChallenges)
+                            buildMultiSelect(
+                              title: 'Your Challenges',
+                              offerings: _challengeOptions,
+                              selectedList: _selectedFacingChallenges,
+                              maxSelect: 5,
+                              onChanged: (list) => _selectedFacingChallenges = list,
                             ),
-                          ],
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 16),
+
+                          // Ready to Qabool Challenges
                           SwitchListTile(
-                            title: const Text('Will you accept someone with past issues?', style: TextStyle(fontSize: 14)),
-                            subtitle: Text('If yes, you will see both normal and issue-related profiles.', style: TextStyle(fontSize: 12, color: isDark ? Colors.grey[400] : Colors.grey[600])),
-                            value: _acceptsPastIssues,
-                            activeColor: pColor,
-                            onChanged: (val) => setState(() => _acceptsPastIssues = val),
-                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Ready to accept partner with challenges?'),
+                            subtitle: const Text('Show you are open to specific situations'),
+                            value: _readyToQaboolChallenges,
+                            activeColor: QaboolTheme.primary,
+                            onChanged: (val) => setState(() => _readyToQaboolChallenges = val),
                           ),
-                          if (_acceptsPastIssues) ...[
-                            const SizedBox(height: 8),
-                            buildLabel('Whom will you accept?'),
-                            DropdownButtonFormField<String>(
-                              value: _selectedAcceptedPastIssueDetails,
-                              decoration: inputDecoration('Select Detail'),
-                              items: _pastIssuesOptions
-                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                  .toList(),
-                              onChanged: (val) => setState(() => _selectedAcceptedPastIssueDetails = val),
+                          if (_readyToQaboolChallenges)
+                            buildMultiSelect(
+                              title: 'Accepted Challenges',
+                              offerings: _challengeOptions,
+                              selectedList: _selectedReadyToQaboolChallenges,
+                              maxSelect: 5,
+                              onChanged: (list) => _selectedReadyToQaboolChallenges = list,
                             ),
-                          ],
-                          const SizedBox(height: 16),
-                          buildLabel('Where did you grow up?'),
-                          TextField(
-                            controller: _grewUpInController,
-                            decoration: inputDecoration('e.g. Bangladesh, UK, etc.'),
-                          ),
-                          const SizedBox(height: 16),
-                          const SizedBox(height: 16),
-                          if (_selectedMaritalStatus != 'Single') ...[
-                            buildLabel('Do you have children?'),
-                            DropdownButtonFormField<String>(
-                              value: _selectedHasChildren,
-                              decoration: inputDecoration('Select Answer'),
-                              items: ['No', 'Yes, living with me', 'Yes, not living with me']
-                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                  .toList(),
-                              onChanged: (val) => setState(() => _selectedHasChildren = val),
-                            ),
-                          ],
-                          const SizedBox(height: 24),
-                          buildLabel('Marriage Intentions Slider'),
-                          Text('Match! <---> Agree together <---> 4-12 months', 
-                            style: TextStyle(fontSize: 10, color: isDark ? Colors.grey[400] : Colors.grey[600])),
-                          Slider(
-                            value: _marriageIntentionsValue,
-                            activeColor: pColor,
-                            inactiveColor: pColor.withOpacity(0.2),
-                            onChanged: (val) => setState(() => _marriageIntentionsValue = val),
-                          ),
                           const SizedBox(height: 24),
                           Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
 
-                          // Profile Bubbles Section
+                          // Profile Details
                           buildSectionHeader(Icons.bubble_chart, 'Profile Details'),
-                          buildMultiSelect(
-                            title: 'Languages',
-                            offerings: _languagesOfferings,
-                            selectedList: _selectedLanguages,
-                            maxSelect: 5,
-                            onChanged: (list) => _selectedLanguages = list,
-                          ),
                           buildMultiSelect(
                             title: 'Personality Traits',
                             offerings: _personalityOfferings,
@@ -1328,10 +1294,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             decoration: inputDecoration('Tell us about yourself...'),
                           ),
                           const SizedBox(height: 24),
-                          Divider(
-                              color: isDark
-                                  ? const Color(0xFF334155)
-                                  : const Color(0xFFE2E8F0)),
+                          Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
 
                           // Special Considerations
@@ -1340,14 +1303,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           TextField(
                             controller: _specialController,
                             maxLines: 4,
-                            decoration: inputDecoration(
-                                "Physical accessibility requirements, etc..."),
+                            decoration: inputDecoration("Physical accessibility requirements, etc..."),
                           ),
                           const SizedBox(height: 24),
-                          Divider(
-                              color: isDark
-                                  ? const Color(0xFF334155)
-                                  : const Color(0xFFE2E8F0)),
+                          Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
 
                           buildMultiSelect(
@@ -1375,41 +1334,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
 
                           // Create Account Button
-                           Consumer<AuthService>(
-                             builder: (context, auth, _) {
-                               return ElevatedButton(
-                                 onPressed: auth.isLoading ? null : () => _handleSignUp(auth),
-                                 style: ElevatedButton.styleFrom(
-                                   backgroundColor: aColor,
-                                   foregroundColor: Colors.white,
-                                   padding: const EdgeInsets.symmetric(vertical: 16),
-                                   shape: RoundedRectangleBorder(
-                                       borderRadius: BorderRadius.circular(12)),
-                                   elevation: 4,
-                                 ),
-                                 child: auth.isLoading
-                                     ? const SizedBox(
-                                         height: 20,
-                                         width: 20,
-                                         child: CircularProgressIndicator(
-                                           strokeWidth: 2,
-                                           color: Colors.white,
-                                         ),
-                                       )
-                                     : const Row(
-                                         mainAxisAlignment: MainAxisAlignment.center,
-                                         children: [
-                                           Text('Create Account',
-                                               style: TextStyle(
-                                                   fontSize: 16,
-                                                   fontWeight: FontWeight.bold)),
-                                           SizedBox(width: 8),
-                                           Icon(Icons.how_to_reg),
-                                         ],
-                                       ),
-                               );
-                             },
-                           ),
+                          Consumer<AuthService>(
+                            builder: (context, auth, _) {
+                              return ElevatedButton(
+                                onPressed: auth.isLoading ? null : () => _handleSignUp(auth),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: QaboolTheme.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  elevation: 4,
+                                ),
+                                child: auth.isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text('Create Account',
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold)),
+                                          SizedBox(width: 8),
+                                          Icon(Icons.how_to_reg),
+                                        ],
+                                      ),
+                              );
+                            },
+                          ),
                           const SizedBox(height: 16),
 
                           RichText(
@@ -1417,16 +1375,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             text: TextSpan(
                               style: TextStyle(
                                   fontSize: 14,
-                                  color: isDark
-                                      ? Colors.grey[400]
-                                      : Colors.grey[500]),
+                                  color: isDark ? Colors.grey[400] : Colors.grey[500]),
                               children: [
-                                const TextSpan(
-                                    text: 'By joining, you agree to our '),
+                                const TextSpan(text: 'By joining, you agree to our '),
                                 TextSpan(
                                   text: 'Terms of Service',
                                   style: TextStyle(
-                                    color: isDark ? pColor : aColor,
+                                    color: QaboolTheme.primary,
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),
@@ -1440,16 +1395,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             text: TextSpan(
                               style: TextStyle(
                                   fontSize: 16,
-                                  color: isDark
-                                      ? Colors.grey[400]
-                                      : Colors.grey[600]),
+                                  color: isDark ? Colors.grey[400] : Colors.grey[600]),
                               children: [
-                                const TextSpan(
-                                    text: 'Already have an account? '),
+                                const TextSpan(text: 'Already have an account? '),
                                 TextSpan(
                                   text: 'Sign In',
                                   style: TextStyle(
-                                    color: isDark ? pColor : aColor,
+                                    color: QaboolTheme.primary,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),

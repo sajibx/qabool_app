@@ -110,19 +110,13 @@ class _ProfileViewState extends State<ProfileView> {
                             const SizedBox(height: 32),
                             
                             // Detailed sections in Cards
-                            _buildDetailCard(isDark, 'About me', Icons.person_outline, _buildAboutMeContent(isDark)),
+                            _buildDetailCard(isDark, 'About me', Icons.badge_outlined, _buildAboutMeContent(isDark)),
                             const SizedBox(height: 24),
 
                             _buildInfoGrid(isDark, true),
                             const SizedBox(height: 24),
 
                             _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, true)),
-                            const SizedBox(height: 24),
-
-                            _buildDetailCard(isDark, 'Marriage Intentions', Icons.favorite_border, _buildMarriageIntentionsContent(isDark, primaryColor)),
-                            const SizedBox(height: 24),
-
-                            _buildDetailCard(isDark, 'My faith', Icons.nightlight_round, _buildMyFaithContent(isDark)),
                             const SizedBox(height: 24),
 
                             _buildDetailCard(isDark, 'Interests & Personality', Icons.auto_awesome_outlined, Column(
@@ -133,25 +127,15 @@ class _ProfileViewState extends State<ProfileView> {
                                 _buildPersonalityContent(isDark),
                               ],
                             )),
-                            const SizedBox(height: 24),
-
-                            _buildDetailCard(isDark, 'Education & Career', Icons.school_outlined, _buildEducationCareerContent(isDark)),
-                            const SizedBox(height: 24),
-
-                            _buildDetailCard(isDark, 'Languages & Ethnicity', Icons.translate, _buildLanguagesEthnicityContent(isDark)),
-                            const SizedBox(height: 24),
-
-                            _buildDetailCard(isDark, 'Preferences', Icons.tune, _buildPreferenceContent(isDark)),
-                            const SizedBox(height: 24),
-
-                            _buildDetailCard(isDark, 'Past Issues & Acceptance', Icons.info_outline, _buildPastIssuesContent(isDark)),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 48),
+                            Center(child: _buildIssuesBadges(isDark)),
+                            const SizedBox(height: 32),
                             if (!widget.isMyProfile) ...[
-                              const SizedBox(height: 48),
+                              const SizedBox(height: 24),
                               _buildSecondaryActions(isDark),
                             ],
                             
-                            const SizedBox(height: 80),
+                            const SizedBox(height: 40), // Reduced from 80
                           ],
                         ),
                       ),
@@ -194,21 +178,27 @@ class _ProfileViewState extends State<ProfileView> {
                       children: [
                         _buildTopImage(context, isDark),
                         if (!widget.isMyProfile) _buildReadyToQaboolCard(isDark),
-                        _buildAboutMeSection(isDark),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          child: _buildAboutMeSection(isDark),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
                           child: _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, false)),
                         ),
-                        _buildMarriageIntentionsSection(isDark, primaryColor),
-                        _buildMyFaithSection(isDark),
-                        _buildInterestsSection(isDark),
-                        _buildPersonalitySection(isDark),
-                        _buildEducationCareerSection(isDark),
-                        _buildLanguagesEthnicitySection(isDark),
-                        _buildPreferenceSection(isDark),
-                        _buildPastIssuesSection(isDark),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          child: _buildInterestsSection(isDark),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          child: _buildPersonalitySection(isDark),
+                        ),
+                        const SizedBox(height: 48),
+                        Center(child: _buildIssuesBadges(isDark)),
+                        const SizedBox(height: 40),
                         if (!widget.isMyProfile) _buildSecondaryActions(isDark),
-                        const SizedBox(height: 100),
+                        const SizedBox(height: 40),
                       ],
                     ),
                   ),
@@ -450,15 +440,29 @@ class _ProfileViewState extends State<ProfileView> {
 
   Widget _buildSectionHeader(String title, IconData icon, bool isDark) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 40, 20, 12),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: isDark ? Colors.white : Colors.black,
-          letterSpacing: -0.5,
-        ),
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, 16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: QaboolTheme.primary.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: QaboolTheme.primary.withOpacity(0.15), width: 1.0),
+            ),
+            child: Icon(icon, size: 18, color: QaboolTheme.primary),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              letterSpacing: -0.5,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -494,7 +498,7 @@ class _ProfileViewState extends State<ProfileView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('About me', Icons.person_outline, isDark),
+        _buildSectionHeader('About me', Icons.badge_outlined, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
@@ -521,19 +525,72 @@ class _ProfileViewState extends State<ProfileView> {
       _RequirementData(Icons.height, 'Height', widget.user.height != null ? '${widget.user.height?.toInt()}cm' : 'N/A'),
       _RequirementData(Icons.monitor_weight_outlined, 'Weight', widget.user.weight != null ? '${widget.user.weight?.toInt()}kg' : 'N/A'),
       _RequirementData(Icons.payments_outlined, 'Income', widget.user.monthlyIncome != null ? '€${widget.user.monthlyIncome?.toInt()}' : 'N/A'),
+      _RequirementData(Icons.language_outlined, 'Language', widget.user.language ?? 'N/A'),
     ];
 
-     return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: isLargeScreen ? 3 : 2,
-        crossAxisSpacing: isLargeScreen ? 30 : 16,
-        mainAxisSpacing: isLargeScreen ? 20 : 16,
-        childAspectRatio: isLargeScreen ? 4 : 2.2,
+      return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: isLargeScreen ? 3 : 2,
+            crossAxisSpacing: isLargeScreen ? 30 : 16,
+            mainAxisSpacing: isLargeScreen ? 20 : 16,
+            childAspectRatio: isLargeScreen ? 4 : 2.2,
+          ),
+          itemCount: items.length,
+          itemBuilder: (context, index) => _buildPolishedRequirementItem(items[index], isDark),
+        ),
+        if (widget.user.otherRequirements != null && widget.user.otherRequirements!.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          _buildNestedOtherRequirementsBox(isDark),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildNestedOtherRequirementsBox(bool isDark) {
+    final boxBg = isDark ? Colors.black.withOpacity(0.2) : const Color(0xFFF1F5F9);
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: boxBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
       ),
-      itemCount: items.length,
-      itemBuilder: (context, index) => _buildPolishedRequirementItem(items[index], isDark),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.assignment_outlined, size: 18, color: QaboolTheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                'OTHER REQUIREMENTS',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  color: textColor,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            widget.user.otherRequirements!,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.5,
+              color: isDark ? Colors.white70 : Colors.black87,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -662,80 +719,22 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildAboutMeContent(bool isDark) {
-    return Text(
-      widget.user.bio ?? "No bio provided.",
-      style: TextStyle(
-        fontSize: 15,
-        height: 1.6,
-        color: isDark ? Colors.white70 : Colors.black87,
-      ),
-    );
-  }
-
-  Widget _buildMarriageIntentionsSection(bool isDark, Color primaryColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('Marriage Intentions', Icons.favorite, isDark),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: _buildMarriageIntentionsContent(isDark, primaryColor),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMarriageIntentionsContent(bool isDark, Color primaryColor) {
-    final value = double.tryParse(widget.user.marriageIntentions ?? "0.5") ?? 0.5;
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+        color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
+        border: Border.all(color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03)),
       ),
-      child: Column(
-        children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white10 : Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              Align(
-                alignment: Alignment(value * 2 - 1, 0),
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: QaboolTheme.primary,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: QaboolTheme.primary.withOpacity(0.3),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Match!', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
-              Text('Agree together', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
-              Text('4-12 months', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
-            ],
-          ),
-        ],
+      child: Text(
+        widget.user.bio ?? "No bio provided.",
+        style: TextStyle(
+          fontSize: 15,
+          height: 1.8,
+          letterSpacing: 0.3,
+          color: isDark ? Colors.white.withOpacity(0.9) : const Color(0xFF334155),
+        ),
       ),
     );
   }
@@ -759,43 +758,12 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildMyFaithSection(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('My faith', Icons.nightlight_round, isDark),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: _buildMyFaithContent(isDark),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMyFaithContent(bool isDark) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        _buildProfileBubble('🕌 ${widget.user.religion ?? "Not specified"}', null, isDark),
-        if (widget.user.sect != null) _buildProfileBubble('🛐 ${widget.user.sect!}', null, isDark),
-        if (widget.user.caste != null) _buildProfileBubble('👥 ${widget.user.caste!}', null, isDark),
-      ],
-    );
-  }
-
-  Widget _buildFuturePlansSection(bool isDark) {
-    // Note: Originally preferences were placed here, now moved back to Preference Section.
-    // If you have actual future plans data, add it here. Otherwise, shrink if empty.
-    return const SizedBox.shrink();
-  }
-
   Widget _buildInterestsSection(bool isDark) {
     if (widget.user.interests.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Interests', Icons.auto_awesome, isDark),
+        _buildSectionHeader('Interests', Icons.auto_awesome_outlined, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: _buildInterestsContent(isDark),
@@ -819,7 +787,7 @@ class _ProfileViewState extends State<ProfileView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Personality', Icons.psychology, isDark),
+        _buildSectionHeader('Personality', Icons.psychology_outlined, isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: _buildPersonalityContent(isDark),
@@ -835,175 +803,6 @@ class _ProfileViewState extends State<ProfileView> {
       children: widget.user.personalityTraits.map((trait) {
         return _buildProfileBubble(trait, null, isDark);
       }).toList(),
-    );
-  }
-
-  Widget _buildEducationCareerSection(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('Education and career', Icons.school, isDark),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: _buildEducationCareerContent(isDark),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEducationCareerContent(bool isDark) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        _buildProfileBubble('🎓 ${widget.user.education ?? "Not specified"}', null, isDark),
-        _buildProfileBubble('💼 ${widget.user.profession ?? "Not specified"}', null, isDark),
-      ],
-    );
-  }
-
-  Widget _buildLanguagesEthnicitySection(bool isDark) {
-    if (widget.user.languages.isEmpty && widget.user.grewUpIn == null && widget.user.ethnicity == null) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('Languages and ethnicity', Icons.translate, isDark),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: _buildLanguagesEthnicityContent(isDark),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLanguagesEthnicityContent(bool isDark) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        ...widget.user.languages.map((lang) => _buildProfileBubble(lang, Icons.translate, isDark)),
-        if (widget.user.grewUpIn != null) _buildProfileBubble('Grew up in ${widget.user.grewUpIn}', null, isDark),
-        if (widget.user.ethnicity != null) _buildProfileBubble('🌍 ${widget.user.ethnicity}', null, isDark),
-      ],
-    );
-  }
-
-  Widget _buildPastIssuesSection(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('Past Issues & Acceptance', Icons.info_outline, isDark),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: _buildPastIssuesContent(isDark),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPastIssuesContent(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // User's own past issues
-        Text(
-          'Personal Status',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white70 : Colors.black54,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            _buildProfileBubble(
-              widget.user.hasPastIssues ? '⚠️ Has Past Issues' : '✅ No Past Issues',
-              null,
-              isDark,
-            ),
-          ],
-        ),
-        if (widget.user.hasPastIssues && widget.user.pastIssuesDetails != null && widget.user.pastIssuesDetails!.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Text(
-            widget.user.pastIssuesDetails!,
-            style: TextStyle(fontSize: 14, color: isDark ? Colors.white60 : Colors.black87),
-          ),
-        ],
-        const SizedBox(height: 24),
-        
-        // Acceptance preferences
-        Text(
-          'Acceptance Preference',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white70 : Colors.black54,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            _buildProfileBubble(
-              widget.user.acceptsPastIssues ? '🤝 Willing to Accept' : '🚫 Not Accepting',
-              null,
-              isDark,
-            ),
-          ],
-        ),
-        if (widget.user.acceptsPastIssues && widget.user.acceptedPastIssuesDetails != null && widget.user.acceptedPastIssuesDetails!.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Text(
-            widget.user.acceptedPastIssuesDetails!,
-            style: TextStyle(fontSize: 14, color: isDark ? Colors.white60 : Colors.black87),
-          ),
-        ],
-      ],
-    );
-  }
-
-
-  Widget _buildPreferenceSection(bool isDark) {
-    final hasPreferences = widget.user.lookingForAge != null || 
-                           widget.user.lookingForType != null || 
-                           widget.user.lookingForProfession != null || 
-                           widget.user.hasPastIssues || 
-                           widget.user.acceptsPastIssues;
-
-    if (!hasPreferences) {
-      return const SizedBox.shrink();
-    }
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('Preferences', Icons.tune, isDark),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: _buildPreferenceContent(isDark),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPreferenceContent(bool isDark) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        if (widget.user.lookingForAge != null) _buildProfileBubble('🎂 Looking for ${widget.user.lookingForAge}', null, isDark),
-        if (widget.user.lookingForType != null) _buildProfileBubble('💘 ${widget.user.lookingForType!}', null, isDark),
-        if (widget.user.lookingForProfession != null) _buildProfileBubble('💼 ${widget.user.lookingForProfession!}', null, isDark),
-        if (widget.user.hasPastIssues && widget.user.pastIssuesDetails != null) 
-          _buildProfileBubble('⚠️ Past issues: ${widget.user.pastIssuesDetails}', null, isDark),
-        if (widget.user.acceptsPastIssues && widget.user.acceptedPastIssuesDetails != null)
-          _buildProfileBubble('✅ Accepts: ${widget.user.acceptedPastIssuesDetails}', null, isDark),
-      ],
     );
   }
 
@@ -1296,12 +1095,6 @@ class _ProfileViewState extends State<ProfileView> {
       padding: const EdgeInsets.symmetric(vertical: 20.0),
       child: Column(
         children: [
-          TextButton.icon(
-            onPressed: () {},
-            icon: Icon(Icons.share, color: isDark ? Colors.white : Colors.black),
-            label: Text('Share profile', style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
-          ),
-          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -1309,6 +1102,77 @@ class _ProfileViewState extends State<ProfileView> {
               _buildSecondaryActionButton(Icons.block, 'Block', isDark, onTap: widget.onBlock),
               _buildSecondaryActionButton(Icons.flag_outlined, 'Report', isDark, onTap: widget.onReport),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIssuesBadges(bool isDark) {
+    if (!widget.user.managedBySomeoneElse && !widget.user.facingChallenges) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 12,
+        runSpacing: 12,
+        children: [
+          if (widget.user.managedBySomeoneElse)
+            _buildBadge(
+              icon: Icons.verified_user_outlined,
+              label: 'REPRESENTATIVE',
+              color: const Color(0xFFD4AF37), // Gold
+              isDark: isDark,
+            ),
+          if (widget.user.facingChallenges)
+            _buildBadge(
+              icon: Icons.warning_amber_rounded,
+              label: 'CHALLENGES',
+              color: QaboolTheme.primary,
+              isDark: isDark,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBadge({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: color.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+              color: color,
+              letterSpacing: 1.1,
+            ),
           ),
         ],
       ),
