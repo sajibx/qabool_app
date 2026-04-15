@@ -464,6 +464,18 @@ class ChatService extends ChangeNotifier {
       'type': 'TEXT',
     });
   }
+  
+  Future<void> sendImageP2P({
+    required String chatId,
+    required String recipientId,
+    required String base64Content,
+  }) async {
+    _socket?.emit('send_image_p2p', {
+      'chatId': chatId,
+      'recipientId': recipientId,
+      'content': base64Content,
+    });
+  }
 
   void setTypingStatus({
     required String chatId,

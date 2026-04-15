@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:qabool_app/utils/image_utils.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -210,6 +213,42 @@ class _ChatViewState extends State<ChatView> {
     }
   }
 
+  Future<void> _handlePickImages() async {
+    if (_activeChatId == null || widget.otherUser == null) return;
+    
+    final ImagePicker picker = ImagePicker();
+    final List<XFile> images = await picker.pickMultiImage(
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 70,
+    );
+
+    if (images.isEmpty) return;
+    
+    // Max 3 images limit
+    final List<XFile> selectedImages = images.take(3).toList();
+    if (images.length > 3) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Maximum 3 images allowed at once')),
+        );
+      }
+    }
+
+    final chatService = context.read<ChatService>();
+    for (final image in selectedImages) {
+      final Uint8List bytes = await image.readAsBytes();
+      final String base64Image = base64Encode(bytes);
+      
+      await chatService.sendImageP2P(
+        chatId: _activeChatId!,
+        recipientId: widget.otherUser!.id,
+        base64Content: base64Image,
+      );
+    }
+    _scrollToBottom();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -385,6 +424,7 @@ class _ChatViewState extends State<ChatView> {
                         message: message.content,
                         time: message.timeString,
                         isSeen: message.status == MessageStatus.READ,
+                        type: message.type,
                       );
                     } else {
                       return _buildReceivedMessage(
@@ -392,6 +432,7 @@ class _ChatViewState extends State<ChatView> {
                         imageUrl: resolveImageUrl(otherUser?.profileImageUrl),
                         message: message.content,
                         time: message.timeString,
+                        type: message.type,
                       );
                     }
                   },
@@ -466,6 +507,12 @@ class _ChatViewState extends State<ChatView> {
                     ),
                   ),
                   const SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(Icons.photo_library_outlined, color: primaryColor),
+                    onPressed: _handlePickImages,
+                    tooltip: 'Send Images (Max 3)',
+                  ),
+                  const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _handleSendMessage,
                     style: ElevatedButton.styleFrom(
@@ -490,6 +537,7 @@ class _ChatViewState extends State<ChatView> {
     required String imageUrl,
     required String message,
     required String time,
+    required MessageType type,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -522,14 +570,25 @@ class _ChatViewState extends State<ChatView> {
                     ),
                     border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
                   ),
-                  child: Text(
-                    message,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isDark ? Colors.grey[200] : Colors.grey[800],
-                      height: 1.4,
-                    ),
-                  ),
+                  child: type == MessageType.IMAGE_P2P
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.memory(
+                            base64Decode(message),
+                            fit: BoxFit.cover,
+                            width: 200,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.broken_image, color: Colors.red),
+                          ),
+                        )
+                      : Text(
+                          message,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: isDark ? Colors.grey[200] : Colors.grey[800],
+                            height: 1.4,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -550,6 +609,7 @@ class _ChatViewState extends State<ChatView> {
     required String message,
     required String time,
     required bool isSeen,
+    required MessageType type,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -572,14 +632,25 @@ class _ChatViewState extends State<ChatView> {
                       bottomLeft: Radius.circular(16),
                     ),
                   ),
-                  child: Text(
-                    message,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                      height: 1.4,
-                    ),
-                  ),
+                  child: type == MessageType.IMAGE_P2P
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.memory(
+                            base64Decode(message),
+                            fit: BoxFit.cover,
+                            width: 200,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.broken_image, color: Colors.white),
+                          ),
+                        )
+                      : Text(
+                          message,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                            height: 1.4,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 4),
                 Row(

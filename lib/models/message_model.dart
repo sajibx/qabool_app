@@ -1,4 +1,4 @@
-enum MessageType { TEXT, IMAGE }
+enum MessageType { TEXT, IMAGE, IMAGE_P2P }
 enum MessageStatus { SENT, DELIVERED, READ }
 
 class MessageModel {
