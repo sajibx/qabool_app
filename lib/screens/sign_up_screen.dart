@@ -39,27 +39,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _heightFtController = TextEditingController();
   final _heightInController = TextEditingController();
   final _weightController = TextEditingController();
-  final _jobController = TextEditingController();
   final _educationController = TextEditingController();
   final _bioController = TextEditingController();
-  final _specialController = TextEditingController();
   final _currentCityController = TextEditingController();
   final _sectController = TextEditingController();
   final _casteController = TextEditingController();
   final _otherRequirementsController = TextEditingController();
   
-  bool _hasPastIssues = false;
-  bool _acceptsPastIssues = true;
   String? _selectedMaritalStatus;
   String? _selectedMonthlyIncome;
   String? _selectedSiblings;
   String? _selectedFamilyMembers;
   String? _selectedLookingForType;
   String? _selectedLookingForAge;
-  String? _selectedLookingForProfession;
   List<String> _selectedInterests = [];
-  String? _selectedPastIssueDetails;
-  String? _selectedAcceptedPastIssueDetails;
   
   bool _managedBySomeoneElse = false;
   bool _facingChallenges = false;
@@ -97,11 +90,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     'Painting', 'Sculpting', 'Martial Arts', 'Entrepreneurship', 'DIY Projects'
   ];
 
-  List<String> _selectedLanguages = [];
-  final List<String> _languagesOfferings = [
-    '🇺🇸 English', '🇧🇩 Bengali', '🇸🇦 Arabic', '🇫🇷 French', '🇪🇸 Spanish', '🇩🇪 German', '🇨🇳 Chinese', '🇮🇳 Hindi', '🇵🇰 Urdu', '🇹🇷 Turkish'
-  ];
-
   List<String> _selectedPersonalityTraits = [];
   final List<String> _personalityOfferings = [
     '😊 Kind', '🧠 Intellectual', '🤣 Humorous', '🎨 Creative', '🤫 Introverted', '🗣️ Extroverted', '🧘 Calm', '⚡ Energetic', '🤝 Empathetic', '🧗 Adventurous'
@@ -112,14 +100,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     '🚭 Non-smoker', '🍽️ Halal only', '🕌 Praying five times', '🏋️ Fitness enthusiast', '🍳 Foodie', '✈️ Traveler', '🎮 Gamer', '🐈 Pet lover'
   ];
 
-  List<String> _selectedHobbies = [];
-  final List<String> _hobbiesOfferings = [
-    '📸 Photography', '🍳 Cooking', '💃 Dancing', '🎤 Singing', '✍️ Writing', '🧶 Knitting', '♟️ Chess', '🎥 Movies'
-  ];
-
-  String? _selectedHasChildren;
   final _grewUpInController = TextEditingController();
-  double _marriageIntentionsValue = 0.5;
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -162,10 +143,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _heightFtController.dispose();
     _heightInController.dispose();
     _weightController.dispose();
-    _jobController.dispose();
     _educationController.dispose();
     _bioController.dispose();
-    _specialController.dispose();
     _phoneController.dispose();
     _currentCityController.dispose();
     _sectController.dispose();
@@ -225,7 +204,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'Phone Code': _selectedCountryCode != null,
       'Phone Number': _phoneController.text.isNotEmpty,
       'Weight': _weightController.text.isNotEmpty,
-      'Work/Profession': _jobController.text.isNotEmpty,
       'Education': _educationController.text.isNotEmpty,
       'Marital Status': _selectedMaritalStatus != null,
       'Current City': _currentCityController.text.isNotEmpty,
@@ -234,7 +212,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'Family Members': _selectedFamilyMembers != null,
       'Partner (Type)': _selectedLookingForType != null,
       'Partner (Age)': _selectedLookingForAge != null,
-      'Partner (Profession)': _selectedLookingForProfession != null,
       'Sect': _sectController.text.isNotEmpty,
       'Caste': _casteController.text.isNotEmpty,
     };
@@ -287,14 +264,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
       return;
     }
-    
-    if (_specialController.text.isNotEmpty && _specialController.text.length < 10) {
-      debugPrint('SignUp: Special considerations validation failed');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Special considerations must be at least 10 characters')),
-      );
-      return;
-    }
     debugPrint('SignUp: All validations passed');
 
     // 4. Data Processing & Registration
@@ -326,13 +295,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         religion: _selectedReligion,
         height: heightCm,
         weight: weightKg,
-        profession: _jobController.text,
         education: _educationController.text,
         bio: _bioController.text,
-        specialConsiderations: _specialController.text,
-        region: "${_selectedCity}, ${_selectedCountry}",
-        hasPastIssues: _hasPastIssues,
-        acceptsPastIssues: _acceptsPastIssues,
+        region: _selectedCountry != null && _selectedCity != null ? "${_selectedCity}, ${_selectedCountry}" : null,
         phoneNumber: "${_selectedCountryCode}${_phoneController.text}",
         maritalStatus: _selectedMaritalStatus,
         currentCity: _currentCityController.text,
@@ -341,15 +306,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         familyMembers: int.tryParse(_selectedFamilyMembers ?? ""),
         lookingForAge: _selectedLookingForAge,
         lookingForType: _selectedLookingForType,
-        lookingForProfession: _selectedLookingForProfession,
         interests: _selectedInterests,
-        languages: _selectedLanguages,
         personalityTraits: _selectedPersonalityTraits,
         lifeStyle: _selectedLifeStyle,
-        hobbies: _selectedHobbies,
-        grewUpIn: _toCamelCase(_grewUpInController.text),
-        sect: _sectController.text,
-        caste: _casteController.text,
+        grewUpIn: _grewUpInController.text,
+        religionSect: _sectController.text,
+        religionCast: _casteController.text,
         otherRequirements: _otherRequirementsController.text,
         managedBySomeoneElse: _managedBySomeoneElse,
         facingChallenges: _facingChallenges,
@@ -357,8 +319,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         readyToQaboolChallenges: _readyToQaboolChallenges,
         readyToQaboolChallengesList: _selectedReadyToQaboolChallenges,
         language: _languageController.text,
-        pastIssuesDetails: _hasPastIssues ? _selectedPastIssueDetails : null,
-        acceptedPastIssuesDetails: _acceptsPastIssues ? _selectedAcceptedPastIssueDetails : null,
         profileImage: _pickedImage,
       );
       if (!mounted) return;
@@ -1144,12 +1104,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   ? const Color(0xFF334155)
                                   : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          Divider(
-                              color: isDark
-                                  ? const Color(0xFF334155)
-                                  : const Color(0xFFE2E8F0)),
-                          const SizedBox(height: 24),
 
                           const SizedBox(height: 16),
 
@@ -1164,18 +1118,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             onChanged: (val) => setState(() => _selectedMaritalStatus = val),
                           ),
                           const SizedBox(height: 16),
-                          if (_selectedMaritalStatus != 'Single') ...[
-                            buildLabel('Do you have children?'),
-                            DropdownButtonFormField<String>(
-                              value: _selectedHasChildren,
-                              decoration: inputDecoration('Select Answer'),
-                              items: ['No', 'Yes, living with me', 'Yes, not living with me']
-                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                  .toList(),
-                              onChanged: (val) => setState(() => _selectedHasChildren = val),
-                            ),
-                            const SizedBox(height: 16),
-                          ],
                           Row(
                             children: [
                               Expanded(
@@ -1274,13 +1216,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             maxSelect: 5,
                             onChanged: (list) => _selectedLifeStyle = list,
                           ),
-                          buildMultiSelect(
-                            title: 'Hobbies',
-                            offerings: _hobbiesOfferings,
-                            selectedList: _selectedHobbies,
-                            maxSelect: 5,
-                            onChanged: (list) => _selectedHobbies = list,
-                          ),
+
                           const SizedBox(height: 24),
                           Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
@@ -1297,15 +1233,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
 
-                          // Special Considerations
-                          buildSectionHeader(Icons.info, 'Special Considerations'),
-                          buildLabel('Accessibility or Special Cases (Optional)'),
-                          TextField(
-                            controller: _specialController,
-                            maxLines: 4,
-                            decoration: inputDecoration("Physical accessibility requirements, etc..."),
-                          ),
-                          const SizedBox(height: 24),
                           Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
 

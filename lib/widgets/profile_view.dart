@@ -326,6 +326,16 @@ class _ProfileViewState extends State<ProfileView> {
             ],
           ),
         ),
+        if (widget.isMyProfile)
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: FloatingActionButton.small(
+              onPressed: () => Navigator.pushNamed(context, '/edit_profile'),
+              backgroundColor: QaboolTheme.primary,
+              child: const Icon(Icons.edit, size: 18, color: Colors.white),
+            ),
+          ),
       ],
     );
   }
@@ -525,8 +535,8 @@ class _ProfileViewState extends State<ProfileView> {
       _RequirementData(Icons.school_outlined, 'Education', widget.user.education ?? 'N/A'),
       _RequirementData(Icons.location_city_outlined, 'City', widget.user.currentCity ?? 'N/A'),
       _RequirementData(Icons.mosque_outlined, 'Religion', widget.user.religion ?? 'N/A'),
-      _RequirementData(Icons.account_balance_outlined, 'Religion-Sect', widget.user.sect ?? 'N/A'),
-      _RequirementData(Icons.groups_outlined, 'Religion-Cast', widget.user.caste ?? 'N/A'),
+      _RequirementData(Icons.account_balance_outlined, 'Religion-Sect', widget.user.religionSect ?? 'N/A'),
+      _RequirementData(Icons.groups_outlined, 'Religion-Cast', widget.user.religionCast ?? 'N/A'),
       _RequirementData(Icons.height, 'Height', widget.user.height != null ? '${widget.user.height?.toInt()}cm' : 'N/A'),
       _RequirementData(Icons.monitor_weight_outlined, 'Weight', widget.user.weight != null ? '${widget.user.weight?.toInt()}kg' : 'N/A'),
       _RequirementData(Icons.payments_outlined, 'Income', widget.user.monthlyIncome != null ? '€${widget.user.monthlyIncome?.toInt()}' : 'N/A'),
@@ -538,6 +548,7 @@ class _ProfileViewState extends State<ProfileView> {
       children: [
         GridView.builder(
           shrinkWrap: true,
+          padding: EdgeInsets.zero,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: isLargeScreen ? 3 : 2,
@@ -663,14 +674,13 @@ class _ProfileViewState extends State<ProfileView> {
         _buildInfoCard(Icons.location_city, 'CURRENT CITY', widget.user.currentCity ?? 'N/A', isDark, isLargeScreen),
         _buildInfoCard(Icons.school_outlined, 'EDUCATION', widget.user.education ?? 'N/A', isDark, isLargeScreen),
         _buildInfoCard(Icons.mosque_outlined, 'RELIGION', widget.user.religion ?? 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.account_balance, 'SECT', widget.user.sect ?? 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.groups_outlined, 'CASTE', widget.user.caste ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.account_balance, 'SECT', widget.user.religionSect ?? 'N/A', isDark, isLargeScreen),
+        _buildInfoCard(Icons.groups_outlined, 'CASTE', widget.user.religionCast ?? 'N/A', isDark, isLargeScreen),
         _buildInfoCard(Icons.payments_outlined, 'MONTHLY INCOME', widget.user.monthlyIncome != null ? '€${widget.user.monthlyIncome?.toInt()}' : 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.work_outline, 'PROFESSION', widget.user.profession ?? 'N/A', isDark, isLargeScreen),
         _buildInfoCard(Icons.people_outline, 'SIBLINGS', widget.user.siblings?.toString() ?? 'N/A', isDark, isLargeScreen),
         _buildInfoCard(Icons.family_restroom_outlined, 'FAMILY MEMBERS', widget.user.familyMembers?.toString() ?? 'N/A', isDark, isLargeScreen),
         _buildInfoCard(Icons.public, 'NATIONALITY', widget.user.country, isDark, isLargeScreen),
-        _buildInfoCard(Icons.language, 'LANGUAGE', widget.user.languages.take(2).join(', '), isDark, isLargeScreen),
+        _buildInfoCard(Icons.language, 'LANGUAGE', widget.user.language ?? 'N/A', isDark, isLargeScreen),
       ],
     );
   }
@@ -973,7 +983,7 @@ class _ProfileViewState extends State<ProfileView> {
           ),
           const SizedBox(height: 24),
           const SizedBox(height: 24),
-          _buildInfoRow(Icons.work_outline, widget.user.profession ?? 'Not specified', isDark),
+
           const SizedBox(height: 12),
           _buildInfoRow(Icons.nightlight_round, widget.user.religion ?? 'Not specified', isDark),
           const SizedBox(height: 12),
@@ -1082,7 +1092,7 @@ class _ProfileViewState extends State<ProfileView> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
           content,
         ],
       ),

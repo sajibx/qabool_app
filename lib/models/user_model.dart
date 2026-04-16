@@ -15,9 +15,9 @@ class UserModel {
   final String? ethnicity;
   final double? height;
   final double? weight;
-  final String? profession;
+  final String? phoneNumber;
+  final String? otherRequirements;
   final String? education;
-  final String? specialConsiderations;
   final bool isVerified;
   final bool isFavorited;
   final String status;
@@ -29,9 +29,6 @@ class UserModel {
   final bool acceptsPastIssues;
   final String? pastIssuesDetails;
   final String? acceptedPastIssuesDetails;
-  final String? phoneNumber;
-  final String? otherRequirements;
-
   
   // New Fields
   final String? maritalStatus;
@@ -41,17 +38,12 @@ class UserModel {
   final int? familyMembers;
   final String? lookingForAge;
   final String? lookingForType;
-  final String? lookingForProfession;
   final String verifiedStatus; // active, inactive
-  final String? sect;
-  final String? caste;
+  final String? religionSect;
+  final String? religionCast;
   final List<String> interests;
-  final List<String> languages;
   final List<String> personalityTraits;
   final List<String> lifeStyle;
-  final List<String> hobbies;
-  final String? marriageIntentions;
-  final String? hasChildren;
   final String? grewUpIn;
   final bool managedBySomeoneElse;
   final bool facingChallenges;
@@ -76,9 +68,7 @@ class UserModel {
     this.ethnicity,
     this.height,
     this.weight,
-    this.profession,
     this.education,
-    this.specialConsiderations,
     this.isVerified = false,
     this.isFavorited = false,
     this.status = 'ACTIVE',
@@ -98,17 +88,12 @@ class UserModel {
     this.familyMembers,
     this.lookingForAge,
     this.lookingForType,
-    this.lookingForProfession,
     this.verifiedStatus = 'inactive',
-    this.sect,
-    this.caste,
+    this.religionSect,
+    this.religionCast,
     this.interests = const [],
-    this.languages = const [],
     this.personalityTraits = const [],
     this.lifeStyle = const [],
-    this.hobbies = const [],
-    this.marriageIntentions,
-    this.hasChildren,
     this.grewUpIn,
     this.otherRequirements,
     this.managedBySomeoneElse = false,
@@ -162,6 +147,34 @@ class UserModel {
     }
   }
 
+  static int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static double? _toDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  static DateTime? _toDateTime(dynamic value) {
+    if (value == null) return null;
+    try {
+      if (value is String && value.isNotEmpty) {
+        return DateTime.parse(value);
+      }
+    } catch (e) {
+      print('UserModel: Error parsing date: $value - $e');
+    }
+    return null;
+  }
+
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id']?.toString() ?? '',
@@ -170,22 +183,20 @@ class UserModel {
       lastName: json['lastName']?.toString() ?? '',
       profileImageUrl: json['profileImageUrl'],
       bio: json['bio'],
-      age: json['age'],
-      dob: json['dob'] != null ? DateTime.parse(json['dob']) : null,
+      age: _toInt(json['age']),
+      dob: _toDateTime(json['dob']),
       gender: json['gender'],
       region: json['region'],
       religion: json['religion'],
       ethnicity: json['ethnicity'],
-      height: json['height']?.toDouble(),
-      weight: json['weight']?.toDouble(),
-      profession: json['profession'],
+      height: _toDouble(json['height']),
+      weight: _toDouble(json['weight']),
       education: json['education'],
-      specialConsiderations: json['specialConsiderations'],
       isVerified: json['isVerified'] ?? false,
       isFavorited: json['isFavorited'] ?? false,
       status: json['status']?.toString() ?? 'ACTIVE',
       isOnline: json['isOnline'] ?? false,
-      lastSeen: json['lastSeen'] != null ? DateTime.parse(json['lastSeen']) : null,
+      lastSeen: _toDateTime(json['lastSeen']),
       connectionStatus: json['connectionStatus']?.toString() ?? 'NONE',
       connectionId: json['connectionId']?.toString(),
       hasPastIssues: json['hasPastIssues'] ?? false,
@@ -193,22 +204,17 @@ class UserModel {
       phoneNumber: json['phoneNumber']?.toString(),
       maritalStatus: json['maritalStatus'],
       currentCity: json['currentCity'],
-      monthlyIncome: json['monthlyIncome']?.toDouble(),
-      siblings: json['siblings'],
-      familyMembers: json['familyMembers'],
+      monthlyIncome: _toDouble(json['monthlyIncome']),
+      siblings: _toInt(json['siblings']),
+      familyMembers: _toInt(json['familyMembers']),
       lookingForAge: json['lookingForAge'],
       lookingForType: json['lookingForType'],
-      lookingForProfession: json['lookingForProfession'],
       verifiedStatus: json['verifiedStatus']?.toString() ?? 'inactive',
-      sect: json['sect'],
-      caste: json['caste'],
+      religionSect: json['religionSect'],
+      religionCast: json['religionCast'],
       interests: json['interests'] != null ? List<String>.from(json['interests']) : const [],
-      languages: json['languages'] != null ? List<String>.from(json['languages']) : const [],
       personalityTraits: json['personalityTraits'] != null ? List<String>.from(json['personalityTraits']) : const [],
       lifeStyle: json['lifeStyle'] != null ? List<String>.from(json['lifeStyle']) : const [],
-      hobbies: json['hobbies'] != null ? List<String>.from(json['hobbies']) : const [],
-      marriageIntentions: json['marriageIntentions']?.toString(),
-      hasChildren: json['hasChildren']?.toString(),
       grewUpIn: json['grewUpIn']?.toString(),
       pastIssuesDetails: json['pastIssuesDetails']?.toString(),
       acceptedPastIssuesDetails: json['acceptedPastIssuesDetails']?.toString(),
@@ -219,7 +225,7 @@ class UserModel {
       readyToQaboolChallenges: json['readyToQaboolChallenges'] ?? false,
       readyToQaboolChallengesList: json['readyToQaboolChallengesList'] != null ? List<String>.from(json['readyToQaboolChallengesList']) : const [],
       language: json['language']?.toString(),
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      updatedAt: _toDateTime(json['updatedAt']),
     );
   }
 
@@ -240,9 +246,7 @@ class UserModel {
       'ethnicity': ethnicity,
       'height': height,
       'weight': weight,
-      'profession': profession,
       'education': education,
-      'specialConsiderations': specialConsiderations,
       'isVerified': isVerified,
       'isFavorited': isFavorited,
       'status': status,
@@ -260,17 +264,12 @@ class UserModel {
       'familyMembers': familyMembers,
       'lookingForAge': lookingForAge,
       'lookingForType': lookingForType,
-      'lookingForProfession': lookingForProfession,
       'verifiedStatus': verifiedStatus,
-      'sect': sect,
-      'caste': caste,
+      'religionSect': religionSect,
+      'religionCast': religionCast,
       'interests': interests,
-      'languages': languages,
       'personalityTraits': personalityTraits,
       'lifeStyle': lifeStyle,
-      'hobbies': hobbies,
-      'marriageIntentions': marriageIntentions,
-      'hasChildren': hasChildren,
       'grewUpIn': grewUpIn,
       'pastIssuesDetails': pastIssuesDetails,
       'acceptedPastIssuesDetails': acceptedPastIssuesDetails,
@@ -300,9 +299,7 @@ class UserModel {
     String? ethnicity,
     double? height,
     double? weight,
-    String? profession,
     String? education,
-    String? specialConsiderations,
     bool? isVerified,
     bool? isFavorited,
     String? status,
@@ -320,17 +317,12 @@ class UserModel {
     int? familyMembers,
     String? lookingForAge,
     String? lookingForType,
-    String? lookingForProfession,
     String? verifiedStatus,
-    String? sect,
-    String? caste,
+    String? religionSect,
+    String? religionCast,
     List<String>? interests,
-    List<String>? languages,
     List<String>? personalityTraits,
     List<String>? lifeStyle,
-    List<String>? hobbies,
-    String? marriageIntentions,
-    String? hasChildren,
     String? grewUpIn,
     String? otherRequirements,
     bool? managedBySomeoneElse,
@@ -356,9 +348,7 @@ class UserModel {
       ethnicity: ethnicity ?? this.ethnicity,
       height: height ?? this.height,
       weight: weight ?? this.weight,
-      profession: profession ?? this.profession,
       education: education ?? this.education,
-      specialConsiderations: specialConsiderations ?? this.specialConsiderations,
       isVerified: isVerified ?? this.isVerified,
       isFavorited: isFavorited ?? this.isFavorited,
       status: status ?? this.status,
@@ -376,17 +366,12 @@ class UserModel {
       familyMembers: familyMembers ?? this.familyMembers,
       lookingForAge: lookingForAge ?? this.lookingForAge,
       lookingForType: lookingForType ?? this.lookingForType,
-      lookingForProfession: lookingForProfession ?? this.lookingForProfession,
       verifiedStatus: verifiedStatus ?? this.verifiedStatus,
-      sect: sect ?? this.sect,
-      caste: caste ?? this.caste,
+      religionSect: religionSect ?? this.religionSect,
+      religionCast: religionCast ?? this.religionCast,
       interests: interests ?? this.interests,
-      languages: languages ?? this.languages,
       personalityTraits: personalityTraits ?? this.personalityTraits,
       lifeStyle: lifeStyle ?? this.lifeStyle,
-      hobbies: hobbies ?? this.hobbies,
-      marriageIntentions: marriageIntentions ?? this.marriageIntentions,
-      hasChildren: hasChildren ?? this.hasChildren,
       grewUpIn: grewUpIn ?? this.grewUpIn,
       otherRequirements: otherRequirements ?? this.otherRequirements,
       managedBySomeoneElse: managedBySomeoneElse ?? this.managedBySomeoneElse,

@@ -258,7 +258,7 @@ class _FavoritesListState extends State<FavoritesList> {
                 ),
               ),
               Text(
-                profile.profession ?? 'No profession mentioned',
+                profile.education ?? 'Education not specified',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

@@ -118,8 +118,8 @@ class UserDiscoveryCard extends StatelessWidget {
                     spacing: 6,
                     runSpacing: 6,
                     children: [
-                      if (user.profession != null) 
-                        _buildTag(user.profession!, Icons.work_outline, isGridMode),
+                      if (user.education != null) 
+                        _buildTag(user.education!, Icons.school_outlined, isGridMode),
                       if (user.religion != null) 
                         _buildTag(user.religion!, Icons.church_outlined, isGridMode),
                       ...user.interests.take(3).map((interest) => 

@@ -4,6 +4,7 @@ import 'package:qabool_app/theme.dart';
 import 'package:qabool_app/screens/login_screen.dart';
 import 'package:qabool_app/screens/sign_up_screen.dart';
 import 'package:qabool_app/screens/main_navigation_screen.dart';
+import 'package:qabool_app/screens/edit_profile_screen.dart';
 import 'package:qabool_app/services/api_service.dart';
 import 'package:qabool_app/services/auth_service.dart';
 import 'package:qabool_app/services/profile_service.dart';
@@ -85,6 +86,7 @@ class QaboolApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/main': (context) => const MainNavigationScreen(),
+        '/edit_profile': (context) => const EditProfileScreen(),
       },
     );
   }

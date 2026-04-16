@@ -46,12 +46,15 @@ class _LoginScreenState extends State<LoginScreen> {
       // Ensure we always land on Home after login
       context.read<NavigationService>().setTab(AppTab.home);
       Navigator.pushReplacementNamed(context, '/main');
-    } on Exception catch (e) {
+    } catch (e, stack) {
+      debugPrint('LOGIN ERROR: $e');
+      debugPrint('STACKTRACE: $stack');
+      
       String message = 'Login failed';
       if (e.toString().contains('401')) {
         message = 'Invalid email or password. Please try again.';
       } else {
-        message = e.toString().contains('DioException') ? 'Server error. Please try again later.' : e.toString();
+        message = e.toString().contains('DioException') ? 'Server error. Please try again later.' : 'Error: ${e.toString()}';
       }
 
       if (mounted) {

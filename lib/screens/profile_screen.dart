@@ -1192,10 +1192,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildInfoCard(Icons.location_city, 'CURRENT CITY', _displayUser!.currentCity ?? 'Not set', isDark),
               _buildInfoCard(Icons.school_outlined, 'EDUCATION', _displayUser!.education ?? 'Not set', isDark),
               _buildInfoCard(Icons.mosque_outlined, 'RELIGION', _displayUser!.religion ?? 'Not set', isDark),
-              _buildInfoCard(Icons.account_balance, 'SECT', _displayUser!.sect ?? 'Not set', isDark),
-              _buildInfoCard(Icons.groups_outlined, 'CASTE', _displayUser!.caste ?? 'Not set', isDark),
+              _buildInfoCard(Icons.account_balance, 'SECT', _displayUser!.religionSect ?? 'Not set', isDark),
+              _buildInfoCard(Icons.groups_outlined, 'CASTE', _displayUser!.religionCast ?? 'Not set', isDark),
               _buildInfoCard(Icons.payments_outlined, 'MONTHLY INCOME', _displayUser!.monthlyIncome != null ? '€${_displayUser!.monthlyIncome}' : 'Not set', isDark),
-              _buildInfoCard(Icons.work_outline, 'PROFESSION', _displayUser!.profession ?? 'Not set', isDark),
+              _buildInfoCard(Icons.school_outlined, 'EDUCATION', _displayUser!.education ?? 'Not set', isDark),
               _buildInfoCard(Icons.people_outline, 'SIBLINGS', _displayUser!.siblings?.toString() ?? 'Not set', isDark),
               _buildInfoCard(Icons.family_restroom_outlined, 'FAMILY MEMBERS', _displayUser!.familyMembers?.toString() ?? 'Not set', isDark),
             ],
@@ -1384,7 +1384,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 16),
           _buildRequirementItem('LOOKING FOR', _displayUser!.lookingForType ?? 'Not set', true),
           _buildRequirementItem('AGE', _displayUser!.lookingForAge ?? 'Not set', true),
-          _buildRequirementItem('EDUCATION', _displayUser!.lookingForProfession ?? 'Not set', true),
+
         ],
       ),
     );

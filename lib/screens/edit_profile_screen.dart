@@ -21,8 +21,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _bioController;
-  late TextEditingController _professionController;
-  late TextEditingController _specialController;
   late TextEditingController _weightController;
   late TextEditingController _heightCmController;
   late TextEditingController _heightFtController;
@@ -30,8 +28,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _emailController;
   late TextEditingController _phoneNumberController;
   late TextEditingController _currentCityController;
-  late TextEditingController _pastIssuesDetailsController;
-  late TextEditingController _acceptedPastIssuesDetailsController;
   late TextEditingController _languageController;
 
   bool _managedBySomeoneElse = false;
@@ -64,16 +60,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _selectedFamilyMembers;
   String? _selectedLookingForAge;
   String? _selectedLookingForType;
-  String? _selectedLookingForProfession;
   String? _selectedEducation;
   String _heightUnit = 'cm';
   String _weightUnit = 'kg';
   XFile? _pickedImage;
-
-  List<String> _selectedLanguages = [];
-  final List<String> _languagesOfferings = [
-    '🇺🇸 English', '🇧🇩 Bengali', '🇸🇦 Arabic', '🇫🇷 French', '🇪🇸 Spanish', '🇩🇪 German', '🇨🇳 Chinese', '🇮🇳 Hindi', '🇵🇰 Urdu', '🇹🇷 Turkish'
-  ];
 
   List<String> _selectedPersonalityTraits = [];
   final List<String> _personalityOfferings = [
@@ -85,11 +75,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     '🚭 Non-smoker', '🍽️ Halal only', '🕌 Praying five times', '🏋️ Fitness enthusiast', '🍳 Foodie', '✈️ Traveler', '🎮 Gamer', '🐈 Pet lover'
   ];
 
-  List<String> _selectedHobbies = [];
-  final List<String> _hobbiesOfferings = [
-    '📸 Photography', '🍳 Cooking', '💃 Dancing', '🎤 Singing', '✍️ Writing', '🧶 Knitting', '♟️ Chess', '🎥 Movies'
-  ];
-
   List<String> _selectedInterests = [];
   final List<String> _availableInterests = [
     'Cooking', 'Traveling', 'Reading', 'Coding', 'Gaming', 
@@ -97,13 +82,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     'Movies', 'Outdoors', 'Coffee', 'Animals', 'Gardening'
   ];
 
-  String? _selectedHasChildren;
   late TextEditingController _grewUpInController;
-  double _marriageIntentionsValue = 0.5;
-  
-  bool _hasPastIssues = false;
-  bool _acceptsPastIssues = true;
-  bool _isLoading = false;
+   bool _isLoading = false;
 
   final Map<String, List<String>> _countryCities = {
     'Germany': ['Berlin', 'Munich', 'Hamburg', 'Frankfurt', 'Stuttgart'],
@@ -132,8 +112,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _firstNameController = TextEditingController(text: user?.firstName);
     _lastNameController = TextEditingController(text: user?.lastName);
     _bioController = TextEditingController(text: user?.bio);
-    _professionController = TextEditingController(text: user?.profession);
-    _specialController = TextEditingController(text: user?.specialConsiderations);
     _weightController = TextEditingController(text: user?.weight?.toStringAsFixed(1));
     _heightCmController = TextEditingController(text: user?.height?.toStringAsFixed(0));
     _heightFtController = TextEditingController();
@@ -141,6 +119,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _emailController = TextEditingController(text: user?.email);
     _phoneNumberController = TextEditingController(text: user?.phoneNumber);
     _currentCityController = TextEditingController(text: user?.currentCity);
+
+    debugPrint('DEBUG: EditProfileScreen initState');
+    debugPrint('DEBUG: user.bio: ${user?.bio}');
+    debugPrint('DEBUG: user.phoneNumber: ${user?.phoneNumber}');
 
     _selectedDob = user?.dob;
     _selectedGender = user?.gender;
@@ -152,22 +134,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _selectedFamilyMembers = user?.familyMembers?.toString();
     _selectedLookingForAge = user?.lookingForAge;
     _selectedLookingForType = user?.lookingForType;
-    _selectedLookingForProfession = user?.lookingForProfession;
     _selectedEducation = user?.education;
-    _hasPastIssues = user?.hasPastIssues ?? false;
-    _acceptsPastIssues = user?.acceptsPastIssues ?? true;
-    _selectedHasChildren = user?.hasChildren;
     _grewUpInController = TextEditingController(text: user?.grewUpIn);
     
-    _selectedLanguages = List<String>.from(user?.languages ?? []);
     _selectedPersonalityTraits = List<String>.from(user?.personalityTraits ?? []);
     _selectedLifeStyle = List<String>.from(user?.lifeStyle ?? []);
-    _selectedHobbies = List<String>.from(user?.hobbies ?? []);
     _selectedInterests = List<String>.from(user?.interests ?? []);
     
-    
-    _pastIssuesDetailsController = TextEditingController(text: user?.pastIssuesDetails);
-    _acceptedPastIssuesDetailsController = TextEditingController(text: user?.acceptedPastIssuesDetails);
     _languageController = TextEditingController(text: user?.language);
 
     _managedBySomeoneElse = user?.managedBySomeoneElse ?? false;
@@ -177,9 +150,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _selectedFacingChallenges = List<String>.from(user?.facingChallengesList ?? []);
     _selectedReadyToQaboolChallenges = List<String>.from(user?.readyToQaboolChallengesList ?? []);
 
-    if (user?.marriageIntentions != null) {
-      _marriageIntentionsValue = double.tryParse(user!.marriageIntentions!) ?? 0.5;
-    }
+    _managedBySomeoneElse = user?.managedBySomeoneElse ?? false;
 
     // Handle Region Decomposition
     if (user?.region != null && user!.region!.contains(',')) {
@@ -210,19 +181,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _bioController.dispose();
-    _professionController.dispose();
-    _specialController.dispose();
     _weightController.dispose();
     _heightCmController.dispose();
     _heightFtController.dispose();
     _heightInController.dispose();
     _emailController.dispose();
     _phoneNumberController.dispose();
-    _phoneNumberController.dispose();
     _currentCityController.dispose();
     _grewUpInController.dispose();
-    _pastIssuesDetailsController.dispose();
-    _acceptedPastIssuesDetailsController.dispose();
     _languageController.dispose();
     super.dispose();
   }
@@ -271,11 +237,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       return;
     }
 
-    if (_specialController.text.isNotEmpty && _specialController.text.length < 10) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Special considerations must be at least 10 characters')));
-      return;
-    }
-
     setState(() => _isLoading = true);
     try {
       // Height Conversion
@@ -313,22 +274,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'familyMembers': int.tryParse(_selectedFamilyMembers ?? ""),
         'lookingForAge': _selectedLookingForAge,
         'lookingForType': _selectedLookingForType,
-        'lookingForProfession': _selectedLookingForProfession,
-        'profession': _professionController.text,
         'education': _selectedEducation,
-        'specialConsiderations': _specialController.text,
         'region': _selectedCountry != null && _selectedCity != null ? "${_selectedCity}, ${_selectedCountry}" : null,
-        'hasPastIssues': _hasPastIssues,
-        'pastIssuesDetails': _hasPastIssues ? _pastIssuesDetailsController.text : null,
-        'acceptsPastIssues': _acceptsPastIssues,
-        'acceptedPastIssuesDetails': _acceptsPastIssues ? _acceptedPastIssuesDetailsController.text : null,
-        'languages': _selectedLanguages,
         'personalityTraits': _selectedPersonalityTraits,
         'lifeStyle': _selectedLifeStyle,
-        'hobbies': _selectedHobbies,
         'interests': _selectedInterests,
-        'marriageIntentions': _marriageIntentionsValue.toString(),
-        'hasChildren': _selectedHasChildren,
         'grewUpIn': _grewUpInController.text,
         'managedBySomeoneElse': _managedBySomeoneElse,
         'facingChallenges': _facingChallenges,
@@ -646,9 +596,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 32),
               
-              _buildSectionTitle('PROFESSIONAL'),
-              const SizedBox(height: 16),
-              _buildTextField(controller: _professionController, label: 'Profession', icon: Icons.work),
+              _buildSectionTitle('EDUCATION & LANGUAGE'),
               const SizedBox(height: 16),
               _buildDropdownField(
                 label: 'Education',
@@ -659,48 +607,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 16),
               _buildTextField(controller: _languageController, label: 'Native/Preferred Language', icon: Icons.translate),
-              const SizedBox(height: 16),
-              _buildTextField(controller: _specialController, label: 'Special Considerations', icon: Icons.info, maxLines: 2),
-              const SizedBox(height: 32),
-
-              _buildSectionTitle('PREFERENCES & BACKGROUND'),
-              const SizedBox(height: 16),
-              SwitchListTile(
-                title: Text('Past issues/problems', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14)),
-                subtitle: Text('Do you have any past issues?', style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 12)),
-                secondary: Icon(Icons.history, color: primaryColor),
-                value: _hasPastIssues,
-                activeColor: primaryColor,
-                onChanged: (val) => setState(() => _hasPastIssues = val),
-                contentPadding: EdgeInsets.zero,
-              ),
-              SwitchListTile(
-                title: Text('Accept others with issues', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14)),
-                subtitle: Text('Would you accept matching with someone who has past issues?', style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 12)),
-                secondary: Icon(Icons.people_outline, color: primaryColor),
-                value: _acceptsPastIssues,
-                activeColor: primaryColor,
-                onChanged: (val) => setState(() => _acceptsPastIssues = val),
-                contentPadding: EdgeInsets.zero,
-              ),
-              if (_hasPastIssues) ...[
-                const SizedBox(height: 8),
-                _buildTextField(
-                  controller: _pastIssuesDetailsController,
-                  label: 'Past Issues Details',
-                  icon: Icons.description_outlined,
-                  maxLines: 2,
-                ),
-              ],
-              if (_acceptsPastIssues) ...[
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _acceptedPastIssuesDetailsController,
-                  label: 'Acceptance Criteria/Details',
-                  icon: Icons.checklist_rtl,
-                  maxLines: 2,
-                ),
-              ],
               const SizedBox(height: 32),
 
               _buildSectionTitle('MANAGEMENT & CHALLENGES'),
@@ -759,63 +665,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ],
               const SizedBox(height: 32),
 
-              _buildSectionTitle('PARTNER PREFERENCES'),
-              const SizedBox(height: 16),
-              _buildDropdownField(
-                label: 'Looking For Age Range',
-                icon: Icons.calendar_month,
-                value: _selectedLookingForAge,
-                items: ['18 - 25 years old', '25 - 35 years old', '35 - 45 years old', '45+ years old'],
-                onChanged: (val) => setState(() => _selectedLookingForAge = val),
-              ),
-              const SizedBox(height: 16),
-              _buildDropdownField(
-                label: 'Looking For Type',
-                icon: Icons.psychology,
-                value: _selectedLookingForType,
-                items: ['Practising Muslim', 'Moderate Muslim', 'Liberal Muslim', 'Other'],
-                onChanged: (val) => setState(() => _selectedLookingForType = val),
-              ),
-              const SizedBox(height: 16),
-              _buildDropdownField(
-                label: 'Looking For Profession/Education',
-                icon: Icons.work_history,
-                value: _selectedLookingForProfession,
-                items: ['High School or above', 'Bachelors Degree or above', 'Masters Degree or above', 'PhD or above'],
-                onChanged: (val) => setState(() => _selectedLookingForProfession = val),
-              ),
-              const SizedBox(height: 32),
+
 
               _buildSectionTitle('PROFILE BUBBLES'),
               const SizedBox(height: 16),
               _buildTextField(controller: _grewUpInController, label: 'Where did you grow up?', icon: Icons.flag),
-              const SizedBox(height: 16),
-              _buildDropdownField(
-                label: 'Do you have children?',
-                icon: Icons.child_care,
-                value: _selectedHasChildren,
-                items: ['No', 'Yes, living with me', 'Yes, not living with me'],
-                onChanged: (val) => setState(() => _selectedHasChildren = val),
-              ),
               const SizedBox(height: 24),
-              _buildSectionTitle('MARRIAGE INTENTIONS'),
-              const SizedBox(height: 8),
-              Text('Match! <---> Agree together <---> 4-12 months', 
-                style: TextStyle(fontSize: 10, color: isDark ? Colors.grey[400] : Colors.grey[600])),
-              Slider(
-                value: _marriageIntentionsValue,
-                activeColor: primaryColor,
-                inactiveColor: primaryColor.withOpacity(0.2),
-                onChanged: (val) => setState(() => _marriageIntentionsValue = val),
-              ),
-              const SizedBox(height: 24),
-              _buildMultiSelect(
-                title: 'Languages',
-                offerings: _languagesOfferings,
-                selectedList: _selectedLanguages,
-                maxSelect: 5,
-                onChanged: (list) => setState(() => _selectedLanguages = list),
-              ),
               _buildMultiSelect(
                 title: 'Personality Traits',
                 offerings: _personalityOfferings,
@@ -823,6 +678,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 maxSelect: 5,
                 onChanged: (list) => setState(() => _selectedPersonalityTraits = list),
               ),
+              const SizedBox(height: 16),
               _buildMultiSelect(
                 title: 'Life Style',
                 offerings: _lifestyleOfferings,
@@ -830,14 +686,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 maxSelect: 5,
                 onChanged: (list) => setState(() => _selectedLifeStyle = list),
               ),
+              const SizedBox(height: 16),
               _buildMultiSelect(
-                title: 'Hobbies',
-                offerings: _hobbiesOfferings,
-                selectedList: _selectedHobbies,
-                maxSelect: 5,
-                onChanged: (list) => setState(() => _selectedHobbies = list),
-              ),
-               _buildMultiSelect(
                 title: 'Interests',
                 offerings: _availableInterests,
                 selectedList: _selectedInterests,
