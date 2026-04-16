@@ -137,19 +137,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _selectedEducation = user?.education;
     _grewUpInController = TextEditingController(text: user?.grewUpIn);
     
-    _selectedPersonalityTraits = List<String>.from(user?.personalityTraits ?? []);
-    _selectedLifeStyle = List<String>.from(user?.lifeStyle ?? []);
-    _selectedInterests = List<String>.from(user?.interests ?? []);
-    
-    _languageController = TextEditingController(text: user?.language);
+    _selectedFacingChallenges = List<String>.from(user?.facingChallengesList ?? [])
+        .where((e) => _challengeOptions.any((opt) => opt.toLowerCase() == e.toLowerCase())).toList();
+    _selectedReadyToQaboolChallenges = List<String>.from(user?.readyToQaboolChallengesList ?? [])
+        .where((e) => _challengeOptions.any((opt) => opt.toLowerCase() == e.toLowerCase())).toList();
+    _selectedInterests = List<String>.from(user?.interests ?? [])
+        .where((e) => _availableInterests.any((opt) => opt.toLowerCase() == e.toLowerCase())).toList();
+    _selectedPersonalityTraits = List<String>.from(user?.personalityTraits ?? [])
+        .where((e) => _personalityOfferings.any((opt) => opt.toLowerCase() == e.toLowerCase())).toList();
+    _selectedLifeStyle = List<String>.from(user?.lifeStyle ?? [])
+        .where((e) => _lifestyleOfferings.any((opt) => opt.toLowerCase() == e.toLowerCase())).toList();
 
-    _managedBySomeoneElse = user?.managedBySomeoneElse ?? false;
+    _languageController = TextEditingController(text: user?.language);
     _facingChallenges = user?.facingChallenges ?? false;
     _readyToQaboolChallenges = user?.readyToQaboolChallenges ?? false;
-    
-    _selectedFacingChallenges = List<String>.from(user?.facingChallengesList ?? []);
-    _selectedReadyToQaboolChallenges = List<String>.from(user?.readyToQaboolChallengesList ?? []);
-
     _managedBySomeoneElse = user?.managedBySomeoneElse ?? false;
 
     // Handle Region Decomposition
@@ -330,7 +331,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: primaryColor),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              // Fallback to MainScreen which hosts the ProfileView
+              Navigator.of(context).pushNamedAndRemoveUntil('/main', (route) => false);
+            }
+          },
         ),
         actions: [
           if (_isLoading)
@@ -656,11 +664,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               if (_readyToQaboolChallenges) ...[
                 const SizedBox(height: 8),
                 _buildMultiSelect(
-                  title: 'Ready to Qabool (Max 5)',
+                  title: 'Ready to Qabool Challenges (Max 5)',
                   offerings: _challengeOptions,
                   selectedList: _selectedReadyToQaboolChallenges,
                   maxSelect: 5,
-                  onChanged: (list) => setState(() => _selectedReadyToQaboolChallenges = list),
+                  onChanged: (newList) {
+                    setState(() {
+                      _selectedReadyToQaboolChallenges = newList;
+                    });
+                  },
                 ),
               ],
               const SizedBox(height: 32),
@@ -721,38 +733,66 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           spacing: 8,
           runSpacing: 8,
           children: offerings.map((item) {
-            final isSelected = selectedList.contains(item);
-            return FilterChip(
-              label: Text(item),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    if (selectedList.length < maxSelect) {
-                      selectedList.add(item);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Max $maxSelect items allowed')),
-                      );
-                    }
+            // Case-insensitive check to ensure robustness
+            final bool isSelected = selectedList.any((e) => e.toLowerCase() == item.toLowerCase());
+            
+            return GestureDetector(
+              onTap: () {
+                final newList = List<String>.from(selectedList);
+                if (isSelected) {
+                  newList.removeWhere((e) => e.toLowerCase() == item.toLowerCase());
+                } else {
+                  // Only count items that are actually in the current offerings
+                  final validCount = newList.where((e) => offerings.any((opt) => opt.toLowerCase() == e.toLowerCase())).length;
+                  
+                  if (validCount < maxSelect) {
+                    newList.add(item);
                   } else {
-                    selectedList.remove(item);
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Maximum $maxSelect items allowed for $title'),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        backgroundColor: pColor,
+                      ),
+                    );
+                    return;
                   }
-                  onChanged(selectedList);
-                });
+                }
+                onChanged(newList);
               },
-              selectedColor: pColor.withOpacity(0.3),
-              checkmarkColor: pColor,
-              labelStyle: TextStyle(
-                color: isSelected ? pColor : (isDark ? Colors.white : Colors.black87),
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 12,
-              ),
-              backgroundColor: isDark ? const Color(0xFF2D2626) : Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(
-                  color: isSelected ? pColor : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected 
+                      ? pColor 
+                      : (isDark ? const Color(0xFF2D2626) : Colors.white),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected 
+                        ? pColor 
+                        : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                    width: 1.5,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isSelected) ...[
+                      const Icon(Icons.check, color: Colors.white, size: 16),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      item,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );

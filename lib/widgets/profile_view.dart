@@ -883,6 +883,56 @@ class _ProfileViewState extends State<ProfileView> {
               ),
             ),
         ],
+        if (!widget.user.facingChallenges && !widget.user.readyToQaboolChallenges) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.verified_user_outlined, color: Colors.green.withOpacity(0.7), size: 18),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'This person is not facing any challenges',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: textColor.withOpacity(0.8),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(Icons.info_outline, color: textColor.withOpacity(0.4), size: 18),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'This person is not willing to accept anyone with challenges',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: textColor.withOpacity(0.5),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }

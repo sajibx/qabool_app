@@ -105,7 +105,17 @@ class ProfileService extends ChangeNotifier {
       filteredData.removeWhere((key, value) => value == null || (value is String && value.isEmpty));
       debugPrint('ProfileService: sending updatedData: $filteredData');
 
-      final formData = FormData.fromMap(filteredData);
+      final formData = FormData();
+      filteredData.forEach((key, value) {
+        if (value is List) {
+          for (var item in value) {
+            // Use key[] format to force backend to treat it as an array even with one item
+            formData.fields.add(MapEntry('${key}[]', item.toString()));
+          }
+        } else {
+          formData.fields.add(MapEntry(key, value.toString()));
+        }
+      });
       if (image != null) {
         if (kIsWeb) {
           formData.files.add(MapEntry(

@@ -133,7 +133,19 @@ class AuthService extends ChangeNotifier {
         'language': language,
       };
 
-      final formData = FormData.fromMap(dataMap);
+      final formData = FormData();
+      dataMap.forEach((key, value) {
+        if (value != null) {
+          if (value is List) {
+            for (var item in value) {
+              // Use key[] format to force backend to treat it as an array even with one item
+              formData.fields.add(MapEntry('${key}[]', item.toString()));
+            }
+          } else {
+            formData.fields.add(MapEntry(key, value.toString()));
+          }
+        }
+      });
 
       if (profileImage != null) {
         if (kIsWeb) {

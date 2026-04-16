@@ -413,80 +413,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       );
     }
-
-    Widget buildLabel(String text) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 6.0, left: 4.0),
-        child: Text(
-          text.toUpperCase(),
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-            color: isDark ? Colors.grey[300] : Colors.grey[700],
-          ),
-        ),
-      );
-    }
-
-    Widget buildMultiSelect({
-      required String title,
-      required List<String> offerings,
-      required List<String> selectedList,
-      required int maxSelect,
-      required Function(List<String>) onChanged,
-    }) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          buildLabel('$title (Select Max $maxSelect)'),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: offerings.map((item) {
-              final isSelected = selectedList.contains(item);
-              return FilterChip(
-                label: Text(item),
-                selected: isSelected,
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      if (selectedList.length < maxSelect) {
-                        selectedList.add(item);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('You can select a maximum of $maxSelect $title')),
-                        );
-                      }
-                    } else {
-                      selectedList.remove(item);
-                    }
-                    onChanged(selectedList);
-                  });
-                },
-                selectedColor: pColor.withOpacity(0.3),
-                checkmarkColor: pColor,
-                labelStyle: TextStyle(
-                  color: isSelected ? pColor : (isDark ? Colors.white : Colors.black87),
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 12,
-                ),
-                backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  side: BorderSide(
-                    color: isSelected ? pColor : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 24),
-        ],
-      );
-    }
-
     InputDecoration inputDecoration(String hint,
         {Widget? suffixIcon, BorderRadius? borderRadius}) {
       final radius = borderRadius ?? BorderRadius.circular(12);
@@ -684,7 +610,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    buildLabel('First Name'),
+                                    _buildLabel('First Name', isDark),
                                     TextField(
                                         controller: _firstNameController,
                                         decoration:
@@ -697,7 +623,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    buildLabel('Last Name'),
+                                    _buildLabel('Last Name', isDark),
                                     TextField(
                                         controller: _lastNameController,
                                         decoration:
@@ -708,7 +634,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          buildLabel('Gender'),
+                          _buildLabel('Gender', isDark),
                           DropdownButtonFormField<String>(
                             value: _selectedGender,
                             decoration: inputDecoration('Select Gender'),
@@ -730,12 +656,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             onChanged: (val) => setState(() => _managedBySomeoneElse = val),
                           ),
                           const SizedBox(height: 16),
-                          buildLabel('Email Address'),
+                          _buildLabel('Email Address', isDark),
                           TextField(
                               controller: _emailController,
                               decoration: inputDecoration('name@example.com')),
                           const SizedBox(height: 16),
-                          buildLabel('Password'),
+                          _buildLabel('Password', isDark),
                           TextField(
                             controller: _passwordController,
                             obscureText: _obscurePassword,
@@ -756,7 +682,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          buildLabel('Phone Number'),
+                          _buildLabel('Phone Number', isDark),
                           Row(
                             children: [
                               Expanded(
@@ -802,7 +728,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               Icons.person_search, 'Personal Attributes'),
                           
                           // Country Dropdown
-                          buildLabel('Country'),
+                          _buildLabel('Country', isDark),
                           DropdownButtonFormField<String>(
                             value: _selectedCountry,
                             decoration: inputDecoration('Select Country'),
@@ -819,7 +745,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const SizedBox(height: 16),
 
                           // City Dropdown
-                          buildLabel('City (Region)'),
+                          _buildLabel('City (Region)', isDark),
                           DropdownButtonFormField<String>(
                             value: _selectedCity,
                             decoration: inputDecoration('Select City'),
@@ -834,7 +760,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             },
                           ),
                           const SizedBox(height: 16),
-                          buildLabel('Race/Ethnicity'),
+                          _buildLabel('Race/Ethnicity', isDark),
                           DropdownButtonFormField<String>(
                             value: _selectedEthnicity,
                             decoration: inputDecoration('Select Ethnicity'),
@@ -879,7 +805,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 16),
                                 
                                 // Age (DOB)
-                                buildLabel('Date of Birth (Age)'),
+                                _buildLabel('Date of Birth (Age)', isDark),
                                 InkWell(
                                   onTap: () => _selectDate(context),
                                   child: IgnorePointer(
@@ -895,7 +821,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 16),
 
                                 // Education
-                                buildLabel('Education'),
+                                _buildLabel('Education', isDark),
                                 DropdownButtonFormField<String>(
                                   value: _educationController.text.isEmpty ? null : _educationController.text,
                                   decoration: inputDecoration('Highest degree earned'),
@@ -910,7 +836,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 16),
 
                                 // City
-                                buildLabel('Current City'),
+                                _buildLabel('Current City', isDark),
                                 TextField(
                                   controller: _currentCityController,
                                   decoration: inputDecoration('e.g. London, UK'),
@@ -918,7 +844,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 16),
 
                                 // Religion
-                                buildLabel('Religion'),
+                                _buildLabel('Religion', isDark),
                                 DropdownButtonFormField<String>(
                                   value: _selectedReligion,
                                   decoration: inputDecoration('Select Religion'),
@@ -935,7 +861,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 16),
 
                                 // Sect
-                                buildLabel('Religion-Sect'),
+                                _buildLabel('Religion-Sect', isDark),
                                 TextField(
                                   controller: _sectController,
                                   decoration: inputDecoration('e.g. Hanafi, Maliki, etc.'),
@@ -943,7 +869,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 16),
 
                                 // Caste
-                                buildLabel('Religion-Cast'),
+                                _buildLabel('Religion-Cast', isDark),
                                 TextField(
                                   controller: _casteController,
                                   decoration: inputDecoration('e.g. Sayyid, Sheikh, etc.'),
@@ -951,7 +877,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 16),
 
                                 // Height
-                                buildLabel('Height'),
+                                _buildLabel('Height', isDark),
                                 Row(
                                   children: [
                                     if (_heightUnit == 'cm')
@@ -1014,7 +940,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 16),
 
                                 // Weight
-                                buildLabel('Weight'),
+                                _buildLabel('Weight', isDark),
                                 Row(
                                   children: [
                                     Expanded(
@@ -1059,7 +985,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 16),
 
                                 // Income
-                                buildLabel('Monthly Income'),
+                                _buildLabel('Monthly Income', isDark),
                                 Row(
                                   children: [
                                     Expanded(
@@ -1083,14 +1009,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 16),
-                                buildLabel('Other Requirements'),
+                                _buildLabel('Other Requirements', isDark),
                                 TextField(
                                   controller: _otherRequirementsController,
                                   maxLines: 3,
                                   decoration: inputDecoration('Additional requirements for your partner...'),
                                 ),
                                 const SizedBox(height: 16),
-                                buildLabel('Preferred Language'),
+                                _buildLabel('Preferred Language', isDark),
                                 TextField(
                                   controller: _languageController,
                                   decoration: inputDecoration('e.g. English, Arabic, Bengali'),
@@ -1108,7 +1034,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const SizedBox(height: 16),
 
                           buildSectionHeader(Icons.home, 'Household & Additional Info'),
-                          buildLabel('Marital Status'),
+                          _buildLabel('Marital Status', isDark),
                           DropdownButtonFormField<String>(
                             value: _selectedMaritalStatus,
                             decoration: inputDecoration('Select Status'),
@@ -1124,7 +1050,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    buildLabel('Siblings'),
+                                    _buildLabel('Siblings', isDark),
                                     DropdownButtonFormField<String>(
                                       value: _selectedSiblings,
                                       decoration: inputDecoration('Select'),
@@ -1141,7 +1067,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    buildLabel('Family Members'),
+                                    _buildLabel('Family Members', isDark),
                                     DropdownButtonFormField<String>(
                                       value: _selectedFamilyMembers,
                                       decoration: inputDecoration('Select'),
@@ -1171,12 +1097,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             onChanged: (val) => setState(() => _facingChallenges = val),
                           ),
                           if (_facingChallenges)
-                            buildMultiSelect(
+                            _buildMultiSelect(
                               title: 'Your Challenges',
                               offerings: _challengeOptions,
                               selectedList: _selectedFacingChallenges,
                               maxSelect: 5,
                               onChanged: (list) => _selectedFacingChallenges = list,
+                              isDark: isDark,
+                              pColor: pColor,
+                              aColor: aColor,
                             ),
                           const SizedBox(height: 16),
 
@@ -1189,12 +1118,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             onChanged: (val) => setState(() => _readyToQaboolChallenges = val),
                           ),
                           if (_readyToQaboolChallenges)
-                            buildMultiSelect(
+                            _buildMultiSelect(
                               title: 'Accepted Challenges',
                               offerings: _challengeOptions,
                               selectedList: _selectedReadyToQaboolChallenges,
                               maxSelect: 5,
                               onChanged: (list) => _selectedReadyToQaboolChallenges = list,
+                              isDark: isDark,
+                              pColor: pColor,
+                              aColor: aColor,
                             ),
                           const SizedBox(height: 24),
                           Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
@@ -1202,28 +1134,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                           // Profile Details
                           buildSectionHeader(Icons.bubble_chart, 'Profile Details'),
-                          buildMultiSelect(
+                          _buildMultiSelect(
                             title: 'Personality Traits',
                             offerings: _personalityOfferings,
                             selectedList: _selectedPersonalityTraits,
                             maxSelect: 5,
                             onChanged: (list) => _selectedPersonalityTraits = list,
+                            isDark: isDark,
+                            pColor: pColor,
+                            aColor: aColor,
                           ),
-                          buildMultiSelect(
-                            title: 'Life Style',
-                            offerings: _lifestyleOfferings,
-                            selectedList: _selectedLifeStyle,
-                            maxSelect: 5,
-                            onChanged: (list) => _selectedLifeStyle = list,
-                          ),
-
                           const SizedBox(height: 24),
                           Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
 
                           // Bio
                           buildSectionHeader(Icons.description, 'Bio'),
-                          buildLabel('Tell us a bit about yourself (Min 10 characters)'),
+                          _buildLabel('Tell us a bit about yourself (Min 10 characters)', isDark),
                           TextField(
                             controller: _bioController,
                             maxLines: 4,
@@ -1236,12 +1163,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
 
-                          buildMultiSelect(
+                          _buildMultiSelect(
                             title: 'Interests',
                             offerings: _availableInterests,
                             selectedList: _selectedInterests,
                             maxSelect: 15,
                             onChanged: (list) => _selectedInterests = list,
+                            isDark: isDark,
+                            pColor: pColor,
+                            aColor: aColor,
                           ),
                           const SizedBox(height: 32),
 
@@ -1343,6 +1273,89 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+  Widget _buildMultiSelect({
+    required String title,
+    required List<String> offerings,
+    required List<String> selectedList,
+    required int maxSelect,
+    required Function(List<String>) onChanged,
+    required bool isDark,
+    required Color pColor,
+    required Color aColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel('$title (Select Max $maxSelect)', isDark),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: offerings.map((item) {
+            // Case-insensitive check to ensure robustness
+            final bool isSelected = selectedList.any((e) => e.toLowerCase() == item.toLowerCase());
+            
+            return FilterChip(
+              label: Text(item),
+              selected: isSelected,
+              onSelected: (selected) {
+                setState(() {
+                  final newList = List<String>.from(selectedList);
+                  if (selected) {
+                    // Only count items that are actually in the current offerings
+                    final validCount = newList.where((e) => offerings.any((opt) => opt.toLowerCase() == e.toLowerCase())).length;
+                    
+                    if (validCount < maxSelect) {
+                      newList.add(item);
+                    } else {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('You can select a maximum of $maxSelect $title')),
+                      );
+                      return;
+                    }
+                  } else {
+                    newList.removeWhere((e) => e.toLowerCase() == item.toLowerCase());
+                  }
+                  onChanged(newList);
+                });
+              },
+              selectedColor: pColor.withOpacity(0.3),
+              checkmarkColor: pColor,
+              labelStyle: TextStyle(
+                color: isSelected ? pColor : (isDark ? Colors.white : Colors.black87),
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 12,
+              ),
+              backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  color: isSelected ? pColor : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildLabel(String text, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6.0, left: 4.0),
+      child: Text(
+        text.toUpperCase(),
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+          color: isDark ? Colors.grey[300] : Colors.grey[700],
         ),
       ),
     );
