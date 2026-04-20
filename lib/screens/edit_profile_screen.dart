@@ -61,7 +61,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _selectedLookingForAge;
   String? _selectedLookingForType;
   String? _selectedEducation;
-  String _heightUnit = 'cm';
+
+  // Partner Requirement Fields
+  String? _reqMinAge;
+  String _heightUnit = 'cm'; // User height unit
+  String _reqHeightUnit = 'cm'; // Requirement height unit
+  late TextEditingController _reqHeightCmController;
+  late TextEditingController _reqHeightFtController;
+  late TextEditingController _reqHeightInController;
+  String? _reqMinWeight;
+  String? _reqMaxWeight;
   String _weightUnit = 'kg';
   XFile? _pickedImage;
 
@@ -81,6 +90,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     'Music', 'Art', 'Sports', 'Photography', 'Fitness', 
     'Movies', 'Outdoors', 'Coffee', 'Animals', 'Gardening'
   ];
+
+  final Map<String, List<String>> _religionSects = {
+    'Islam': ['Sunni', 'Shia', 'Ahmadiyya', 'Other'],
+    'Christianity': ['Catholic', 'Protestant', 'Orthodox', 'Other'],
+    'Hinduism': ['Vaishnavism', 'Shaivism', 'Shaktism', 'Smartism', 'Other'],
+    'Sikhism': ['Khalsa', 'Sahajdhari', 'Other'],
+    'Buddhism': ['Theravada', 'Mahayana', 'Vajrayana', 'Other'],
+    'Other': ['Other'],
+  };
+
+  final Map<String, List<String>> _religionCastes = {
+    'Islam': ['Sheikh', 'Syed', 'Mughal', 'Pathan', 'Malik', 'Other'],
+    'Hinduism': ['Brahmin', 'Kshatriya', 'Vaishya', 'Shudra', 'Other'],
+    'Christianity': ['None', 'Other'],
+    'Other': ['Other'],
+  };
+
+  String? _selectedSect;
+  String? _selectedCaste;
 
   late TextEditingController _grewUpInController;
    bool _isLoading = false;
@@ -135,6 +163,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _selectedLookingForAge = user?.lookingForAge;
     _selectedLookingForType = user?.lookingForType;
     _selectedEducation = user?.education;
+    _selectedSect = user?.religionSect;
+    _selectedCaste = user?.religionCast;
     _grewUpInController = TextEditingController(text: user?.grewUpIn);
     
     _selectedFacingChallenges = List<String>.from(user?.facingChallengesList ?? [])
@@ -149,6 +179,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         .where((e) => _lifestyleOfferings.any((opt) => opt.toLowerCase() == e.toLowerCase())).toList();
 
     _languageController = TextEditingController(text: user?.language);
+    _reqHeightCmController = TextEditingController(text: user?.lookingForMinHeight?.toStringAsFixed(0));
+    _reqHeightFtController = TextEditingController();
+    _reqHeightInController = TextEditingController();
+    
+    _reqMinWeight = user?.lookingForMinWeight?.toStringAsFixed(0);
+    _selectedLookingForAge = user?.lookingForAge;
+    
+    // Initialize Requirement Ft/In if height exists
+    if (user?.lookingForMinHeight != null) {
+      final totalInches = user!.lookingForMinHeight! / 2.54;
+      final feet = (totalInches / 12).floor();
+      final inches = (totalInches % 12).round();
+      _reqHeightFtController.text = feet.toString();
+      _reqHeightInController.text = inches.toString();
+    }
+
     _facingChallenges = user?.facingChallenges ?? false;
     _readyToQaboolChallenges = user?.readyToQaboolChallenges ?? false;
     _managedBySomeoneElse = user?.managedBySomeoneElse ?? false;
@@ -191,6 +237,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _currentCityController.dispose();
     _grewUpInController.dispose();
     _languageController.dispose();
+    _reqHeightCmController.dispose();
+    _reqHeightFtController.dispose();
+    _reqHeightInController.dispose();
     super.dispose();
   }
 
@@ -273,6 +322,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'monthlyIncome': double.tryParse(_selectedMonthlyIncome ?? ""),
         'siblings': int.tryParse(_selectedSiblings ?? ""),
         'familyMembers': int.tryParse(_selectedFamilyMembers ?? ""),
+        'religion': _selectedReligion,
+        'religionSect': _selectedSect,
+        'religionCast': _selectedCaste,
         'lookingForAge': _selectedLookingForAge,
         'lookingForType': _selectedLookingForType,
         'education': _selectedEducation,
@@ -285,8 +337,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'facingChallenges': _facingChallenges,
         'facingChallengesList': _selectedFacingChallenges,
         'readyToQaboolChallenges': _readyToQaboolChallenges,
-        'readyToQaboolChallengesList': _selectedReadyToQaboolChallenges,
-        'language': _languageController.text,
+        'lookingForMinHeight': _reqHeightUnit == 'cm' 
+            ? double.tryParse(_reqHeightCmController.text) 
+            : (double.tryParse(_reqHeightFtController.text) ?? 0) * 30.48 + (double.tryParse(_reqHeightInController.text) ?? 0) * 2.54,
+        'lookingForMinWeight': double.tryParse(_reqMinWeight ?? ""),
       };
 
       final updatedUser = await context.read<ProfileService>().updateProfile(updatedData, image: _pickedImage);
@@ -505,13 +559,38 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               // Religion
               _buildDropdownField(
-                label: 'Religion/Caste',
+                label: 'Religion',
                 icon: Icons.church,
                 value: _selectedReligion,
-                items: ['Islam (Sunni)', 'Islam (Shia)', 'Islam (Other)', 'Other'],
-                onChanged: (val) => setState(() => _selectedReligion = val),
+                items: ['Islam', 'Christianity', 'Hinduism', 'Sikhism', 'Buddhism', 'Other'],
+                onChanged: (val) {
+                  setState(() {
+                    _selectedReligion = val;
+                    _selectedSect = null;
+                    _selectedCaste = null;
+                  });
+                },
               ),
               const SizedBox(height: 16),
+
+              if (_selectedReligion != null) ...[
+                _buildDropdownField(
+                  label: 'Sect',
+                  icon: Icons.alt_route,
+                  value: _selectedSect,
+                  items: _religionSects[_selectedReligion] ?? ['Other'],
+                  onChanged: (val) => setState(() => _selectedSect = val),
+                ),
+                const SizedBox(height: 16),
+                _buildDropdownField(
+                  label: 'Caste',
+                  icon: Icons.account_tree_outlined,
+                  value: _selectedCaste,
+                  items: _religionCastes[_selectedReligion] ?? ['Other'],
+                  onChanged: (val) => setState(() => _selectedCaste = val),
+                ),
+                const SizedBox(height: 16),
+              ],
               _buildTextField(controller: _currentCityController, label: 'Current City', icon: Icons.home_work),
               const SizedBox(height: 32),
 
@@ -615,6 +694,50 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 16),
               _buildTextField(controller: _languageController, label: 'Native/Preferred Language', icon: Icons.translate),
+              const SizedBox(height: 32),
+
+              _buildSectionTitle('PARTNER REQUIREMENT'),
+              const SizedBox(height: 16),
+              _buildDropdownField(
+                label: 'Age Range',
+                icon: Icons.cake_outlined,
+                value: _selectedLookingForAge,
+                items: ['18-25', '25-35', '35-45', '45-55', '55+'],
+                onChanged: (val) => setState(() => _selectedLookingForAge = val),
+              ),
+              // Partner Height
+              Text('Height', style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 12)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  if (_reqHeightUnit == 'cm')
+                    Expanded(
+                      flex: 2,
+                      child: _buildTextField(controller: _reqHeightCmController, label: 'cm', icon: Icons.height),
+                    )
+                  else ...[
+                    Expanded(
+                      child: _buildTextField(controller: _reqHeightFtController, label: 'ft', icon: Icons.height),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildTextField(controller: _reqHeightInController, label: 'in', icon: Icons.straighten),
+                    ),
+                  ],
+                  const SizedBox(width: 8),
+                  _buildUnitSelector(_reqHeightUnit, (val) => setState(() => _reqHeightUnit = val!), ['cm', 'ft']),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Partner Weight
+              _buildDropdownField(
+                label: 'Min Weight (kg)',
+                icon: Icons.monitor_weight_outlined,
+                value: _reqMinWeight,
+                items: List.generate(121, (i) => (i + 30).toString()),
+                onChanged: (val) => setState(() => _reqMinWeight = val),
+              ),
               const SizedBox(height: 32),
 
               _buildSectionTitle('MANAGEMENT & CHALLENGES'),

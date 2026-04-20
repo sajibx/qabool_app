@@ -59,7 +59,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   List<String> _selectedFacingChallenges = [];
   bool _readyToQaboolChallenges = false;
   List<String> _selectedReadyToQaboolChallenges = [];
-  final _languageController = TextEditingController();
+  String? _selectedLanguage;
+
+  // New Requirement Fields
+  String? _reqMinAge;
+  String _reqHeightUnit = 'cm';
+  final _reqHeightCmController = TextEditingController();
+  final _reqHeightFtController = TextEditingController();
+  final _reqHeightInController = TextEditingController();
+  String? _reqMinWeight;
+  String? _reqMaxWeight;
 
   final List<String> _challengeOptions = [
     'Age problem',
@@ -89,6 +98,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
     'Coffee Lover', 'Tea Enthusiast', 'Foodie', 'Public Speaking', 'Blogging',
     'Painting', 'Sculpting', 'Martial Arts', 'Entrepreneurship', 'DIY Projects'
   ];
+
+  final Map<String, List<String>> _religionSects = {
+    'Islam': ['Sunni', 'Shia', 'Ahmadiyya', 'Other'],
+    'Christianity': ['Catholic', 'Protestant', 'Orthodox', 'Other'],
+    'Hinduism': ['Vaishnavism', 'Shaivism', 'Shaktism', 'Smartism', 'Other'],
+    'Sikhism': ['Khalsa', 'Sahajdhari', 'Other'],
+    'Buddhism': ['Theravada', 'Mahayana', 'Vajrayana', 'Other'],
+    'Other': ['Other'],
+  };
+
+  final Map<String, List<String>> _religionCastes = {
+    'Islam': ['Sheikh', 'Syed', 'Mughal', 'Pathan', 'Malik', 'Other'],
+    'Hinduism': ['Brahmin', 'Kshatriya', 'Vaishya', 'Shudra', 'Other'],
+    'Christianity': ['None', 'Other'],
+    'Other': ['Other'],
+  };
+
+  String? _selectedSect;
+  String? _selectedCaste;
 
   List<String> _selectedPersonalityTraits = [];
   final List<String> _personalityOfferings = [
@@ -151,7 +179,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _casteController.dispose();
     _grewUpInController.dispose();
     _otherRequirementsController.dispose();
-    _languageController.dispose();
+    _reqHeightCmController.dispose();
+    _reqHeightFtController.dispose();
+    _reqHeightInController.dispose();
     super.dispose();
   }
 
@@ -207,13 +237,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'Education': _educationController.text.isNotEmpty,
       'Marital Status': _selectedMaritalStatus != null,
       'Current City': _currentCityController.text.isNotEmpty,
-      'Monthly Income': _selectedMonthlyIncome != null,
       'Siblings': _selectedSiblings != null,
       'Family Members': _selectedFamilyMembers != null,
-      'Partner (Type)': _selectedLookingForType != null,
       'Partner (Age)': _selectedLookingForAge != null,
-      'Sect': _sectController.text.isNotEmpty,
-      'Caste': _casteController.text.isNotEmpty,
+      'Sect': _selectedSect != null,
+      'Caste': _selectedCaste != null,
     };
 
     final List<String> missingFields = validationMap.entries
@@ -292,7 +320,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         gender: _selectedGender,
         dob: _selectedDob?.toIso8601String(),
         ethnicity: _selectedEthnicity,
-        religion: _selectedReligion,
         height: heightCm,
         weight: weightKg,
         education: _educationController.text,
@@ -310,15 +337,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
         personalityTraits: _selectedPersonalityTraits,
         lifeStyle: _selectedLifeStyle,
         grewUpIn: _grewUpInController.text,
-        religionSect: _sectController.text,
-        religionCast: _casteController.text,
+        religion: _selectedReligion,
+        religionSect: _selectedSect,
+        religionCast: _selectedCaste,
         otherRequirements: _otherRequirementsController.text,
         managedBySomeoneElse: _managedBySomeoneElse,
         facingChallenges: _facingChallenges,
         facingChallengesList: _selectedFacingChallenges,
         readyToQaboolChallenges: _readyToQaboolChallenges,
         readyToQaboolChallengesList: _selectedReadyToQaboolChallenges,
-        language: _languageController.text,
+        language: _selectedLanguage,
+        lookingForMinHeight: _reqHeightUnit == 'cm' 
+            ? double.tryParse(_reqHeightCmController.text) 
+            : (double.tryParse(_reqHeightFtController.text) ?? 0) * 30.48 + (double.tryParse(_reqHeightInController.text) ?? 0) * 2.54,
+        lookingForMinWeight: double.tryParse(_reqMinWeight ?? ""),
         profileImage: _pickedImage,
       );
       if (!mounted) return;
@@ -769,41 +801,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 .toList(),
                             onChanged: (val) => setState(() => _selectedEthnicity = val),
                           ),
-                          const SizedBox(height: 24),
-                          Divider(
-                              color: isDark
-                                  ? const Color(0xFF334155)
-                                  : const Color(0xFFE2E8F0)),
-                          const SizedBox(height: 24),
 
-                          // Requirement Section (Moving requested fields here)
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: isDark ? Colors.white10 : Colors.grey[300]!),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.assignment_turned_in, color: pColor, size: 20),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'REQUIREMENT',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w900,
-                                        color: isDark ? pColor : aColor,
-                                        letterSpacing: 1.2,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
                                 
+                                const SizedBox(height: 16),
                                 // Age (DOB)
                                 _buildLabel('Date of Birth (Age)', isDark),
                                 InkWell(
@@ -817,62 +817,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 16),
-
-                                // Education
-                                _buildLabel('Education', isDark),
-                                DropdownButtonFormField<String>(
-                                  value: _educationController.text.isEmpty ? null : _educationController.text,
-                                  decoration: inputDecoration('Highest degree earned'),
-                                  items: [
-                                    'High School', 'Associate Degree', 'Bachelors Degree', 
-                                    'Masters Degree', 'PhD', 'Other'
-                                  ]
-                                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                      .toList(),
-                                  onChanged: (val) => setState(() => _educationController.text = val ?? ''),
-                                ),
-                                const SizedBox(height: 16),
-
-                                // City
-                                _buildLabel('Current City', isDark),
-                                TextField(
-                                  controller: _currentCityController,
-                                  decoration: inputDecoration('e.g. London, UK'),
-                                ),
-                                const SizedBox(height: 16),
-
-                                // Religion
-                                _buildLabel('Religion', isDark),
-                                DropdownButtonFormField<String>(
-                                  value: _selectedReligion,
-                                  decoration: inputDecoration('Select Religion'),
-                                  items: [
-                                    'Islam (Sunni)',
-                                    'Islam (Shia)',
-                                    'Islam (Other)'
-                                  ]
-                                      .map((e) => DropdownMenuItem(
-                                          value: e, child: Text(e)))
-                                      .toList(),
-                                  onChanged: (val) => setState(() => _selectedReligion = val),
-                                ),
-                                const SizedBox(height: 16),
-
-                                // Sect
-                                _buildLabel('Religion-Sect', isDark),
-                                TextField(
-                                  controller: _sectController,
-                                  decoration: inputDecoration('e.g. Hanafi, Maliki, etc.'),
-                                ),
-                                const SizedBox(height: 16),
-
-                                // Caste
-                                _buildLabel('Religion-Cast', isDark),
-                                TextField(
-                                  controller: _casteController,
-                                  decoration: inputDecoration('e.g. Sayyid, Sheikh, etc.'),
                                 ),
                                 const SizedBox(height: 16),
 
@@ -983,6 +927,196 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 16),
+                          const SizedBox(height: 24),
+                          Divider(
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFE2E8F0)),
+                          const SizedBox(height: 24),
+
+                          // Requirement Section (Moving requested fields here)
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: isDark ? Colors.white10 : Colors.grey[300]!),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.assignment_turned_in, color: pColor, size: 20),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'REQUIREMENT',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w900,
+                                        color: isDark ? pColor : aColor,
+                                        letterSpacing: 1.2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Education
+                                _buildLabel('Education', isDark),
+                                DropdownButtonFormField<String>(
+                                  value: _educationController.text.isEmpty ? null : _educationController.text,
+                                  decoration: inputDecoration('Highest degree earned'),
+                                  items: [
+                                    'High School', 'Associate Degree', 'Bachelors Degree', 
+                                    'Masters Degree', 'PhD', 'Other'
+                                  ]
+                                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => _educationController.text = val ?? ''),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // City
+                                _buildLabel('Current City', isDark),
+                                TextField(
+                                  controller: _currentCityController,
+                                  decoration: inputDecoration('e.g. London, UK'),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Religion
+                                DropdownButtonFormField<String>(
+                                  value: _selectedReligion,
+                                  decoration: inputDecoration('Select Religion'),
+                                  items: ['Islam', 'Christianity', 'Hinduism', 'Sikhism', 'Buddhism', 'Other']
+                                      .map((e) => DropdownMenuItem(
+                                          value: e, child: Text(e)))
+                                      .toList(),
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _selectedReligion = val;
+                                      _selectedSect = null;
+                                      _selectedCaste = null;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+
+                                if (_selectedReligion != null) ...[
+                                  // Sect
+                                  _buildLabel('Sect', isDark),
+                                  DropdownButtonFormField<String>(
+                                    value: _selectedSect,
+                                    decoration: inputDecoration('Select Sect'),
+                                    items: (_religionSects[_selectedReligion] ?? ['Other'])
+                                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                        .toList(),
+                                    onChanged: (val) => setState(() => _selectedSect = val),
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // Caste
+                                  _buildLabel('Caste', isDark),
+                                  DropdownButtonFormField<String>(
+                                    value: _selectedCaste,
+                                    decoration: inputDecoration('Select Caste'),
+                                    items: (_religionCastes[_selectedReligion] ?? ['Other'])
+                                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                        .toList(),
+                                    onChanged: (val) => setState(() => _selectedCaste = val),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                                // Partner Age
+                                _buildLabel('Age Range', isDark),
+                                DropdownButtonFormField<String>(
+                                  value: _selectedLookingForAge,
+                                  decoration: inputDecoration('Select Age Range'),
+                                  items: ['18-25', '25-35', '35-45', '45-55', '55+']
+                                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => _selectedLookingForAge = val),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Partner Height
+                                _buildLabel('Height', isDark),
+                                Row(
+                                  children: [
+                                    if (_reqHeightUnit == 'cm')
+                                      Expanded(
+                                        flex: 2,
+                                        child: TextField(
+                                          controller: _reqHeightCmController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: inputDecoration('cm'),
+                                        ),
+                                      )
+                                    else ...[
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _reqHeightFtController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: inputDecoration('ft'),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _reqHeightInController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: inputDecoration('in'),
+                                        ),
+                                      ),
+                                    ],
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      flex: 1,
+                                      child: InputDecorator(
+                                        decoration: inputDecoration(
+                                          '',
+                                          borderRadius: BorderRadius.circular(12),
+                                        ).copyWith(
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(horizontal: 8),
+                                        ),
+                                        child: DropdownButtonHideUnderline(
+                                          child: DropdownButton<String>(
+                                            value: _reqHeightUnit,
+                                            isExpanded: true,
+                                            icon: const Icon(Icons.arrow_drop_down),
+                                            items: ['cm', 'ft']
+                                                .map((e) => DropdownMenuItem(
+                                                    value: e, child: Text(e)))
+                                                .toList(),
+                                            onChanged: (val) {
+                                              if (val != null) {
+                                                setState(() => _reqHeightUnit = val);
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Partner Weight
+                                _buildLabel('Min Weight (kg)', isDark),
+                                DropdownButtonFormField<String>(
+                                  value: _reqMinWeight,
+                                  decoration: inputDecoration('Min kg'),
+                                  isExpanded: true,
+                                  items: List.generate(121, (i) => (i + 30).toString())
+                                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => _reqMinWeight = val),
+                                ),
+                                const SizedBox(height: 16),
+
+
 
                                 // Income
                                 _buildLabel('Monthly Income', isDark),
@@ -1017,9 +1151,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 _buildLabel('Preferred Language', isDark),
-                                TextField(
-                                  controller: _languageController,
-                                  decoration: inputDecoration('e.g. English, Arabic, Bengali'),
+                                DropdownButtonFormField<String>(
+                                  value: _selectedLanguage,
+                                  decoration: inputDecoration('Select Language'),
+                                  items: ['English', 'Bengali', 'Hindi', 'Urdu', 'Arabic', 'French', 'German', 'Spanish', 'Other']
+                                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => _selectedLanguage = val),
                                 ),
                               ],
                             ),

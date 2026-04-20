@@ -533,17 +533,18 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildRequirementSection(bool isDark, bool isLargeScreen) {
-    final items = [
-      _RequirementData(Icons.cake_outlined, 'Age', "${widget.user.displayAge}"),
+    final List<_RequirementData> items = [
+      _RequirementData(Icons.cake_outlined, 'Min Partner Age', widget.user.lookingForMinAge != null ? '${widget.user.lookingForMinAge}' : 'N/A'),
       _RequirementData(Icons.school_outlined, 'Education', widget.user.education ?? 'N/A'),
       _RequirementData(Icons.location_city_outlined, 'City', widget.user.currentCity ?? 'N/A'),
       _RequirementData(Icons.mosque_outlined, 'Religion', widget.user.religion ?? 'N/A'),
       _RequirementData(Icons.account_balance_outlined, 'Religion-Sect', widget.user.religionSect ?? 'N/A'),
       _RequirementData(Icons.groups_outlined, 'Religion-Cast', widget.user.religionCast ?? 'N/A'),
-      _RequirementData(Icons.height, 'Height', widget.user.height != null ? '${widget.user.height?.toInt()}cm' : 'N/A'),
-      _RequirementData(Icons.monitor_weight_outlined, 'Weight', widget.user.weight != null ? '${widget.user.weight?.toInt()}kg' : 'N/A'),
+      _RequirementData(Icons.height, 'Min Partner Height', widget.user.lookingForMinHeight != null ? '${widget.user.lookingForMinHeight?.toInt()}cm' : 'N/A'),
+      _RequirementData(Icons.monitor_weight_outlined, 'Partner Weight', widget.user.lookingForMinWeight != null ? '${widget.user.lookingForMinWeight?.toInt()}kg' : 'N/A'),
       _RequirementData(Icons.payments_outlined, 'Income', widget.user.monthlyIncome != null ? '€${widget.user.monthlyIncome?.toInt()}' : 'N/A'),
       _RequirementData(Icons.language_outlined, 'Language', widget.user.language ?? 'N/A'),
+      _RequirementData(Icons.person_outline, 'Partner Type', widget.user.lookingForType ?? 'N/A'),
     ];
 
       return Column(

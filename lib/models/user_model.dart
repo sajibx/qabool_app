@@ -51,6 +51,10 @@ class UserModel {
   final bool readyToQaboolChallenges;
   final List<String> readyToQaboolChallengesList;
   final String? language;
+  final int? lookingForMinAge;
+  final double? lookingForMinHeight;
+  final double? lookingForMinWeight;
+  final double? lookingForMaxWeight;
   final DateTime? updatedAt;
 
   UserModel({
@@ -102,6 +106,10 @@ class UserModel {
     this.readyToQaboolChallenges = false,
     this.readyToQaboolChallengesList = const [],
     this.language,
+    this.lookingForMinAge,
+    this.lookingForMinHeight,
+    this.lookingForMinWeight,
+    this.lookingForMaxWeight,
     this.updatedAt,
   });
 
@@ -225,6 +233,10 @@ class UserModel {
       readyToQaboolChallenges: json['readyToQaboolChallenges'] ?? false,
       readyToQaboolChallengesList: json['readyToQaboolChallengesList'] != null ? List<String>.from(json['readyToQaboolChallengesList']) : const [],
       language: json['language']?.toString(),
+      lookingForMinAge: _toInt(json['lookingForMinAge']),
+      lookingForMinHeight: _toDouble(json['lookingForMinHeight']),
+      lookingForMinWeight: _toDouble(json['lookingForMinWeight']),
+      lookingForMaxWeight: _toDouble(json['lookingForMaxWeight']),
       updatedAt: _toDateTime(json['updatedAt']),
     );
   }
@@ -280,6 +292,10 @@ class UserModel {
       'readyToQaboolChallenges': readyToQaboolChallenges,
       'readyToQaboolChallengesList': readyToQaboolChallengesList,
       'language': language,
+      'lookingForMinAge': lookingForMinAge,
+      'lookingForMinHeight': lookingForMinHeight,
+      'lookingForMinWeight': lookingForMinWeight,
+      'lookingForMaxWeight': lookingForMaxWeight,
       'updatedAt': updatedAt?.toIso8601String(),
     };
   }
@@ -331,6 +347,10 @@ class UserModel {
     bool? readyToQaboolChallenges,
     List<String>? readyToQaboolChallengesList,
     String? language,
+    int? lookingForMinAge,
+    double? lookingForMinHeight,
+    double? lookingForMinWeight,
+    double? lookingForMaxWeight,
     DateTime? updatedAt,
   }) {
     return UserModel(
@@ -380,6 +400,10 @@ class UserModel {
       readyToQaboolChallenges: readyToQaboolChallenges ?? this.readyToQaboolChallenges,
       readyToQaboolChallengesList: readyToQaboolChallengesList ?? this.readyToQaboolChallengesList,
       language: language ?? this.language,
+      lookingForMinAge: lookingForMinAge ?? this.lookingForMinAge,
+      lookingForMinHeight: lookingForMinHeight ?? this.lookingForMinHeight,
+      lookingForMinWeight: lookingForMinWeight ?? this.lookingForMinWeight,
+      lookingForMaxWeight: lookingForMaxWeight ?? this.lookingForMaxWeight,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }

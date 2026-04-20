@@ -87,6 +87,10 @@ class AuthService extends ChangeNotifier {
     bool readyToQaboolChallenges = false,
     List<String>? readyToQaboolChallengesList,
     String? language,
+    int? lookingForMinAge,
+    double? lookingForMinHeight,
+    double? lookingForMinWeight,
+    double? lookingForMaxWeight,
     XFile? profileImage,
   }) async {
     try {
@@ -131,6 +135,10 @@ class AuthService extends ChangeNotifier {
         'readyToQaboolChallenges': readyToQaboolChallenges,
         'readyToQaboolChallengesList': readyToQaboolChallengesList,
         'language': language,
+        'lookingForMinAge': lookingForMinAge,
+        'lookingForMinHeight': lookingForMinHeight,
+        'lookingForMinWeight': lookingForMinWeight,
+        'lookingForMaxWeight': lookingForMaxWeight,
       };
 
       final formData = FormData();
