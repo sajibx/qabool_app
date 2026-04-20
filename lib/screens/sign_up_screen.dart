@@ -62,13 +62,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? _selectedLanguage;
 
   // New Requirement Fields
-  String? _reqMinAge;
+  int? _reqMinAge;
   String _reqHeightUnit = 'cm';
   final _reqHeightCmController = TextEditingController();
   final _reqHeightFtController = TextEditingController();
   final _reqHeightInController = TextEditingController();
-  String? _reqMinWeight;
-  String? _reqMaxWeight;
+  double? _reqMinWeight;
+  double? _reqMaxWeight;
 
   final List<String> _challengeOptions = [
     'Age problem',
@@ -347,10 +347,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         readyToQaboolChallenges: _readyToQaboolChallenges,
         readyToQaboolChallengesList: _selectedReadyToQaboolChallenges,
         language: _selectedLanguage,
+        lookingForMinAge: _reqMinAge,
         lookingForMinHeight: _reqHeightUnit == 'cm' 
             ? double.tryParse(_reqHeightCmController.text) 
             : (double.tryParse(_reqHeightFtController.text) ?? 0) * 30.48 + (double.tryParse(_reqHeightInController.text) ?? 0) * 2.54,
-        lookingForMinWeight: double.tryParse(_reqMinWeight ?? ""),
+        lookingForMinWeight: _reqMinWeight,
+        lookingForMaxWeight: _reqMaxWeight,
         profileImage: _pickedImage,
       );
       if (!mounted) return;
@@ -1029,7 +1031,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   const SizedBox(height: 16),
                                 ],
                                 // Partner Age
-                                _buildLabel('Age Range', isDark),
+                                _buildLabel('Min Age', isDark),
+                                DropdownButtonFormField<int>(
+                                  value: _reqMinAge,
+                                  decoration: inputDecoration('Select Min Age'),
+                                  items: List.generate(83, (i) => i + 18)
+                                      .map((e) => DropdownMenuItem(value: e, child: Text(e.toString())))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => _reqMinAge = val),
+                                ),
+                                const SizedBox(height: 16),
+
+                                _buildLabel('Age Range (Display)', isDark),
                                 DropdownButtonFormField<String>(
                                   value: _selectedLookingForAge,
                                   decoration: inputDecoration('Select Age Range'),
@@ -1104,15 +1117,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 16),
 
                                 // Partner Weight
-                                _buildLabel('Min Weight (kg)', isDark),
-                                DropdownButtonFormField<String>(
-                                  value: _reqMinWeight,
-                                  decoration: inputDecoration('Min kg'),
-                                  isExpanded: true,
-                                  items: List.generate(121, (i) => (i + 30).toString())
-                                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                      .toList(),
-                                  onChanged: (val) => setState(() => _reqMinWeight = val),
+                                _buildLabel('Partner Weight (kg)', isDark),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: DropdownButtonFormField<double>(
+                                        value: _reqMinWeight,
+                                        decoration: inputDecoration('Min kg'),
+                                        isExpanded: true,
+                                        items: List.generate(121, (i) => (i + 30).toDouble())
+                                            .map((e) => DropdownMenuItem(value: e, child: Text(e.toInt().toString())))
+                                            .toList(),
+                                        onChanged: (val) => setState(() => _reqMinWeight = val),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: DropdownButtonFormField<double>(
+                                        value: _reqMaxWeight,
+                                        decoration: inputDecoration('Max kg'),
+                                        isExpanded: true,
+                                        items: List.generate(121, (i) => (i + 30).toDouble())
+                                            .map((e) => DropdownMenuItem(value: e, child: Text(e.toInt().toString())))
+                                            .toList(),
+                                        onChanged: (val) => setState(() => _reqMaxWeight = val),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 16),
 
