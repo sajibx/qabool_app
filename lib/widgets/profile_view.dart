@@ -119,8 +119,10 @@ class _ProfileViewState extends State<ProfileView> {
                             _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, true)),
                             const SizedBox(height: 24),
 
-                            _buildDetailCard(isDark, 'Are you ready to qabool', Icons.volunteer_activism_outlined, _buildChallengesContent(isDark)),
-                            const SizedBox(height: 24),
+                            _buildDetailCard(isDark, 'Whom are you ready to qabool', Icons.volunteer_activism_outlined, _buildChallengesContent(isDark)),
+                            const SizedBox(height: 48),
+                            Center(child: _buildIssuesBadges(isDark)),
+                            const SizedBox(height: 16),
 
                             _buildDetailCard(isDark, 'Interests & Personality', Icons.auto_awesome_outlined, Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,8 +132,6 @@ class _ProfileViewState extends State<ProfileView> {
                                 _buildPersonalityContent(isDark),
                               ],
                             )),
-                            const SizedBox(height: 48),
-                            Center(child: _buildIssuesBadges(isDark)),
                             const SizedBox(height: 32),
                             if (!widget.isMyProfile) ...[
                               const SizedBox(height: 24),
@@ -197,11 +197,14 @@ class _ProfileViewState extends State<ProfileView> {
                           padding: const EdgeInsets.symmetric(horizontal: 24.0),
                           child: _buildPersonalitySection(isDark),
                         ),
+                        const SizedBox(height: 24),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          child: _buildChallengesSection(isDark),
+                        ),
                         const SizedBox(height: 48),
                         Center(child: _buildIssuesBadges(isDark)),
-                        const SizedBox(height: 32),
-                        _buildChallengesSection(isDark),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 28),
                         if (!widget.isMyProfile) _buildSecondaryActions(isDark),
                         const SizedBox(height: 40),
                       ],
@@ -349,7 +352,7 @@ class _ProfileViewState extends State<ProfileView> {
     final isReceived = status == 'PENDING_RECEIVED';
     final isSent = status == 'PENDING_SENT' || status == 'PENDING';
     
-    String title = 'Ready to Qabool?';
+    String title = 'Whom are you ready to qabool?';
     String subtitle = isReceived 
         ? '${widget.user.firstName} sent you a request!' 
         : isSent 
@@ -659,6 +662,7 @@ class _ProfileViewState extends State<ProfileView> {
 
    Widget _buildInfoGrid(bool isDark, bool isLargeScreen) {
     return GridView.count(
+      padding: EdgeInsets.zero,
       crossAxisCount: isLargeScreen ? 4 : 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -824,13 +828,13 @@ class _ProfileViewState extends State<ProfileView> {
   // Removed _buildReadyToQaboolSummary and _buildStatusIndicator as per request
 
   Widget _buildChallengesSection(bool isDark) {
-    if (!widget.user.facingChallenges && widget.user.readyToQaboolChallengesList.isEmpty) return const SizedBox.shrink();
+    if (widget.user.readyToQaboolChallengesList.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Are you ready to qabool', Icons.volunteer_activism_outlined, isDark),
+        _buildSectionHeader('Whom are you ready to qabool', Icons.volunteer_activism_outlined, isDark),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: _buildChallengesContent(isDark),
         ),
       ],
@@ -849,22 +853,7 @@ class _ProfileViewState extends State<ProfileView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.user.facingChallenges) ...[
-          Row(
-            children: [
-              Icon(Icons.check_circle_outline, color: Colors.orange, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                'IS FACING PERSONAL CHALLENGES',
-                style: subHeaderStyle.copyWith(color: Colors.orange, fontSize: 12),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-        ],
         if (widget.user.readyToQaboolChallenges) ...[
-          Text('WHO ARE YOU READY TO QABOOL', style: subHeaderStyle),
-          const SizedBox(height: 12),
           if (widget.user.readyToQaboolChallengesList.isNotEmpty)
             Wrap(
               spacing: 12,
@@ -882,56 +871,6 @@ class _ProfileViewState extends State<ProfileView> {
                 color: textColor.withOpacity(0.5),
               ),
             ),
-        ],
-        if (!widget.user.facingChallenges && !widget.user.readyToQaboolChallenges) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.verified_user_outlined, color: Colors.green.withOpacity(0.7), size: 18),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'This person is not facing any challenges',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: textColor.withOpacity(0.8),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(Icons.info_outline, color: textColor.withOpacity(0.4), size: 18),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'This person is not willing to accept anyone with challenges',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: textColor.withOpacity(0.5),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
         ],
       ],
     );
@@ -1243,7 +1182,7 @@ class _ProfileViewState extends State<ProfileView> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
       child: Wrap(
         alignment: WrapAlignment.center,
         spacing: 12,
@@ -1275,11 +1214,11 @@ class _ProfileViewState extends State<ProfileView> {
     required bool isDark,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: color.withOpacity(0.4), width: 1.0),
         boxShadow: [
           if (!isDark)
             BoxShadow(
@@ -1292,12 +1231,12 @@ class _ProfileViewState extends State<ProfileView> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(width: 8),
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w900,
               color: color,
               letterSpacing: 1.1,

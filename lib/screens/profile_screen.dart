@@ -840,7 +840,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(
                         _displayUser!.connectionStatus == 'ACCEPTED' ? 'Match Found!' :
                         _displayUser!.connectionStatus == 'PENDING_RECEIVED' ? 'Pending Request' :
-                        'Ready to Qabool?',
+                        'Whom are you ready to qabool?',
                         style: TextStyle(
                             fontSize: 18, 
                             fontWeight: FontWeight.w800, 
@@ -1171,12 +1171,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
 
         // Info Grid
         LayoutBuilder(builder: (context, constraints) {
           final crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
           return GridView.count(
+            padding: EdgeInsets.zero,
             crossAxisCount: crossAxisCount,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

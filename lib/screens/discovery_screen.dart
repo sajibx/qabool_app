@@ -282,7 +282,7 @@ class DiscoveryScreenState extends State<DiscoveryScreen> with TickerProviderSta
           dividerColor: isDark ? Colors.white10 : Colors.black12,
           tabs: const [
             Tab(text: "My History"),
-            Tab(text: "Ready to Qabool"),
+            Tab(text: "Whom are you ready to qabool"),
           ],
         ),
       ),
