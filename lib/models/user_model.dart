@@ -52,9 +52,16 @@ class UserModel {
   final List<String> readyToQaboolChallengesList;
   final String? language;
   final int? lookingForMinAge;
+  final int? lookingForMaxAge;
   final double? lookingForMinHeight;
   final double? lookingForMinWeight;
   final double? lookingForMaxWeight;
+  final String? lookingForReligion;
+  final String? lookingForReligionSect;
+  final String? lookingForReligionCast;
+  final double? lookingForMonthlyIncome;
+  final String? lookingForEducation;
+  final String? lookingForMaritalStatus;
   final DateTime? updatedAt;
 
   UserModel({
@@ -107,9 +114,16 @@ class UserModel {
     this.readyToQaboolChallengesList = const [],
     this.language,
     this.lookingForMinAge,
+    this.lookingForMaxAge,
     this.lookingForMinHeight,
     this.lookingForMinWeight,
     this.lookingForMaxWeight,
+    this.lookingForReligion,
+    this.lookingForReligionSect,
+    this.lookingForReligionCast,
+    this.lookingForMonthlyIncome,
+    this.lookingForEducation,
+    this.lookingForMaritalStatus,
     this.updatedAt,
   });
 
@@ -234,9 +248,16 @@ class UserModel {
       readyToQaboolChallengesList: json['readyToQaboolChallengesList'] != null ? List<String>.from(json['readyToQaboolChallengesList']) : const [],
       language: json['language']?.toString(),
       lookingForMinAge: _toInt(json['lookingForMinAge']),
+      lookingForMaxAge: _toInt(json['lookingForMaxAge']),
       lookingForMinHeight: _toDouble(json['lookingForMinHeight']),
       lookingForMinWeight: _toDouble(json['lookingForMinWeight']),
       lookingForMaxWeight: _toDouble(json['lookingForMaxWeight']),
+      lookingForReligion: json['lookingForReligion']?.toString(),
+      lookingForReligionSect: json['lookingForReligionSect']?.toString(),
+      lookingForReligionCast: json['lookingForReligionCast']?.toString(),
+      lookingForMonthlyIncome: _toDouble(json['lookingForMonthlyIncome']),
+      lookingForEducation: json['lookingForEducation']?.toString(),
+      lookingForMaritalStatus: json['lookingForMaritalStatus']?.toString(),
       updatedAt: _toDateTime(json['updatedAt']),
     );
   }
@@ -293,9 +314,16 @@ class UserModel {
       'readyToQaboolChallengesList': readyToQaboolChallengesList,
       'language': language,
       'lookingForMinAge': lookingForMinAge,
+      'lookingForMaxAge': lookingForMaxAge,
       'lookingForMinHeight': lookingForMinHeight,
       'lookingForMinWeight': lookingForMinWeight,
       'lookingForMaxWeight': lookingForMaxWeight,
+      'lookingForReligion': lookingForReligion,
+      'lookingForReligionSect': lookingForReligionSect,
+      'lookingForReligionCast': lookingForReligionCast,
+      'lookingForMonthlyIncome': lookingForMonthlyIncome,
+      'lookingForEducation': lookingForEducation,
+      'lookingForMaritalStatus': lookingForMaritalStatus,
       'updatedAt': updatedAt?.toIso8601String(),
     };
   }
@@ -348,9 +376,16 @@ class UserModel {
     List<String>? readyToQaboolChallengesList,
     String? language,
     int? lookingForMinAge,
+    int? lookingForMaxAge,
     double? lookingForMinHeight,
     double? lookingForMinWeight,
     double? lookingForMaxWeight,
+    String? lookingForReligion,
+    String? lookingForReligionSect,
+    String? lookingForReligionCast,
+    double? lookingForMonthlyIncome,
+    String? lookingForEducation,
+    String? lookingForMaritalStatus,
     DateTime? updatedAt,
   }) {
     return UserModel(
@@ -401,9 +436,16 @@ class UserModel {
       readyToQaboolChallengesList: readyToQaboolChallengesList ?? this.readyToQaboolChallengesList,
       language: language ?? this.language,
       lookingForMinAge: lookingForMinAge ?? this.lookingForMinAge,
+      lookingForMaxAge: lookingForMaxAge ?? this.lookingForMaxAge,
       lookingForMinHeight: lookingForMinHeight ?? this.lookingForMinHeight,
       lookingForMinWeight: lookingForMinWeight ?? this.lookingForMinWeight,
       lookingForMaxWeight: lookingForMaxWeight ?? this.lookingForMaxWeight,
+      lookingForReligion: lookingForReligion ?? this.lookingForReligion,
+      lookingForReligionSect: lookingForReligionSect ?? this.lookingForReligionSect,
+      lookingForReligionCast: lookingForReligionCast ?? this.lookingForReligionCast,
+      lookingForMonthlyIncome: lookingForMonthlyIncome ?? this.lookingForMonthlyIncome,
+      lookingForEducation: lookingForEducation ?? this.lookingForEducation,
+      lookingForMaritalStatus: lookingForMaritalStatus ?? this.lookingForMaritalStatus,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }

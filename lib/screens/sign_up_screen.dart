@@ -30,6 +30,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? _selectedCountryCode;
   String? _selectedCity;
   String? _selectedReligion;
+  String? _userReligion;
+  String? _userSect;
+  String? _userCaste;
+  String? _userMonthlyIncome;
   XFile? _pickedImage;
   
   String _heightUnit = 'cm';
@@ -39,8 +43,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _heightFtController = TextEditingController();
   final _heightInController = TextEditingController();
   final _weightController = TextEditingController();
-  final _educationController = TextEditingController();
   final _bioController = TextEditingController();
+  String? _userEducation;
+  String? _reqEducation;
   final _currentCityController = TextEditingController();
   final _sectController = TextEditingController();
   final _casteController = TextEditingController();
@@ -60,6 +65,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _readyToQaboolChallenges = false;
   List<String> _selectedReadyToQaboolChallenges = [];
   String? _selectedLanguage;
+  String? _selectedLookingForMaritalStatus;
 
   // New Requirement Fields
   int? _reqMinAge;
@@ -171,7 +177,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _heightFtController.dispose();
     _heightInController.dispose();
     _weightController.dispose();
-    _educationController.dispose();
     _bioController.dispose();
     _phoneController.dispose();
     _currentCityController.dispose();
@@ -234,12 +239,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'Phone Code': _selectedCountryCode != null,
       'Phone Number': _phoneController.text.isNotEmpty,
       'Weight': _weightController.text.isNotEmpty,
-      'Education': _educationController.text.isNotEmpty,
+      'Education': _userEducation != null,
       'Marital Status': _selectedMaritalStatus != null,
       'Current City': _currentCityController.text.isNotEmpty,
       'Siblings': _selectedSiblings != null,
       'Family Members': _selectedFamilyMembers != null,
       'Partner (Age)': _selectedLookingForAge != null,
+      'Partner Type': _selectedLookingForType != null,
       'Sect': _selectedSect != null,
       'Caste': _selectedCaste != null,
     };
@@ -315,20 +321,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
       await auth.register(
         email: _emailController.text,
         password: _passwordController.text,
-        firstName: _firstNameController.text,
-        lastName: _lastNameController.text,
+        firstName: _toCamelCase(_firstNameController.text),
+        lastName: _toCamelCase(_lastNameController.text),
         gender: _selectedGender,
         dob: _selectedDob?.toIso8601String(),
         ethnicity: _selectedEthnicity,
         height: heightCm,
         weight: weightKg,
-        education: _educationController.text,
-        bio: _bioController.text,
+        education: _userEducation,
+        bio: _toCamelCase(_bioController.text),
         region: _selectedCountry != null && _selectedCity != null ? "${_selectedCity}, ${_selectedCountry}" : null,
         phoneNumber: "${_selectedCountryCode}${_phoneController.text}",
         maritalStatus: _selectedMaritalStatus,
-        currentCity: _currentCityController.text,
-        monthlyIncome: double.tryParse(_selectedMonthlyIncome ?? ""),
+        currentCity: _toCamelCase(_currentCityController.text),
+        userMonthlyIncome: double.tryParse(_userMonthlyIncome ?? '0'),
+        lookingForMonthlyIncome: double.tryParse(_selectedMonthlyIncome ?? '0'),
+        userReligion: _userReligion,
+        userReligionSect: _userSect,
+        userReligionCast: _userCaste,
+        lookingForEducation: _reqEducation,
+        lookingForMaritalStatus: _selectedLookingForMaritalStatus,
+        lookingForReligion: _selectedReligion,
+        lookingForReligionSect: _selectedSect,
+        lookingForReligionCast: _selectedCaste,
         siblings: int.tryParse(_selectedSiblings ?? ""),
         familyMembers: int.tryParse(_selectedFamilyMembers ?? ""),
         lookingForAge: _selectedLookingForAge,
@@ -337,17 +352,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
         personalityTraits: _selectedPersonalityTraits,
         lifeStyle: _selectedLifeStyle,
         grewUpIn: _grewUpInController.text,
-        religion: _selectedReligion,
-        religionSect: _selectedSect,
-        religionCast: _selectedCaste,
-        otherRequirements: _otherRequirementsController.text,
+        otherRequirements: _toCamelCase(_otherRequirementsController.text),
         managedBySomeoneElse: _managedBySomeoneElse,
         facingChallenges: _facingChallenges,
         facingChallengesList: _selectedFacingChallenges,
         readyToQaboolChallenges: _readyToQaboolChallenges,
         readyToQaboolChallengesList: _selectedReadyToQaboolChallenges,
         language: _selectedLanguage,
-        lookingForMinAge: _reqMinAge,
+        lookingForMinAge: _reqMinAge ?? (() {
+          if (_selectedLookingForAge == null) return null;
+          if (_selectedLookingForAge!.contains('-')) {
+            return int.tryParse(_selectedLookingForAge!.split('-')[0]);
+          } else if (_selectedLookingForAge!.endsWith('+')) {
+            return int.tryParse(_selectedLookingForAge!.replaceAll('+', ''));
+          }
+          return null;
+        })(),
+        lookingForMaxAge: (() {
+          if (_selectedLookingForAge == null) return null;
+          if (_selectedLookingForAge!.contains('-')) {
+            return int.tryParse(_selectedLookingForAge!.split('-')[1]);
+          } else if (_selectedLookingForAge!.endsWith('+')) {
+            return 100;
+          }
+          return null;
+        })(),
         lookingForMinHeight: _reqHeightUnit == 'cm' 
             ? double.tryParse(_reqHeightCmController.text) 
             : (double.tryParse(_reqHeightFtController.text) ?? 0) * 30.48 + (double.tryParse(_reqHeightInController.text) ?? 0) * 2.54,
@@ -803,6 +832,85 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 .toList(),
                             onChanged: (val) => setState(() => _selectedEthnicity = val),
                           ),
+                          const SizedBox(height: 16),
+                          
+                          // User Religion
+                          _buildLabel('Your Religion', isDark),
+                          DropdownButtonFormField<String>(
+                            value: _userReligion,
+                            decoration: inputDecoration('Select Your Religion'),
+                            items: ['Islam', 'Christianity', 'Hinduism', 'Sikhism', 'Buddhism', 'Other']
+                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (val) {
+                              setState(() {
+                                _userReligion = val;
+                                _userSect = null;
+                                _userCaste = null;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          if (_userReligion != null) ...[
+                            _buildLabel('Your Sect', isDark),
+                            DropdownButtonFormField<String>(
+                              value: _userSect,
+                              decoration: inputDecoration('Select Your Sect'),
+                              items: (_religionSects[_userReligion] ?? ['Other'])
+                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                  .toList(),
+                              onChanged: (val) => setState(() => _userSect = val),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildLabel('Your Caste', isDark),
+                            DropdownButtonFormField<String>(
+                              value: _userCaste,
+                              decoration: inputDecoration('Select Your Caste'),
+                              items: (_religionCastes[_userReligion] ?? ['Other'])
+                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                  .toList(),
+                              onChanged: (val) => setState(() => _userCaste = val),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildLabel('Your Education', isDark),
+                            DropdownButtonFormField<String>(
+                              value: _userEducation,
+                              decoration: inputDecoration('Your highest degree'),
+                              items: [
+                                'High School', 'Associate Degree', 'Bachelors Degree', 
+                                'Masters Degree', 'PhD', 'Other'
+                              ]
+                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                  .toList(),
+                              onChanged: (val) => setState(() => _userEducation = val),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+
+                          _buildLabel('Your Monthly Income', isDark),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: DropdownButtonFormField<String>(
+                                  value: _userMonthlyIncome,
+                                  decoration: inputDecoration('Select Your Income'),
+                                  items: ['0', '500', '1000', '2000', '3000', '4000', '5000', '7500', '10000']
+                                      .map((e) => DropdownMenuItem(value: e, child: Text(e == '0' ? 'no income' : e)))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => _userMonthlyIncome = val),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Euro',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
 
                                 
                                 const SizedBox(height: 16),
@@ -936,6 +1044,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   : const Color(0xFFE2E8F0)),
                           const SizedBox(height: 24),
 
+                          // Partner Type (Requested to be outside requirement section and mandatory)
+                          _buildLabel('Partner Type', isDark),
+                          DropdownButtonFormField<String>(
+                            value: _selectedLookingForType,
+                            decoration: inputDecoration('Select Partner Type'),
+                            items: ['Religious', 'Moderate', 'Liberal', 'Any']
+                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (val) => setState(() => _selectedLookingForType = val),
+                          ),
+                          const SizedBox(height: 24),
+
                           // Requirement Section (Moving requested fields here)
                           Container(
                             padding: const EdgeInsets.all(16),
@@ -964,18 +1084,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ),
                                 const SizedBox(height: 16),
 
-                                // Education
-                                _buildLabel('Education', isDark),
+                                // Partner Education
+                                _buildLabel('Partner Education', isDark),
                                 DropdownButtonFormField<String>(
-                                  value: _educationController.text.isEmpty ? null : _educationController.text,
-                                  decoration: inputDecoration('Highest degree earned'),
+                                  value: _reqEducation,
+                                  decoration: inputDecoration('Partner\'s highest degree'),
                                   items: [
                                     'High School', 'Associate Degree', 'Bachelors Degree', 
                                     'Masters Degree', 'PhD', 'Other'
                                   ]
                                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                                       .toList(),
-                                  onChanged: (val) => setState(() => _educationController.text = val ?? ''),
+                                  onChanged: (val) => setState(() => _reqEducation = val),
                                 ),
                                 const SizedBox(height: 16),
 
@@ -985,12 +1105,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _currentCityController,
                                   decoration: inputDecoration('e.g. London, UK'),
                                 ),
-                                const SizedBox(height: 16),
-
-                                // Religion
+                                 // Partner Religion
+                                 const SizedBox(height: 16),
+                                 _buildLabel('Partner Religion', isDark),
                                 DropdownButtonFormField<String>(
                                   value: _selectedReligion,
-                                  decoration: inputDecoration('Select Religion'),
+                                  decoration: inputDecoration('Select Partner Religion'),
                                   items: ['Islam', 'Christianity', 'Hinduism', 'Sikhism', 'Buddhism', 'Other']
                                       .map((e) => DropdownMenuItem(
                                           value: e, child: Text(e)))
@@ -1004,25 +1124,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   },
                                 ),
                                 const SizedBox(height: 16),
-
+ 
                                 if (_selectedReligion != null) ...[
-                                  // Sect
-                                  _buildLabel('Sect', isDark),
+                                  // Partner Sect
+                                  _buildLabel('Partner Sect', isDark),
                                   DropdownButtonFormField<String>(
                                     value: _selectedSect,
-                                    decoration: inputDecoration('Select Sect'),
+                                    decoration: inputDecoration('Select Partner Sect'),
                                     items: (_religionSects[_selectedReligion] ?? ['Other'])
                                         .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                                         .toList(),
                                     onChanged: (val) => setState(() => _selectedSect = val),
                                   ),
                                   const SizedBox(height: 16),
-
-                                  // Caste
-                                  _buildLabel('Caste', isDark),
+ 
+                                  // Partner Caste
+                                  _buildLabel('Partner Caste', isDark),
                                   DropdownButtonFormField<String>(
                                     value: _selectedCaste,
-                                    decoration: inputDecoration('Select Caste'),
+                                    decoration: inputDecoration('Select Partner Caste'),
                                     items: (_religionCastes[_selectedReligion] ?? ['Other'])
                                         .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                                         .toList(),
@@ -1030,18 +1150,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   ),
                                   const SizedBox(height: 16),
                                 ],
-                                // Partner Age
-                                _buildLabel('Min Age', isDark),
-                                DropdownButtonFormField<int>(
-                                  value: _reqMinAge,
-                                  decoration: inputDecoration('Select Min Age'),
-                                  items: List.generate(83, (i) => i + 18)
-                                      .map((e) => DropdownMenuItem(value: e, child: Text(e.toString())))
-                                      .toList(),
-                                  onChanged: (val) => setState(() => _reqMinAge = val),
-                                ),
-                                const SizedBox(height: 16),
-
+                                
                                 _buildLabel('Age Range (Display)', isDark),
                                 DropdownButtonFormField<String>(
                                   value: _selectedLookingForAge,
@@ -1117,48 +1226,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 16),
 
                                 // Partner Weight
-                                _buildLabel('Partner Weight (kg)', isDark),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: DropdownButtonFormField<double>(
-                                        value: _reqMinWeight,
-                                        decoration: inputDecoration('Min kg'),
-                                        isExpanded: true,
-                                        items: List.generate(121, (i) => (i + 30).toDouble())
-                                            .map((e) => DropdownMenuItem(value: e, child: Text(e.toInt().toString())))
-                                            .toList(),
-                                        onChanged: (val) => setState(() => _reqMinWeight = val),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: DropdownButtonFormField<double>(
-                                        value: _reqMaxWeight,
-                                        decoration: inputDecoration('Max kg'),
-                                        isExpanded: true,
-                                        items: List.generate(121, (i) => (i + 30).toDouble())
-                                            .map((e) => DropdownMenuItem(value: e, child: Text(e.toInt().toString())))
-                                            .toList(),
-                                        onChanged: (val) => setState(() => _reqMaxWeight = val),
-                                      ),
-                                    ),
-                                  ],
+                                _buildLabel('Max Partner Weight (kg)', isDark),
+                                DropdownButtonFormField<double>(
+                                  value: _reqMaxWeight,
+                                  decoration: inputDecoration('Select Max Weight'),
+                                  isExpanded: true,
+                                  items: List.generate(121, (i) => (i + 30).toDouble())
+                                      .map((e) => DropdownMenuItem(value: e, child: Text(e.toInt().toString())))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => _reqMaxWeight = val),
                                 ),
                                 const SizedBox(height: 16),
 
 
 
-                                // Income
-                                _buildLabel('Monthly Income', isDark),
+                                // Partner Income
+                                _buildLabel('Min Partner Income', isDark),
                                 Row(
                                   children: [
                                     Expanded(
                                       child: DropdownButtonFormField<String>(
                                         value: _selectedMonthlyIncome,
-                                        decoration: inputDecoration('Select Income'),
+                                        decoration: inputDecoration('Select Partner Income'),
                                         items: ['0', '500', '1000', '2000', '3000', '4000', '5000', '7500', '10000']
-                                            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                            .map((e) => DropdownMenuItem(value: e, child: Text(e == '0' ? 'no income' : e)))
                                             .toList(),
                                         onChanged: (val) => setState(() => _selectedMonthlyIncome = val),
                                       ),
@@ -1189,6 +1280,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                                       .toList(),
                                   onChanged: (val) => setState(() => _selectedLanguage = val),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Partner Marital Status
+                                _buildLabel('Partner Marital Status', isDark),
+                                DropdownButtonFormField<String>(
+                                  value: _selectedLookingForMaritalStatus,
+                                  decoration: inputDecoration('Select Partner Marital Status'),
+                                  items: ['Single', 'Divorced', 'Widowed', 'Separated', 'Any']
+                                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => _selectedLookingForMaritalStatus = val),
                                 ),
                               ],
                             ),

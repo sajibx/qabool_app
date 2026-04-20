@@ -533,16 +533,24 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildRequirementSection(bool isDark, bool isLargeScreen) {
+    String ageRange = 'N/A';
+    if (widget.user.lookingForMinAge != null && widget.user.lookingForMaxAge != null) {
+      ageRange = '${widget.user.lookingForMinAge}-${widget.user.lookingForMaxAge}';
+    } else if (widget.user.lookingForMinAge != null) {
+      ageRange = '${widget.user.lookingForMinAge}+';
+    }
+
     final List<_RequirementData> items = [
-      _RequirementData(Icons.cake_outlined, 'Min Partner Age', widget.user.lookingForMinAge != null ? '${widget.user.lookingForMinAge}' : 'N/A'),
-      _RequirementData(Icons.school_outlined, 'Education', widget.user.education ?? 'N/A'),
+      _RequirementData(Icons.cake_outlined, 'Partner Age', ageRange),
+      _RequirementData(Icons.school_outlined, 'Partner Education', widget.user.lookingForEducation ?? 'N/A'),
       _RequirementData(Icons.location_city_outlined, 'City', widget.user.currentCity ?? 'N/A'),
-      _RequirementData(Icons.mosque_outlined, 'Religion', widget.user.religion ?? 'N/A'),
-      _RequirementData(Icons.account_balance_outlined, 'Religion-Sect', widget.user.religionSect ?? 'N/A'),
-      _RequirementData(Icons.groups_outlined, 'Religion-Cast', widget.user.religionCast ?? 'N/A'),
+      _RequirementData(Icons.mosque_outlined, 'Partner Religion', widget.user.lookingForReligion ?? 'N/A'),
+      _RequirementData(Icons.account_balance_outlined, 'Partner Sect', widget.user.lookingForReligionSect ?? 'N/A'),
+      _RequirementData(Icons.groups_outlined, 'Partner Caste', widget.user.lookingForReligionCast ?? 'N/A'),
       _RequirementData(Icons.height, 'Min Partner Height', widget.user.lookingForMinHeight != null ? '${widget.user.lookingForMinHeight?.toInt()}cm' : 'N/A'),
-      _RequirementData(Icons.monitor_weight_outlined, 'Partner Weight', widget.user.lookingForMinWeight != null ? '${widget.user.lookingForMinWeight?.toInt()}kg' : 'N/A'),
-      _RequirementData(Icons.payments_outlined, 'Income', widget.user.monthlyIncome != null ? '€${widget.user.monthlyIncome?.toInt()}' : 'N/A'),
+      _RequirementData(Icons.monitor_weight_outlined, 'Max Partner Weight', widget.user.lookingForMaxWeight != null ? '${widget.user.lookingForMaxWeight?.toInt()}kg' : 'N/A'),
+      _RequirementData(Icons.family_restroom_outlined, 'Partner Marital Status', widget.user.lookingForMaritalStatus ?? 'N/A'),
+      _RequirementData(Icons.payments_outlined, 'Partner Income', widget.user.lookingForMonthlyIncome != null ? '€${widget.user.lookingForMonthlyIncome?.toInt()}' : 'N/A'),
       _RequirementData(Icons.language_outlined, 'Language', widget.user.language ?? 'N/A'),
       _RequirementData(Icons.person_outline, 'Partner Type', widget.user.lookingForType ?? 'N/A'),
     ];
