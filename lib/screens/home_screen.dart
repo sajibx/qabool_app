@@ -393,225 +393,92 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
             ),
           ),
 
-        Expanded(
-              child: Stack(
-                children: [
-                  RefreshIndicator(
-                    onRefresh: refreshData,
-                    color: pColor,
-                child: Builder(builder: (context) {
-                  if (isLargeScreen) {
-                    return SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SizedBox(height: 4),
-                          // People Nearby Header (Only on Desktop)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    if (!_isSearching)
-                                      IconButton(
-                                        icon: Icon(Icons.search, color: pColor, size: 20),
-                                        onPressed: () => setState(() => _isSearching = true),
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(),
-                                      ),
-                                    if (!_isSearching) const SizedBox(width: 8),
-                                    Text(
-                                      _isSearching ? 'Search Results' : 'People Nearby',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.grey[100] : Colors.grey[800],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: pColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        'NEW',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: pColor,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                GestureDetector(
-                                  onTap: () => widget.onNavigate?.call(1),
-                                  child: Text(
-                                    'View all',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: pColor,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                            child: _isLoadingProfiles
-                                ? const Center(child: CircularProgressIndicator())
-                                : _nearbyProfiles.isEmpty
-                                    ? const Center(child: Text('No profiles nearby'))
-                                    : GridView.builder(
-                                        shrinkWrap: true,
-                                        physics: const NeverScrollableScrollPhysics(),
-                                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                                          maxCrossAxisExtent: 250,
-                                          childAspectRatio: 0.55,
-                                          crossAxisSpacing: 16,
-                                          mainAxisSpacing: 16,
-                                        ),
-                                        itemCount: _nearbyProfiles.length,
-                                        itemBuilder: (context, index) {
-                                          final profile = _nearbyProfiles[index];
-                                          return UserDiscoveryCard(
-                                            user: profile,
-                                            isGridMode: true,
-                                            onConnect: () => _handleConnect(profile),
-                                            onFavorite: () => _handleFavorite(profile),
-                                            onSkip: () => _handleSkip(profile),
-                                            onTap: () {
-                                              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(user: profile)));
-                                            },
-                                          );
-                                        },
-                                      ),
-                          ),
-                          const SizedBox(height: 24),
-                          // Liked You Section
-                          if (_likedMeProfiles.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Text(
-                                'Who Liked You',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.grey[100] : Colors.grey[800],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              height: 100,
-                              child: _isLoadingLikedMe
-                                  ? const Center(child: CircularProgressIndicator())
-                                  : ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                                      itemCount: _likedMeProfiles.length,
-                                      itemBuilder: (context, index) {
-                                        final profile = _likedMeProfiles[index];
-                                        return GestureDetector(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => ProfileScreen(user: profile),
-                                              ),
-                                            );
-                                          },
-                                          child: Container(
-                                            width: 80,
-                                            margin: const EdgeInsets.only(right: 12),
-                                            child: Column(
-                                              children: [
-                                                Hero(
-                                                  tag: 'user_profile_${profile.id}',
-                                                  child: CircleAvatar(
-                                                    radius: 30,
-                                                    backgroundImage: profile.profileImageUrl != null
-                                                        ? CachedNetworkImageProvider(getVersionedImageUrl(profile.profileImageUrl, profile.updatedAt))
-                                                        : null,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  profile.firstName,
-                                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                            ),
-                          ],
-                          const SizedBox(height: 32),
-                        ],
-                      ),
-                    );
-                  }
-
-                  // Mobile View: Full Screen PageView
-                  return _isLoadingProfiles
+          Expanded(
+            child: Stack(
+              children: [
+                RefreshIndicator(
+                  onRefresh: refreshData,
+                  color: pColor,
+                  child: _isLoadingProfiles
                       ? const Center(child: CircularProgressIndicator())
                       : _nearbyProfiles.isEmpty
                           ? const Center(
                               child: Padding(
-                              padding: EdgeInsets.all(32.0),
-                              child: Text('No more profiles nearby', textAlign: TextAlign.center),
-                            ))
-                          : PageView.builder(
-                              controller: _pageController,
-                              scrollDirection: Axis.vertical,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: _nearbyProfiles.length,
-                              onPageChanged: (index) {
-                                setState(() => _currentPageIndex = index);
-                                context.read<NavigationService>().setBottomNavVisible(true);
-                              },
-                              itemBuilder: (context, index) {
-                                final profile = _nearbyProfiles[index];
-                                return ProfileView(
-                                  user: profile,
-                                  onConnect: () => _handleConnect(profile, goToNext: true),
-                                  onFavorite: () => _handleFavorite(profile),
-                                  onSkip: () => _handleSkip(profile, goToNext: true),
-                                  onBlock: () => _handleBlock(profile),
-                                  onReport: () => _handleReport(profile),
-                                  onRewind: () {
-                                    if (_currentPageIndex > 0) {
-                                      _pageController.previousPage(
-                                        duration: const Duration(milliseconds: 500),
-                                        curve: Curves.easeInOut,
+                                padding: EdgeInsets.all(32.0),
+                                child: Text('No more profiles nearby', textAlign: TextAlign.center),
+                              ),
+                            )
+                          : Stack(
+                              children: [
+                                PageView.builder(
+                                  controller: _pageController,
+                                  scrollDirection: Axis.vertical,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: _nearbyProfiles.length,
+                                  onPageChanged: (index) {
+                                    setState(() => _currentPageIndex = index);
+                                    context.read<NavigationService>().setBottomNavVisible(true);
+                                  },
+                                  itemBuilder: (context, index) {
+                                    final profile = _nearbyProfiles[index];
+                                    
+                                    if (isLargeScreen) {
+                                      // Desktop Spotlight View
+                                      return Container(
+                                        color: isDark ? const Color(0xFF0F172A).withOpacity(0.3) : const Color(0xFFF8FAFC),
+                                        child: Column(
+                                          children: [
+
+                                            
+                                            Expanded(
+                                              child: Center(
+                                                child: ConstrainedBox(
+                                                  constraints: const BoxConstraints(maxWidth: 1200),
+                                                  child: Stack(
+                                                    children: [
+                                                      ProfileView(
+                                                        key: ValueKey('profile_${profile.id}'),
+                                                        user: profile,
+                                                        onConnect: () => _handleConnect(profile, goToNext: true),
+                                                        onFavorite: () => _handleFavorite(profile),
+                                                        onSkip: () => _handleSkip(profile, goToNext: true),
+                                                        onBlock: () => _handleBlock(profile),
+                                                        onReport: () => _handleReport(profile),
+                                                        onRewind: () => _goToPreviousPage(),
+                                                      ),
+                                                      // Desktop Navigation Controls
+                                                      _buildDesktopNavigationControls(isDark, pColor),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       );
                                     }
-                                  },
-                                );
-                              },
-                            );
-                          }),
-                        ),
 
-                  // Overlay Buttons (Top Left)
+                                    // Mobile View: Full Screen
+                                    return ProfileView(
+                                      user: profile,
+                                      onConnect: () => _handleConnect(profile, goToNext: true),
+                                      onFavorite: () => _handleFavorite(profile),
+                                      onSkip: () => _handleSkip(profile, goToNext: true),
+                                      onBlock: () => _handleBlock(profile),
+                                      onReport: () => _handleReport(profile),
+                                      onRewind: () => _goToPreviousPage(),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                ),
+
                   Positioned(
                     top: MediaQuery.of(context).padding.top + 10,
                     right: 16,
                     child: Row(
                       children: [
-                        // Filter Button
                         CompositedTransformTarget(
                           link: _filterLayerLink,
                           child: IconButton(
@@ -624,7 +491,6 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // Notification Button
                         CompositedTransformTarget(
                           link: _notificationLayerLink,
                           child: Stack(
@@ -635,7 +501,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                 style: IconButton.styleFrom(
                                   side: BorderSide(color: Colors.white.withOpacity(0.6), width: 1.5),
                                   padding: const EdgeInsets.all(10),
-                                  backgroundColor: Colors.black.withOpacity(0.15), // Very subtle for visibility
+                                  backgroundColor: Colors.black.withOpacity(0.15),
                                 ),
                               ),
                               Consumer<NotificationService>(
@@ -674,6 +540,101 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
               ),
             ),
       ],
+    );
+  }
+
+  void _goToPreviousPage() {
+    if (_currentPageIndex > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _goToNextPage() {
+    if (_currentPageIndex < _nearbyProfiles.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+
+
+  Widget _buildDesktopNavigationControls(bool isDark, Color pColor) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        ignoring: true,
+        child: Stack(
+          children: [
+            if (_currentPageIndex > 0)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: IgnorePointer(
+                    ignoring: false,
+                    child: _buildSpotlightNavButton(
+                      icon: Icons.keyboard_arrow_up,
+                      onTap: _goToPreviousPage,
+                      isDark: isDark,
+                      pColor: pColor,
+                      tooltip: 'Previous Profile',
+                    ),
+                  ),
+                ),
+              ),
+            if (_currentPageIndex < _nearbyProfiles.length - 1)
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: IgnorePointer(
+                    ignoring: false,
+                    child: _buildSpotlightNavButton(
+                      icon: Icons.keyboard_arrow_down,
+                      onTap: _goToNextPage,
+                      isDark: isDark,
+                      pColor: pColor,
+                      tooltip: 'Next Profile',
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpotlightNavButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    required bool isDark,
+    required Color pColor,
+    required String tooltip,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(40),
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+              shape: BoxShape.circle,
+              border: Border.all(color: isDark ? Colors.white10 : Colors.black12),
+            ),
+            child: Icon(icon, color: isDark ? Colors.white54 : Colors.black54, size: 36),
+          ),
+        ),
+      ),
     );
   }
 

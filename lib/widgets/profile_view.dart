@@ -83,17 +83,22 @@ class _ProfileViewState extends State<ProfileView> {
         children: [
           LayoutBuilder(
             builder: (context, constraints) {
-              final isLargeScreen = constraints.maxWidth > 700;
+              final isExtraWide = constraints.maxWidth > 1200;
+              final isLargeScreen = constraints.maxWidth > 800;
               
               if (isLargeScreen) {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // --- CENTER/LEFT COLUMN (Details) ---
+                    // --- LEFT COLUMN (Scrollable Details) ---
                     Expanded(
+                      flex: isExtraWide ? 6 : 5,
                       child: SingleChildScrollView(
                         controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 24),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isExtraWide ? 100 : 60, 
+                          vertical: 32
+                        ),
                         physics: const BouncingScrollPhysics(),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,66 +106,75 @@ class _ProfileViewState extends State<ProfileView> {
                             Text(
                               'Profile Details',
                               style: TextStyle(
-                                fontSize: 24,
+                                fontSize: 32,
                                 fontWeight: FontWeight.w900,
                                 color: isDark ? Colors.white : Colors.black87,
-                                letterSpacing: -0.5,
+                                letterSpacing: -1.0,
                               ),
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 40),
                             
-                            // Detailed sections in Cards
-                            _buildDetailCard(isDark, 'About me', Icons.badge_outlined, _buildAboutMeContent(isDark)),
-                            const SizedBox(height: 24),
-
+                            // Info Grid (Gender, Age, etc)
                             _buildInfoGrid(isDark, true),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 40),
 
+                            // Requirement section
                             _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, true)),
+                            const SizedBox(height: 32),
+
+                            // Interests
+                            _buildInterestsSection(isDark),
                             const SizedBox(height: 24),
 
-                            _buildDetailCard(isDark, 'Whom are you ready to qabool', Icons.volunteer_activism_outlined, _buildChallengesContent(isDark)),
-                            const SizedBox(height: 48),
-                            Center(child: _buildIssuesBadges(isDark)),
-                            const SizedBox(height: 16),
-
-                            _buildDetailCard(isDark, 'Interests & Personality', Icons.auto_awesome_outlined, Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildInterestsContent(isDark),
-                                const SizedBox(height: 16),
-                                _buildPersonalityContent(isDark),
-                              ],
-                            )),
+                            // Personality
+                            _buildPersonalitySection(isDark),
                             const SizedBox(height: 32),
-                            if (!widget.isMyProfile) ...[
-                              const SizedBox(height: 24),
-                              _buildSecondaryActions(isDark),
-                            ],
+
+                            // Challenges
+                            _buildChallengesSection(isDark),
+                            const SizedBox(height: 60),
                             
-                            const SizedBox(height: 40), // Reduced from 80
+                            Center(child: _buildIssuesBadges(isDark)),
+                            const SizedBox(height: 40),
+
+                            if (!widget.isMyProfile) _buildSecondaryActions(isDark),
+                            const SizedBox(height: 60),
                           ],
                         ),
                       ),
                     ),
 
-
-                    // --- ABSOLUTE RIGHT COLUMN (Hero & Primary Info) ---
-                    SizedBox(
-                      width: 420,
+                    // --- RIGHT COLUMN (DP & Bio) ---
+                    Expanded(
+                      flex: isExtraWide ? 4 : 5,
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.all(32),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Absolute right panel DP
                             _buildDesktopHeroImage(context, isDark),
-                            const SizedBox(height: 24),
-                            _buildPrimaryInfoCard(isDark),
-                            if (!widget.isMyProfile) ...[
-                              const SizedBox(height: 24),
-                              _buildActionCard(isDark, primaryColor),
-                            ],
+                            const SizedBox(height: 32),
+                            
+
+                            // Bio section
+                            Text(
+                              'ABOUT ME',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                                color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildAboutMeContent(isDark),
+                            
                             const SizedBox(height: 40),
+                            
+                            if (!widget.isMyProfile) 
+                              _buildActionCard(isDark, primaryColor),
+                            const SizedBox(height: 60),
                           ],
                         ),
                       ),
@@ -555,27 +569,27 @@ class _ProfileViewState extends State<ProfileView> {
       _RequirementData(Icons.person_outline, 'Partner Type', widget.user.lookingForType ?? 'N/A'),
     ];
 
-      return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GridView.builder(
-          shrinkWrap: true,
-          padding: EdgeInsets.zero,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: isLargeScreen ? 3 : 2,
-            crossAxisSpacing: isLargeScreen ? 30 : 16,
-            mainAxisSpacing: isLargeScreen ? 20 : 16,
-            childAspectRatio: isLargeScreen ? 4 : 2.2,
-          ),
-          itemCount: items.length,
-          itemBuilder: (context, index) => _buildPolishedRequirementItem(items[index], isDark),
-        ),
-        if (widget.user.otherRequirements != null && widget.user.otherRequirements!.isNotEmpty) ...[
-          const SizedBox(height: 24),
-          _buildNestedOtherRequirementsBox(isDark),
-        ],
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double itemWidth = (constraints.maxWidth - 24) / 2; // 2 columns, 24 spacing
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              spacing: 24,
+              runSpacing: 24,
+              children: items.map((item) => SizedBox(
+                width: itemWidth,
+                child: _buildPolishedRequirementItem(item, isDark),
+              )).toList(),
+            ),
+            if (widget.user.otherRequirements != null && widget.user.otherRequirements!.isNotEmpty) ...[
+              const SizedBox(height: 24),
+              _buildNestedOtherRequirementsBox(isDark),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -626,75 +640,74 @@ class _ProfileViewState extends State<ProfileView> {
     String val = item.value;
     if (val.isEmpty || val == 'null') val = 'N/A';
     
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: QaboolTheme.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(item.icon, size: 16, color: QaboolTheme.primary),
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: QaboolTheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  item.label.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                    color: isDark ? Colors.grey[500] : Colors.grey[600],
-                  ),
+          child: Icon(item.icon, size: 16, color: QaboolTheme.primary),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                item.label.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                  color: isDark ? Colors.grey[500] : Colors.grey[600],
                 ),
-                Text(
-                  val,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
+              ),
+              Text(
+                val,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
    Widget _buildInfoGrid(bool isDark, bool isLargeScreen) {
-    return GridView.count(
-      padding: EdgeInsets.zero,
-      crossAxisCount: isLargeScreen ? 4 : 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      childAspectRatio: isLargeScreen ? 3.6 : 2.8, // Shorter on desktop
-      children: [
-        _buildInfoCard(Icons.wc, 'GENDER', widget.user.gender ?? 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.cake, 'AGE', widget.user.displayAge.toString(), isDark, isLargeScreen),
-        _buildInfoCard(Icons.favorite_border, 'MARITAL STATUS', widget.user.maritalStatus ?? 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.monitor_weight_outlined, 'WEIGHT', widget.user.weight != null ? '${widget.user.weight?.toInt()}kg' : 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.height, 'HEIGHT', widget.user.height != null ? '${widget.user.height?.toInt()}cm' : 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.location_city, 'CURRENT CITY', widget.user.currentCity ?? 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.school_outlined, 'EDUCATION', widget.user.education ?? 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.mosque_outlined, 'RELIGION', widget.user.religion ?? 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.account_balance, 'SECT', widget.user.religionSect ?? 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.groups_outlined, 'CASTE', widget.user.religionCast ?? 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.payments_outlined, 'MONTHLY INCOME', widget.user.monthlyIncome != null ? '€${widget.user.monthlyIncome?.toInt()}' : 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.people_outline, 'SIBLINGS', widget.user.siblings?.toString() ?? 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.family_restroom_outlined, 'FAMILY MEMBERS', widget.user.familyMembers?.toString() ?? 'N/A', isDark, isLargeScreen),
-        _buildInfoCard(Icons.public, 'NATIONALITY', widget.user.country, isDark, isLargeScreen),
-        _buildInfoCard(Icons.language, 'LANGUAGE', widget.user.language ?? 'N/A', isDark, isLargeScreen),
-      ],
+    final List<Widget> items = [
+      _buildInfoCard(Icons.wc, 'GENDER', widget.user.gender ?? 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.cake, 'AGE', widget.user.displayAge.toString(), isDark, isLargeScreen),
+      _buildInfoCard(Icons.favorite_border, 'MARITAL STATUS', widget.user.maritalStatus ?? 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.monitor_weight_outlined, 'WEIGHT', widget.user.weight != null ? '${widget.user.weight?.toInt()}kg' : 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.height, 'HEIGHT', widget.user.height != null ? '${widget.user.height?.toInt()}cm' : 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.location_city, 'CURRENT CITY', widget.user.currentCity ?? 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.school_outlined, 'EDUCATION', widget.user.education ?? 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.mosque_outlined, 'RELIGION', widget.user.religion ?? 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.account_balance, 'SECT', widget.user.religionSect ?? 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.groups_outlined, 'CASTE', widget.user.religionCast ?? 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.payments_outlined, 'MONTHLY INCOME', widget.user.monthlyIncome != null ? '€${widget.user.monthlyIncome?.toInt()}' : 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.people_outline, 'SIBLINGS', widget.user.siblings?.toString() ?? 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.family_restroom_outlined, 'FAMILY MEMBERS', widget.user.familyMembers?.toString() ?? 'N/A', isDark, isLargeScreen),
+      _buildInfoCard(Icons.public, 'NATIONALITY', widget.user.country, isDark, isLargeScreen),
+      _buildInfoCard(Icons.language, 'LANGUAGE', widget.user.language ?? 'N/A', isDark, isLargeScreen),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double itemWidth = (constraints.maxWidth - (2 * 12)) / 3; // 3 columns, 12 spacing
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: items.map((item) => SizedBox(width: itemWidth, child: item)).toList(),
+        );
+      },
     );
   }
 
@@ -702,41 +715,39 @@ class _ProfileViewState extends State<ProfileView> {
     if (value.isEmpty || value == 'null') value = 'N/A';
     
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: isLargeScreen ? 8 : 10, vertical: isLargeScreen ? 2 : 4), 
+      padding: EdgeInsets.symmetric(horizontal: isLargeScreen ? 12 : 8, vertical: 10), 
       decoration: BoxDecoration(
         color: isDark ? Colors.grey[900] : const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(isLargeScreen ? 40 : 30), 
+        borderRadius: BorderRadius.circular(40), 
+        border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: QaboolTheme.primary, size: 14), // Slightly smaller icon to compensate for shorter height
+          Icon(icon, color: QaboolTheme.primary, size: 14),
           const SizedBox(width: 6),
-          Expanded(
+          Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 9, // Larger label
+                    fontSize: 8,
                     fontWeight: FontWeight.w900,
                     color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
-                    letterSpacing: 0.1,
+                    letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 0.5),
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 11, // Larger value
+                    fontSize: 11,
                     fontWeight: FontWeight.w900,
                     color: isDark ? Colors.white : const Color(0xFF1E293B),
-                    height: 1.1,
                   ),
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
                 ),
               ],
             ),
@@ -897,6 +908,7 @@ class _ProfileViewState extends State<ProfileView> {
             width: double.infinity,
             fit: BoxFit.cover,
           ),
+          // Gradient Overlay (Darker at bottom for text readability)
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -904,22 +916,89 @@ class _ProfileViewState extends State<ProfileView> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.1),
                     Colors.transparent,
-                    Colors.black.withOpacity(0.5),
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.85),
                   ],
+                  stops: const [0.0, 0.4, 1.0],
                 ),
               ),
             ),
           ),
+
+          // User Info Overlay
+          Positioned(
+            bottom: 24,
+            left: 24,
+            right: 80, // Space for the edit button
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        widget.user.firstName.toLowerCase(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22, // Reduced from 40
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (widget.user.verifiedStatus == 'active') ...[
+                      const SizedBox(width: 6),
+                      const Icon(Icons.verified, color: Color(0xFF3498DB), size: 16), // Reduced from 28
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.location_on, color: Colors.white, size: 10), // Reduced from 16
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '6KM AWAY, ${widget.user.currentCity?.toUpperCase() ?? ""}, ${widget.user.country.toUpperCase()}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 8, // Reduced from 12
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
           if (widget.isMyProfile)
             Positioned(
-              bottom: 16,
-              right: 16,
-              child: FloatingActionButton.small(
-                onPressed: () => Navigator.pushNamed(context, '/edit_profile'),
-                backgroundColor: QaboolTheme.primary,
-                child: const Icon(Icons.edit, size: 18, color: Colors.white),
+              bottom: 24,
+              right: 24,
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: FloatingActionButton.small(
+                  onPressed: () => Navigator.pushNamed(context, '/edit_profile'),
+                  backgroundColor: const Color(0xFF9E1B1B), 
+                  elevation: 0, 
+                  shape: const CircleBorder(), // Explicitly circular
+                  child: const Icon(Icons.edit, size: 16, color: Colors.white), // Reduced icon size
+                ),
               ),
             ),
         ],
@@ -965,27 +1044,6 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
             ],
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Icons.location_on_outlined, size: 18, color: Colors.grey),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  widget.user.region ?? 'No location',
-                  style: const TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          const SizedBox(height: 24),
-
-          const SizedBox(height: 12),
-          _buildInfoRow(Icons.nightlight_round, widget.user.religion ?? 'Not specified', isDark),
-          const SizedBox(height: 12),
-          _buildInfoRow(Icons.public, widget.user.ethnicity ?? 'Not specified', isDark),
         ],
       ),
     );
