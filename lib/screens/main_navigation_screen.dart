@@ -11,6 +11,7 @@ import 'package:qabool_app/models/chat_model.dart';
 import 'package:qabool_app/models/user_model.dart';
 import 'package:qabool_app/services/api_service.dart';
 import 'package:qabool_app/services/navigation_service.dart';
+import 'package:qabool_app/widgets/floating_chat_overlay.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -72,135 +73,137 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const accentGold = QaboolTheme.accentGold;
     const bgDark = Color(0xFF1A1616);
 
-    return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isLargeScreen = constraints.maxWidth > 800;
+    return FloatingChatOverlay(
+      child: Scaffold(
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final isLargeScreen = constraints.maxWidth > 800;
 
-          return Stack(
-            children: [
-              Positioned.fill(
-                child: Row(
-                  children: [
-                  if (isLargeScreen)
-                    // Desktop Sidebar
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      width: _isSidebarCollapsed ? 80 : 280,
-                      decoration: BoxDecoration(
-                        color: isDark ? bgDark : Colors.white,
-                        border: Border(
-                          right: BorderSide(
-                            color: isDark ? const Color(0xFF1E293B) : primaryColor.withOpacity(0.1),
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: Row(
+                    children: [
+                    if (isLargeScreen)
+                      // Desktop Sidebar
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        width: _isSidebarCollapsed ? 80 : 280,
+                        decoration: BoxDecoration(
+                          color: isDark ? bgDark : Colors.white,
+                          border: Border(
+                            right: BorderSide(
+                              color: isDark ? const Color(0xFF1E293B) : primaryColor.withOpacity(0.1),
+                            ),
                           ),
                         ),
-                      ),
-                      child: SafeArea(
-                        child: Builder(
-                          builder: (context) {
-                            final chatService = context.watch<ChatService>();
-                            final nav = context.watch<NavigationService>();
-                            final totalUnread = chatService.totalUnreadCount;
-                            final currentIndex = nav.currentTab.index;
-                            return Column(
-                              children: [
-                                const SizedBox(height: 16),
-                                // Burger Menu Toggle
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: _isSidebarCollapsed ? 0 : 16),
-                                  child: Align(
-                                    alignment: _isSidebarCollapsed ? Alignment.center : Alignment.centerLeft,
-                                    child: IconButton(
-                                      icon: Icon(Icons.menu, color: isDark ? Colors.white70 : Colors.black87),
-                                      onPressed: () => setState(() => _isSidebarCollapsed = !_isSidebarCollapsed),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                // Logo/Brand Area
-                                SizedBox(
-                                  height: 60,
-                                  child: ClipRect(
-                                    child: AnimatedOpacity(
-                                      duration: const Duration(milliseconds: 250),
-                                      curve: Curves.easeInOut,
-                                      opacity: _isSidebarCollapsed ? 0 : 1,
-                                      child: _isSidebarCollapsed 
-                                        ? const SizedBox.shrink()
-                                      : Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.favorite, color: primaryColor, size: 32),
-                                              const SizedBox(width: 12),
-                                              const Text(
-                                                'Qabool',
-                                                style: TextStyle(
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: Colors.black, // fallback, handled by text theme
-                                                  letterSpacing: -0.5,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: _isSidebarCollapsed ? 16 : 48),
-                                // Nav Items
-                                _buildSidebarItem(Icons.home_outlined, Icons.home, 'Qabool', 0, accentGold, primaryColor, isDark, currentIndex: currentIndex),
-                                _buildSidebarItem(Icons.explore_outlined, Icons.explore, 'Explore', 1, accentGold, primaryColor, isDark, currentIndex: currentIndex),
-                                _buildSidebarItem(Icons.chat_bubble_outline, Icons.chat_bubble, 'Chat', 2, accentGold, primaryColor, isDark, badgeCount: totalUnread > 0 ? totalUnread : null, currentIndex: currentIndex),
-                                _buildSidebarItem(Icons.person_outline, Icons.person, 'Profile', 3, accentGold, primaryColor, isDark, currentIndex: currentIndex),
-                                const Spacer(),
-                                // version info
-                                if (!_isSidebarCollapsed)
-                                  AnimatedOpacity(
-                                    duration: const Duration(milliseconds: 250),
-                                    curve: Curves.easeInOut,
-                                    opacity: _isSidebarCollapsed ? 0 : 1,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(24),
-                                      child: Text(
-                                        'v1.0.0',
-                                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                        child: SafeArea(
+                          child: Builder(
+                            builder: (context) {
+                              final chatService = context.watch<ChatService>();
+                              final nav = context.watch<NavigationService>();
+                              final totalUnread = chatService.totalUnreadCount;
+                              final currentIndex = nav.currentTab.index;
+                              return Column(
+                                children: [
+                                  const SizedBox(height: 16),
+                                  // Burger Menu Toggle
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: _isSidebarCollapsed ? 0 : 16),
+                                    child: Align(
+                                      alignment: _isSidebarCollapsed ? Alignment.center : Alignment.centerLeft,
+                                      child: IconButton(
+                                        icon: Icon(Icons.menu, color: isDark ? Colors.white70 : Colors.black87),
+                                        onPressed: () => setState(() => _isSidebarCollapsed = !_isSidebarCollapsed),
                                       ),
                                     ),
                                   ),
-                              ],
-                            );
-                          },
+                                  const SizedBox(height: 16),
+                                  // Logo/Brand Area
+                                  SizedBox(
+                                    height: 60,
+                                    child: ClipRect(
+                                      child: AnimatedOpacity(
+                                        duration: const Duration(milliseconds: 250),
+                                        curve: Curves.easeInOut,
+                                        opacity: _isSidebarCollapsed ? 0 : 1,
+                                        child: _isSidebarCollapsed 
+                                          ? const SizedBox.shrink()
+                                        : Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.favorite, color: primaryColor, size: 32),
+                                                const SizedBox(width: 12),
+                                                const Text(
+                                                  'Qabool',
+                                                  style: TextStyle(
+                                                    fontSize: 24,
+                                                    fontWeight: FontWeight.w900,
+                                                    color: Colors.black, // fallback, handled by text theme
+                                                    letterSpacing: -0.5,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: _isSidebarCollapsed ? 16 : 48),
+                                  // Nav Items
+                                  _buildSidebarItem(Icons.home_outlined, Icons.home, 'Qabool', 0, accentGold, primaryColor, isDark, currentIndex: currentIndex),
+                                  _buildSidebarItem(Icons.explore_outlined, Icons.explore, 'Explore', 1, accentGold, primaryColor, isDark, currentIndex: currentIndex),
+                                  _buildSidebarItem(Icons.chat_bubble_outline, Icons.chat_bubble, 'Chat', 2, accentGold, primaryColor, isDark, badgeCount: totalUnread > 0 ? totalUnread : null, currentIndex: currentIndex),
+                                  _buildSidebarItem(Icons.person_outline, Icons.person, 'Profile', 3, accentGold, primaryColor, isDark, currentIndex: currentIndex),
+                                  const Spacer(),
+                                  // version info
+                                  if (!_isSidebarCollapsed)
+                                    AnimatedOpacity(
+                                      duration: const Duration(milliseconds: 250),
+                                      curve: Curves.easeInOut,
+                                      opacity: _isSidebarCollapsed ? 0 : 1,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(24),
+                                        child: Text(
+                                          'v1.0.0',
+                                          style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
+                    
+                    // Main Content
+                    Expanded(
+                      child: Consumer<NavigationService>(
+                        builder: (context, nav, _) {
+                          return IndexedStack(
+                            index: nav.currentTab.index,
+                            children: _screens,
+                          );
+                        },
+                      ),
                     ),
-                  
-                  // Main Content
-                  Expanded(
-                    child: Consumer<NavigationService>(
-                      builder: (context, nav, _) {
-                        return IndexedStack(
-                          index: nav.currentTab.index,
-                          children: _screens,
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (!isLargeScreen)
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: _buildMobileBottomBar(isDark, primaryColor, bgDark),
+                  ],
                 ),
-            ],
-          );
-        },
+              ),
+              if (!isLargeScreen)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: _buildMobileBottomBar(isDark, primaryColor, bgDark),
+                  ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

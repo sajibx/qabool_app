@@ -19,6 +19,7 @@ class ProfileView extends StatefulWidget {
   final VoidCallback? onReject;
   final VoidCallback? onCancel;
   final bool isMyProfile;
+  final bool forceMobileLayout;
 
   const ProfileView({
     super.key,
@@ -33,6 +34,7 @@ class ProfileView extends StatefulWidget {
     this.onReject,
     this.onCancel,
     this.isMyProfile = false,
+    this.forceMobileLayout = false,
   });
 
   @override
@@ -42,6 +44,7 @@ class ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<ProfileView> {
   late ScrollController _scrollController;
   bool _isScrollingDown = false;
+  bool _isAtBottom = false;
 
   @override
   void initState() {
@@ -58,6 +61,7 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _scrollListener() {
+    // Bottom navigation visibility logic
     if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
       if (!_isScrollingDown) {
         _isScrollingDown = true;
@@ -69,6 +73,31 @@ class _ProfileViewState extends State<ProfileView> {
         context.read<NavigationService>().setBottomNavVisible(true);
       }
     }
+
+    // Scroll-to-top/bottom button logic
+    if (_scrollController.hasClients) {
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final currentScroll = _scrollController.offset;
+      final isNearBottom = currentScroll > (maxScroll * 0.5);
+      
+      if (_isAtBottom != isNearBottom) {
+        setState(() {
+          _isAtBottom = isNearBottom;
+        });
+      }
+    }
+  }
+
+  void _scrollToFarthest() {
+    if (!_scrollController.hasClients) return;
+    
+    final targetOffset = _isAtBottom ? 0.0 : _scrollController.position.maxScrollExtent;
+    
+    _scrollController.animateTo(
+      targetOffset,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOutQuart,
+    );
   }
 
   @override
@@ -84,152 +113,150 @@ class _ProfileViewState extends State<ProfileView> {
           LayoutBuilder(
             builder: (context, constraints) {
               final isExtraWide = constraints.maxWidth > 1200;
-              final isLargeScreen = constraints.maxWidth > 800;
-              
-              if (isLargeScreen) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // --- LEFT COLUMN (Scrollable Details) ---
-                    Expanded(
-                      flex: isExtraWide ? 6 : 5,
-                      child: SingleChildScrollView(
-                        controller: _scrollController,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isExtraWide ? 100 : 60, 
-                          vertical: 32
-                        ),
-                        physics: const BouncingScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Profile Details',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w900,
-                                color: isDark ? Colors.white : Colors.black87,
-                                letterSpacing: -1.0,
-                              ),
-                            ),
-                            const SizedBox(height: 40),
-                            
-                            // Info Grid (Gender, Age, etc)
-                            _buildInfoGrid(isDark, true),
-                            const SizedBox(height: 40),
+              final isLargeScreen = constraints.maxWidth > 800 && !widget.forceMobileLayout;
 
-                            // Requirement section
-                            _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, true)),
-                            const SizedBox(height: 32),
-
-                            // Interests
-                            _buildInterestsSection(isDark),
-                            const SizedBox(height: 24),
-
-                            // Personality
-                            _buildPersonalitySection(isDark),
-                            const SizedBox(height: 32),
-
-                            // Challenges
-                            _buildChallengesSection(isDark),
-                            const SizedBox(height: 60),
-                            
-                            Center(child: _buildIssuesBadges(isDark)),
-                            const SizedBox(height: 40),
-
-                            if (!widget.isMyProfile) _buildSecondaryActions(isDark),
-                            const SizedBox(height: 60),
-                          ],
-                        ),
+              if (!isLargeScreen) {
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildTopImage(context, isDark),
+                          if (!widget.isMyProfile) _buildReadyToQaboolCard(isDark),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                            child: _buildAboutMeSection(isDark),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8),
+                            child: _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, false)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                            child: _buildInterestsSection(isDark),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                            child: _buildPersonalitySection(isDark),
+                          ),
+                          const SizedBox(height: 24),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                            child: _buildChallengesSection(isDark),
+                          ),
+                          const SizedBox(height: 48),
+                          Center(child: _buildIssuesBadges(isDark)),
+                          const SizedBox(height: 28),
+                          if (!widget.isMyProfile) _buildSecondaryActions(isDark),
+                          const SizedBox(height: 40),
+                        ],
                       ),
                     ),
-
-                    // --- RIGHT COLUMN (DP & Bio) ---
-                    Expanded(
-                      flex: isExtraWide ? 4 : 5,
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(32),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Absolute right panel DP
-                            _buildDesktopHeroImage(context, isDark),
-                            const SizedBox(height: 32),
-                            
-
-                            // Bio section
-                            Text(
-                              'ABOUT ME',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w900,
-                                color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            _buildAboutMeContent(isDark),
-                            
-                            const SizedBox(height: 40),
-                            
-                            if (!widget.isMyProfile) 
-                              _buildActionCard(isDark, primaryColor),
-                            const SizedBox(height: 60),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 );
               }
 
-              // --- MOBILE/TABLET VIEW (Existing single column) ---
-              return Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildTopImage(context, isDark),
-                        if (!widget.isMyProfile) _buildReadyToQaboolCard(isDark),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                          child: _buildAboutMeSection(isDark),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8),
-                          child: _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, false)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                          child: _buildInterestsSection(isDark),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                          child: _buildPersonalitySection(isDark),
-                        ),
-                        const SizedBox(height: 24),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                          child: _buildChallengesSection(isDark),
-                        ),
-                        const SizedBox(height: 48),
-                        Center(child: _buildIssuesBadges(isDark)),
-                        const SizedBox(height: 28),
-                        if (!widget.isMyProfile) _buildSecondaryActions(isDark),
-                        const SizedBox(height: 40),
-                      ],
+              // --- DESKTOP VIEW ---
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // --- LEFT COLUMN (Scrollable Details) ---
+                  Expanded(
+                    flex: isExtraWide ? 7 : 6,
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isExtraWide ? 100 : 60, 
+                        vertical: 32
+                      ),
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Profile Details',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              color: isDark ? Colors.white : Colors.black87,
+                              letterSpacing: -1.0,
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                          
+                          // Info Grid (Gender, Age, etc)
+                          _buildInfoGrid(isDark, true),
+                          const SizedBox(height: 40),
+
+                          // Requirement section
+                          _buildDetailCard(isDark, 'Requirement', Icons.assignment_turned_in_outlined, _buildRequirementSection(isDark, true)),
+                          const SizedBox(height: 32),
+
+                          // Interests
+                          _buildInterestsSection(isDark),
+                          const SizedBox(height: 24),
+
+                          // Personality
+                          _buildPersonalitySection(isDark),
+                          const SizedBox(height: 32),
+
+                          // Challenges
+                          _buildChallengesSection(isDark),
+                          const SizedBox(height: 60),
+                          
+                          Center(child: _buildIssuesBadges(isDark)),
+                          const SizedBox(height: 40),
+
+                          if (!widget.isMyProfile) _buildSecondaryActions(isDark),
+                          const SizedBox(height: 60),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+
+                  // --- RIGHT COLUMN (DP & Bio) ---
+                  Expanded(
+                    flex: isExtraWide ? 3 : 4,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Absolute right panel DP
+                          _buildDesktopHeroImage(context, isDark),
+                          const SizedBox(height: 32),
+                          
+
+                          // Bio section
+                          Text(
+                            'ABOUT ME',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildAboutMeContent(isDark),
+                          
+                          const SizedBox(height: 40),
+                          
+                          if (!widget.isMyProfile) 
+                            _buildActionCard(isDark, primaryColor),
+                          const SizedBox(height: 60),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
           ),
-
-           // Floating Action Buttons at Bottom (REMOVED)
         ],
       ),
     );
@@ -1148,7 +1175,7 @@ class _ProfileViewState extends State<ProfileView> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
           content,
         ],
       ),

@@ -439,6 +439,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                                                       ProfileView(
                                                         key: ValueKey('profile_${profile.id}'),
                                                         user: profile,
+                                                        forceMobileLayout: true,
                                                         onConnect: () => _handleConnect(profile, goToNext: true),
                                                         onFavorite: () => _handleFavorite(profile),
                                                         onSkip: () => _handleSkip(profile, goToNext: true),
@@ -586,6 +587,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                   ),
                 ),
               ),
+            /*
             if (_currentPageIndex < _nearbyProfiles.length - 1)
               Align(
                 alignment: Alignment.centerRight,
@@ -603,6 +605,7 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                   ),
                 ),
               ),
+            */
           ],
         ),
       ),

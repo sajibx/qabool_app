@@ -78,9 +78,7 @@ class QaboolApp extends StatelessWidget {
       theme: QaboolTheme.lightTheme,
       darkTheme: QaboolTheme.darkTheme,
       themeMode: ThemeMode.light,
-      builder: (context, child) {
-        return FloatingChatOverlay(child: child!);
-      },
+      builder: (context, child) => child!,
       initialRoute: authService.isAuthenticated ? '/main' : '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
